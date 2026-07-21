@@ -31,6 +31,24 @@ Chaque compétence est offerte en français et en anglais.
 
 Conception initiale — voir `docs/` pour le devis de conception.
 
+## Remerciements
+
+Un immense merci à deux personnes dont le travail a profondément inspiré ce
+projet :
+
+- **[Matt Pocock](https://github.com/mattpocock)** — son dépôt
+  [mattpocock/skills](https://github.com/mattpocock/skills) est une leçon
+  magistrale sur l'art d'écrire des compétences : wayfinder, grilling,
+  handoff, ask-matt et sa philosophie de conception se retrouvent partout
+  dans Atelier, adaptés pour les dirigeants.
+- **[Jesse Vincent (obra)](https://github.com/obra)** — son dépôt
+  [obra/superpowers](https://github.com/obra/superpowers) a défini la
+  discipline de travail derrière Atelier : brainstorming, rédaction de
+  devis, création de compétences testées avant d'être livrées.
+
+Ce dépôt n'existerait pas sans leur générosité de partager leur travail
+ouvertement. Allez voir leurs dépôts — ils valent le détour.
+
 ---
 
 # Atelier — English
@@ -61,3 +79,20 @@ Every skill ships in both French and English.
 ## Status
 
 Early design — see `docs/` for the design spec.
+
+## Acknowledgements
+
+A huge thank you to two people whose work heavily inspired this project:
+
+- **[Matt Pocock](https://github.com/mattpocock)** — his
+  [mattpocock/skills](https://github.com/mattpocock/skills) repo is a
+  masterclass in skill authorship: wayfinder, grilling, handoff, ask-matt,
+  and his design philosophy echo throughout Atelier, adapted for
+  executives.
+- **[Jesse Vincent (obra)](https://github.com/obra)** — his
+  [obra/superpowers](https://github.com/obra/superpowers) repo defined the
+  working discipline behind Atelier: brainstorming, spec writing, and
+  building skills that are tested before they ship.
+
+This repo would not exist without their generosity in sharing their work
+openly. Go explore their repos — they're worth the detour.
