@@ -308,8 +308,9 @@ These rules govern every Atelier skill and are embedded in
 - **Shared glossary.** A small exec-facing glossary of Atelier vocabulary
   (skill, workspace, Company Profile, relais, boussole, routine…) lives in
   `skills/shared/` per locale and is adhered to by every skill — the
-  leading-words standard made into an artifact. Forge gives it to
-  generated skills too.
+  leading-words standard made into an artifact. It is never inlined in
+  SKILL.md: the build copies each locale's glossary into every skill
+  ZIP's `references/` (AC18). Forge gives it to generated skills too.
 
 ## Testing
 
@@ -407,6 +408,10 @@ issues — see Deferred Items.
 
 ## Acceptance Criteria
 
+*(AC18–AC27 were added by the Stage 2 cross-model critique and grouped
+thematically, so numbering is not monotonic in document order. Ids are
+stable — never renumber.)*
+
 Build & packaging:
 
 - **AC1** — `scripts/build.sh --lang all` (and `scripts/build.ps1 -Lang all`)
@@ -419,62 +424,109 @@ Build & packaging:
 - **AC3** — Given no `--lang` flag, both build scripts prompt for
   français / English / both; given `--lang fr|en|all`, they run without
   prompting.
-- **AC4** — Given a SKILL.md whose shared paragraph (Company Profile
-  pointer or glossary reference) differs from its locale's canonical text
-  in `skills/shared/`, the build exits non-zero naming the file.
+- **AC4** — Given a SKILL.md whose inline Company Profile pointer
+  paragraph differs from its locale's canonical text in `skills/shared/`,
+  the build exits non-zero naming the file. (The glossary is never
+  inlined — see AC18.)
 - **AC5** — Localized names are exact: `atelier-ventes`→`atelier-sales`,
   `atelier-reunions`→`atelier-meetings`, `atelier-boussole`→
   `atelier-compass`; `atelier`, `atelier-marketing`, `atelier-mentor`,
   `atelier-forge` identical across locales.
+- **AC18** — Every built ZIP contains its locale's glossary in
+  `references/`, byte-identical to the canonical copy in
+  `skills/shared/`; the build copies it in, and the mechanical check
+  fails on a missing or drifted copy. SKILL.md files never inline
+  glossary content.
 
 Skill behavior (verified via `tests/` scenarios, judged manually):
 
 - **AC6** — Each skill's description states only triggering conditions
-  (no workflow summary) and contains its locale's trigger vocabulary; the
-  FR réunions description contains « procès-verbal », « PV », « compte
-  rendu »; the EN meetings description contains "minutes" and "meeting
-  prep".
+  in "Use when…" form (no workflow steps) and contains every trigger
+  term its locale's `tests/` scenarios list for that skill; at minimum
+  the FR réunions description contains « procès-verbal », « PV »,
+  « compte rendu » and the EN meetings description contains "minutes"
+  and "meeting prep".
 - **AC7** — Given a fresh conversation with the hub installed, when the
   exec starts onboarding, the interview establishes the project root
   folder (explained in plain language) and produces
   `{root}/docs/atelier/company-profile.md` including an AI-ambitions
   section, then instructs copying it to project knowledge.
-- **AC8** — Given any Atelier skill invoked with no Company Profile
-  findable (file or knowledge), it asks for the profile or offers
-  onboarding before producing role-specific output.
+- **AC8** — Given any Atelier skill invoked when neither the canonical
+  profile file nor project knowledge contains a Company Profile, the
+  skill asks for the profile or offers onboarding before continuing
+  with any behavior that depends on the profile.
 - **AC9** — Given a handoff trigger (« on continue dans une nouvelle
   conversation », "summarize so I can start fresh"), the hub produces a
-  relais document (downloadable, copy-paste fallback) containing: state
-  of work, decisions, next steps, and which skill the next conversation
-  uses; it references existing documents instead of duplicating them and
-  redacts credentials/PII.
+  relais document — delivered as a downloadable file when file creation
+  is available, otherwise presented in full for copy-paste — containing:
+  state of work, decisions, next steps, and which skill the next
+  conversation uses; it references existing documents instead of
+  duplicating them and redacts credentials/PII.
 - **AC10** — Given "what can Atelier do?", mentor enumerates the exec's
   skills including role-registry entries from
   `{root}/docs/atelier/roles.md` when present.
 - **AC11** — Mentor reads `{root}/docs/atelier/progression.md` at session
-  start when present, and updates it when a practice is adopted.
-- **AC12** — Given a large fuzzy initiative, boussole opens with a
-  heavy/light path recommendation plus an intensity question, each with
-  a recommended answer.
+  start when present, and updates it only after the exec explicitly
+  confirms adopting a practice — recording the practice, any stated
+  struggle, and the agreed next step.
+- **AC12** — Given a large fuzzy initiative, boussole opens by
+  recommending the heavy or light path and asking the exec to confirm
+  it, and separately asks the intensity preference (grilled or
+  light-footed) with a recommended answer.
 - **AC13** — A completed boussole heavy path leaves:
   `{root}/docs/<initiative>/map.md`, ticket files in
   `{root}/docs/tickets/` each carrying delivers / blocked-by /
   who-does-it, and (when the collapse condition fired) a brief in
   `{root}/docs/<initiative>/`.
 - **AC14** — Given a scripted forge interview, forge produces a valid
-  uploadable skill ZIP in the exec's language, appends the skill to
-  `{root}/docs/atelier/roles.md`, and ends with the test-phrases step.
+  uploadable skill ZIP in the exec's working language and ends with the
+  test-phrases step; if the generated skill is a role skill, forge
+  appends it to `{root}/docs/atelier/roles.md`; if it is a core skill,
+  it does not.
+- **AC19** — A completed boussole light path leaves a decision brief in
+  `{root}/docs/` containing destination, decisions, assumptions, and
+  next actions.
+- **AC20** — Given a deferral surfaced on either boussole path —
+  including ones Claude itself proposes — a ticket file with context is
+  written to `{root}/docs/tickets/` in the same conversation.
+- **AC21** — A research detour files a cited brief in
+  `{root}/docs/research/` referenced from the map; a maquette detour
+  files its artifact under `{root}/docs/maquettes/` and records the
+  resulting decision in the map.
+- **AC22** — Given a Company Profile present in both the canonical file
+  and project knowledge with differing content, skills use the file's
+  content.
+- **AC23** — Onboarding seeds `{root}/docs/atelier/roles.md` with the
+  installed role skills; re-running onboarding updates the existing
+  `company-profile.md` instead of starting a new one.
+- **AC24** — Given the scripted-interview test of AC14, the generated
+  skill is then run against its own exec-voice scenarios in a fresh
+  session and triggers on them.
+- **AC25** — Given an exec writing in a language other than the
+  installed skill's locale, the skill conducts the conversation in the
+  exec's language.
+- **AC26** — Given a raw meeting transcript and a PV request (« Voici le
+  transcript brut, fais-moi le PV » / "turn this transcript into
+  minutes"), réunions/meetings produces a formatted PV / minutes
+  document, not a summary-only reply.
+- **AC27** — Given an AI-practice question, mentor recommends exactly
+  one next practice per the graduation ladder (never the full roadmap);
+  given "can Claude do X?", it verifies against and cites one of its
+  listed high-trust sources.
 
 Repo & CI:
 
 - **AC15** — `tests/` contains at least one scenario per skill per
   locale; the mechanical CI check fails otherwise.
-- **AC16** — Pushing a tag runs the release workflow: builds all ZIPs
-  (`--lang all`) and attaches them to the GitHub release; push/PR runs
-  the mechanical checks (AC2, AC4, AC15).
+- **AC16** — Pushing a tag runs the release workflow: it builds all
+  ZIPs (`--lang all`), creates a GitHub release for the tag if none
+  exists, and attaches every ZIP plus a plain-language changelog to
+  that release; push/PR runs the mechanical checks (AC2, AC4, AC15,
+  AC18).
 - **AC17** — `docs/INSTALL.fr.md` and `docs/INSTALL.en.md` exist, cover
   the Capabilities toggle, the upload flow, and an updating section, and
-  link to the latest release assets.
+  link directly to each ZIP asset via the release's stable
+  `/releases/latest/download/<zip>` URLs.
 
 ## Deferred Items
 
@@ -497,7 +549,7 @@ conflicts surfaced.
 
 | File | Change |
 | --- | --- |
-| `scripts/build.sh` | Create — interactive language prompt, `--lang` flag, per-locale ZIPs, shared-text verification (AC1–AC5) |
+| `scripts/build.sh` | Create — interactive language prompt, `--lang` flag, per-locale ZIPs, shared-text verification, glossary copy into `references/` (AC1–AC5, AC18) |
 | `scripts/build.ps1` | Create — Windows equivalent, same behavior and outputs |
 | `.github/workflows/release.yml` | Create — tag → build `--lang all` → attach ZIPs to release; push/PR → mechanical checks (AC16) |
 | `CLAUDE.md` | Add one-line build/test command entries once scripts exist |
@@ -541,7 +593,7 @@ docs-and-scripts repo.
 >
 > These are not separate tasks; they are rules every task must follow.
 >
-> - **Testing (TDD)** — Follow `superpowers:test-driven-development`, adapted per the spec's Testing section: skill behavior is verified through `tests/` scenarios (write the scenario before the skill content; run baseline, then with-skill); build-script behavior through executable checks (AC1–AC5).
+> - **Testing (TDD)** — Follow `superpowers:test-driven-development`, adapted per the spec's Testing section: skill behavior is verified through `tests/` scenarios (write the scenario before the skill content; run baseline, then with-skill); build-script behavior through executable checks (AC1–AC5, AC18).
 > - **Verification before completion** — Before claiming a task done, invoke `superpowers:verification-before-completion`.
 > - **Commit hygiene** — One focused commit per task, matching the commit-message convention visible in this repo's history. Commit frequently.
 > - **Pre-commit verification (mandatory)** — Before EVERY `git commit`, dispatch a verification subagent that runs `bash scripts/build.sh --lang all` from the repo root (once the script exists; before that, verify the task's own stated checks) and reports `STATUS: PASS` or `STATUS: FAIL` with a terse per-issue list (no raw output). Wait for `STATUS: PASS` before committing; if FAIL, fix in the current task and re-run. Never use `git commit --no-verify`.
@@ -550,6 +602,6 @@ docs-and-scripts repo.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC17) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC27) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
