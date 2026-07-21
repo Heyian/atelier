@@ -22,7 +22,7 @@
 #>
 [CmdletBinding()]
 param(
-  [ValidateSet('fr', 'en', 'all')]
+  [ValidateSet('fr', 'en', 'all', IgnoreCase = $false)]
   [string]$Lang,
   [switch]$Check
 )
@@ -84,7 +84,7 @@ function Get-FrontmatterField {
       # whitespace. A plain .Trim() would also eat trailing spaces, giving a
       # different character count for AC2's 1024 cap and a different $desc
       # for AC6 substring tests than build.sh computes for the same file.
-      return ($lines[$i].Substring($Field.Length + 1)).TrimStart()
+      return ($lines[$i].Substring($Field.Length + 1)).TrimStart(' ', "`t")
     }
   }
   return ''
@@ -283,11 +283,14 @@ function Test-Triggers {
       if ($lines[$i] -ceq 'triggers:') { $collecting = $true; continue }
       if ($collecting) {
         if ($lines[$i] -clike '  - *') {
-          # TrimStart, not Trim: bash keeps trailing whitespace on a term
-          # (its awk `sub(/^  - /, "")` only strips the leading marker), so
-          # `  - relance ` must still carry its trailing space here too, or
-          # AC6's Contains() check disagrees with build.sh's grep -qF.
-          $term = $lines[$i].Substring(4).TrimStart()
+          # Bare Substring(4), no trim at all: bash's awk `sub(/^  - /, "")`
+          # strips only the four-character leading marker `  - ` and leaves
+          # everything else — including extra leading/trailing whitespace on
+          # the term — untouched. `  - relance ` must still carry its
+          # trailing space (and `  -   relance` its extra leading spaces)
+          # here too, or AC6's Contains() check disagrees with build.sh's
+          # grep -qF.
+          $term = $lines[$i].Substring(4)
           if ($term -and -not $desc.Contains($term)) {
             Add-CheckFailure "$($scenario.FullName): trigger '$term' is absent from the $Locale description of $Canonical"
           }
@@ -328,10 +331,10 @@ if (-not (Test-Path -LiteralPath $NamesTsv)) { throw "ERROR: missing $NamesTsv" 
 if (-not $Lang) {
   $Lang = if ($Check) { 'all' } else { Read-LocaleChoice }
 }
-# -ceq: mirrors bash's `if [[ "$lang" == "all" ]]`. ValidateSet above accepts
-# -Lang's value case-insensitively, so this is the one place left where a
-# non-lowercase 'all' (e.g. -Lang All) would otherwise be treated as the
-# all-locales case on Windows but not on Linux.
+# -ceq: mirrors bash's `if [[ "$lang" == "all" ]]`. ValidateSet above now
+# has IgnoreCase = $false, so a miscased -Lang value (e.g. -Lang All) is
+# rejected at parameter-binding time, before this line ever runs — matching
+# bash's `case "$lang" in fr|en|all) ;; *) die` for the same input.
 $selected = if ($Lang -ceq 'all') { $AllLocales } else { @($Lang) }
 
 if ($Check) {
