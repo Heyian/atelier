@@ -40,16 +40,23 @@ document the exec owns:
 - Every Atelier skill starts by looking for the profile in project knowledge
   and asks for it (or offers to run onboarding) if missing.
 - Human-readable, editable, and updatable by re-running the interview.
+- **"Company Profile" / « Profil d'entreprise » is a deliberate leading
+  word:** the exact same term appears in every skill, the install guide, and
+  onboarding. Each skill opens with the same standardized pointer paragraph
+  ("start by looking for the Company Profile in project knowledge…"), kept
+  as a single-source template in `skills/shared/` and stamped into each
+  locale's SKILL.md. Consistent language is what makes cross-skill reference
+  firing reliable.
 
 ## The five skills
 
 | Skill (FR / EN) | Purpose |
 |-----------------|---------|
-| `atelier` | Hub: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. |
+| `atelier` | Hub and **router**: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. As router, its body names every sibling skill and when each applies, so "what can Atelier do?" gets a real answer and Claude routes between skills reliably (execs won't remember skill names — the hub is the index). |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
 | `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
 | `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
-| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions. |
+| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them. |
 
 ## Languages
 
@@ -68,6 +75,52 @@ document the exec owns:
 - README and install guide are bilingual (French first, then English, or
   side-by-side sections).
 
+## Skill authoring standards
+
+These rules govern every Atelier skill and are embedded in
+`atelier-forge`'s references so generated skills inherit them. They live in
+`docs/AUTHORING.md` as the single source of truth.
+
+- **Descriptions state only when to use the skill — never its workflow.**
+  A description that summarizes the process gets followed *instead of* the
+  skill body. Format: "Use when…" with concrete triggering situations.
+- **Descriptions use the exec's vocabulary, per language.** The French
+  `atelier-reunions` description literally contains « procès-verbal, PV,
+  compte rendu, préparer ma réunion, suivi de rencontre »; `atelier-meetings`
+  contains "minutes, meeting prep, action items, decision log". Trigger
+  vocabulary is authored per locale, never translated mechanically.
+- **All skills are model-invoked.** Execs cannot be the index of what's
+  installed; descriptions carry the discovery load, and the hub routes.
+- **SKILL.md stays lean; knowledge lives in `references/`.** The author's
+  playbooks (marketing, sales, meetings) are reference files loaded on
+  demand, not inlined. Target: SKILL.md under ~500 words.
+- **Positive recipes, not prohibition lists.** State what the output IS and
+  the steps to produce it; prohibitions measurably backfire on shaping
+  problems.
+- **Checkable completion criteria.** Multi-step flows (onboarding, forge's
+  interview) end each step on a condition Claude can verify — "profile
+  document delivered and the exec told where to save it", not "help the
+  user".
+- **One excellent example per skill** where it earns its place: a sample
+  Company Profile in the hub, a sample generated skill in forge.
+
+## Testing
+
+No skill ships untested. Adapted from skill-TDD, scaled to this project:
+
+- `tests/` holds exec-voice scenarios per skill per locale — realistic
+  prompts an executive would actually type ("Voici le transcript brut,
+  fais-moi le PV", "I need a campaign for our fall promo").
+- Each scenario runs twice via a fresh subagent session: **baseline**
+  (skill absent) to see default behavior, then **with the skill installed**,
+  comparing against the scenario's expected behaviors (did it trigger? did
+  it look for the Company Profile? did it act instead of lecture?).
+- Trigger testing matters most: a skill whose description doesn't fire on
+  its scenarios fails, whatever the body says.
+- Forge's output is tested the same way: generate a skill from a scripted
+  interview, then verify the generated skill triggers and runs on its own
+  scenarios.
+
 ## Repo structure
 
 ```
@@ -75,13 +128,17 @@ atelier/
 ├── README.md                  # bilingual FR/EN
 ├── LICENSE                    # MIT
 ├── skills/
+│   ├── shared/                # cross-skill templates (Company Profile pointer, FR+EN)
 │   └── <skill-name>/
 │       ├── en/SKILL.md        # + references/ as needed
 │       └── fr/SKILL.md
+├── tests/
+│   └── <skill-name>/          # exec-voice scenarios per locale (see Testing)
 ├── scripts/
 │   ├── build.sh               # Linux/macOS: zips skills into dist/
 │   └── build.ps1              # Windows equivalent, same outputs
 ├── docs/
+│   ├── AUTHORING.md           # authoring standards (single source of truth)
 │   ├── INSTALL.fr.md          # illustrated self-serve guide
 │   └── INSTALL.en.md
 └── .github/workflows/release.yml   # tag → build ZIPs → attach to GitHub release
@@ -122,3 +179,5 @@ automated skill updates.
   Profile exists.
 - An exec can go from "I wish Claude could do X" to an installed custom
   skill via `atelier-forge` without outside help.
+- Every skill passes its `tests/` scenarios in both locales — triggers fire,
+  the Company Profile is sought, output matches expected behaviors.
