@@ -48,15 +48,32 @@ document the exec owns:
   locale's SKILL.md. Consistent language is what makes cross-skill reference
   firing reliable.
 
-## The five skills
+## The six skills
 
 | Skill (FR / EN) | Purpose |
 |-----------------|---------|
-| `atelier` | Hub and **router**: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. As router, its body names every sibling skill and when each applies, so "what can Atelier do?" gets a real answer and Claude routes between skills reliably (execs won't remember skill names — the hub is the index). |
+| `atelier` | Hub: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. Includes the **relais** (handoff) capability: on triggers like « on continue dans une nouvelle conversation » / "summarize so I can start fresh", it produces a handoff document — a downloadable file (copy-paste fallback) covering where the work stands, decisions made, what's next, and which Atelier skill the next conversation should use. Rules carried from the source skill: reference existing documents instead of duplicating them; redact sensitive information. The exec saves it to their Claude Project or pastes it to open the new chat. |
+| `atelier-mentor` | **Router + AI-practice advisor** — the exec's single "I'm lost / what should I do?" entry point. As router, its body names every sibling skill and when each applies, so "what can Atelier do?" gets a real answer (execs won't remember skill names — mentor is the index). As advisor, it counsels **exclusively on AI practice** — use cases, best practices, workflow optimization, when to use which Claude feature — never business wisdom. Its corpus in `references/` is distilled from the author's real AI practice (see Mentor corpus below). |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
 | `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
 | `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
 | `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them. |
+
+## Mentor corpus
+
+`atelier-mentor`'s advisory content is distilled from the author's actual AI
+practice — primarily the traction-app project (CLAUDE.md conventions,
+custom skills, agent orchestration) and the author's working conventions —
+filtered through two gates:
+
+1. **AI practice only.** Use cases, best practices, session and context
+   management, delegation to AI, workflow optimization. No business advice.
+2. **Translatable to Cowork/Desktop.** Terminal-specific techniques are
+   either translated to their chat-surface equivalent or dropped.
+
+The corpus lives in mentor's `references/`, organized by question shape
+("how do I get consistent outputs?", "when should I start a new
+conversation?", "can Claude do X?").
 
 ## Languages
 
@@ -66,9 +83,9 @@ document the exec owns:
 - **Skill names are localized too.** The repo folder name is the canonical
   French name; each locale's SKILL.md frontmatter carries the localized
   `name` (`atelier-ventes` → `atelier-sales`, `atelier-reunions` →
-  `atelier-meetings`; `atelier`, `atelier-marketing`, and `atelier-forge`
-  are identical in both languages). ZIPs are named after the localized skill
-  name plus a locale suffix.
+  `atelier-meetings`; `atelier`, `atelier-marketing`, `atelier-mentor`, and
+  `atelier-forge` are identical in both languages). ZIPs are named after the
+  localized skill name plus a locale suffix.
 - Regardless of locale, every skill adapts its conversation to the language
   the exec actually writes in.
 - `atelier-forge` generates skills in the exec's working language.
@@ -90,7 +107,8 @@ These rules govern every Atelier skill and are embedded in
   contains "minutes, meeting prep, action items, decision log". Trigger
   vocabulary is authored per locale, never translated mechanically.
 - **All skills are model-invoked.** Execs cannot be the index of what's
-  installed; descriptions carry the discovery load, and the hub routes.
+  installed; descriptions carry the discovery load, and `atelier-mentor`
+  routes.
 - **SKILL.md stays lean; knowledge lives in `references/`.** The author's
   playbooks (marketing, sales, meetings) are reference files loaded on
   demand, not inlined. Target: SKILL.md under ~500 words.

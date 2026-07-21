@@ -17,7 +17,8 @@ Conçu pour Claude Cowork et l'application Claude Desktop. Aucun terminal requis
 
 | Compétence | Rôle |
 |------------|------|
-| `atelier` | Le cœur : entrevue d'intégration, profil d'entreprise, et l'art de travailler avec Claude (délégation, relais de session, gestion du contexte) |
+| `atelier` | Le cœur : entrevue d'intégration, profil d'entreprise, relais de session, et l'art de travailler avec Claude (délégation, gestion du contexte) |
+| `atelier-mentor` | Le guide : oriente vers la bonne compétence et conseille sur les meilleures pratiques d'utilisation de l'IA |
 | `atelier-marketing` | Création de contenu, planification de campagnes, capture de la voix de marque |
 | `atelier-ventes` | Revues de pipeline, suivis, propositions, hygiène CRM |
 | `atelier-reunions` | Cycle complet des réunions : préparation, procès-verbaux (PV), journaux de décisions, communications |
@@ -46,7 +47,8 @@ Built for Claude Cowork and the Claude Desktop app. No terminal required.
 
 | Skill | Purpose |
 |-------|---------|
-| `atelier` | The hub: onboarding interview, company profile, and the Claude-craft curriculum (delegation, session handoffs, context management) |
+| `atelier` | The hub: onboarding interview, company profile, session handoff, and the Claude-craft curriculum (delegation, context management) |
+| `atelier-mentor` | The guide: routes you to the right skill and advises on AI best practices and workflow optimization |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture |
 | `atelier-sales` | Pipeline reviews, follow-ups, proposals, CRM hygiene |
 | `atelier-meetings` | Full meeting lifecycle: prep, minutes, decision logs, communications |
