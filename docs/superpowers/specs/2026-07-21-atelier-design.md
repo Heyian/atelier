@@ -118,6 +118,18 @@ fires; no separate skills, no extra descriptions in context):
   answer one question; the decision is the keeper, recorded in the map.
   Artifacts filed under `{root}/docs/maquettes/`.
 
+**Collapse — conditional, before the plan d'action** (adapted from the
+to-spec step): the map is an index for the people doing the thinking; a
+brief is for readers who weren't in the journey. When the map exceeds a
+handful of decisions, **or** the exec indicates the outcome is for someone
+else's eyes ("pour le CA", "for my team"), boussole proposes collapsing
+the map into a single coherent brief in `{root}/docs/<initiative>/` —
+what was decided, why, what happens next. Writing it doubles as a
+coherence check (late decisions contradicting early ones surface here),
+and the plan d'action is then cut from the brief's logic rather than from
+isolated map entries. Small maps skip straight to the plan d'action — the
+map already reads as a brief.
+
 **Closing phase — plan d'action** (adapted from the to-tickets skill):
 when the map is clear, boussole breaks execution into action tickets in
 `{root}/docs/tickets/` — one file each, in dependency order, with:
