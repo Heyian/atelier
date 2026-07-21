@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  checks-linux:
+    runs-on: ubuntu-latest
+    # AC2's 1024-char cap is measured with bash's ${#var}, which counts
+    # characters only under a UTF-8-aware LC_CTYPE. Under the runner's
+    # default LC_ALL=C it would count bytes instead, over-counting every
+    # accented French description. Pin a UTF-8 locale so the check measures
+    # what AC2 actually specifies.
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shared-text tests
+        run: bash scripts/tests/shared_test.sh
+      - name: Authoring-standards tests
+        run: bash scripts/tests/authoring_test.sh
+      - name: Build-script tests
+        run: bash scripts/tests/build_test.sh
+      - name: Mechanical checks (AC2, AC4, AC6, AC15, AC18, AC34)
+        run: bash scripts/build.sh --check
+
+  checks-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mechanical checks on Windows
+        shell: pwsh
+        run: ./scripts/build.ps1 -Check
+      - name: Build all locales on Windows
+        shell: pwsh
+        run: ./scripts/build.ps1 -Lang all
+      - name: Assert ZIP entry names use forward slashes
+        shell: pwsh
+        run: |
+          # Compress-Archive's entry-name separator is undocumented; older
+          # Windows PowerShell archive modules write backslashes, producing
+          # an entry literally named "references\glossary.md" instead of a
+          # references/ directory. Such a ZIP uploads to Claude with the
+          # references flattened and broken. -Check cannot detect this, so
+          # this is the single most valuable assertion this job can make.
+          #
+          # No skills exist yet (Tasks 7-13 add them), so dist/ is empty
+          # today and there is nothing to inspect. Don't let that read as a
+          # silent pass: announce the skip explicitly. Once Task 7 lands the
+          # first skill, this step starts inspecting a real ZIP automatically.
+          $zips = Get-ChildItem dist -Filter *.zip -ErrorAction SilentlyContinue
+          if (-not $zips) {
+            Write-Host "SKIPPED: no ZIPs in dist/ yet (no skills exist before Task 7) — nothing to inspect."
+            exit 0
+          }
+          $zip = $zips | Select-Object -First 1
+          Write-Host "Inspecting $($zip.Name)"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($zip.FullName)
+          try {
+            $entries = $archive.Entries.FullName
+            $bad = $entries | Where-Object { $_ -like '*\*' }
+            if ($bad) {
+              Write-Host "FAIL: entries with backslash separators found in $($zip.Name):"
+              $bad | ForEach-Object { Write-Host "  $_" }
+              throw "ZIP entry names must use forward slashes, not backslashes"
+            }
+            if ($entries -notcontains 'SKILL.md') {
+              Write-Host "FAIL: SKILL.md is not at the archive root of $($zip.Name). Entries:"
+              $entries | ForEach-Object { Write-Host "  $_" }
+              throw "SKILL.md must be at the ZIP root, not nested"
+            }
+            Write-Host "OK: all $($entries.Count) entries use forward slashes; SKILL.md is at the archive root."
+          } finally {
+            $archive.Dispose()
+          }
+      - name: Verify Windows ZIPs match the expected roster
+        shell: pwsh
+        run: |
+          Write-Host "Skipped: not all seven skills exist yet. Task 19 re-enables this."
+        # $zips = Get-ChildItem dist -Filter *.zip | Select-Object -ExpandProperty Name | Sort-Object
+        # Write-Host ($zips -join "`n")
+        # $expected = @(
+        #   'atelier-boussole-fr.zip','atelier-compass-en.zip',
+        #   'atelier-forge-en.zip','atelier-forge-fr.zip',
+        #   'atelier-marketing-en.zip','atelier-marketing-fr.zip',
+        #   'atelier-meetings-en.zip','atelier-mentor-en.zip',
+        #   'atelier-mentor-fr.zip','atelier-reunions-fr.zip',
+        #   'atelier-sales-en.zip','atelier-ventes-fr.zip',
+        #   'atelier-en.zip','atelier-fr.zip'
+        # ) | Sort-Object
+        # if (Compare-Object $zips $expected) { throw 'Windows ZIP roster does not match the expected 14' }
