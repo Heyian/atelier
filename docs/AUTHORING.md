@@ -26,6 +26,30 @@ installed or when to reach for it — the description carries the entire
 discovery load, and `atelier-mentor` routes when the exec asks in plain
 language instead of triggering a skill directly.
 
+## Frontmatter contract
+
+Every skill's `SKILL.md` opens with three required fields in YAML frontmatter,
+in this exact order: `name`, `description`, and `version`. The build enforces
+this structure via `scripts/build.sh --check` (and its PowerShell twin), which
+CI runs on every push.
+
+- **name**: Must match `^[a-z0-9-]+$` (lowercase, digits, hyphens only). Must
+  equal the localized skill name for that locale in `skills/names.tsv`. The
+  build fails on any mismatch.
+- **description**: Required. Constraint: `len(name) + len(description)` must
+  be ≤ 1024 characters.
+- **version**: Required.
+
+Example:
+
+```yaml
+---
+name: atelier-reunions
+description: À utiliser quand la personne dirigeante parle de réunion, de rencontre, ou demande un procès-verbal, un PV, un compte rendu, de préparer sa réunion, un suivi de rencontre, ou un relevé de décisions.
+version: 0.1.0
+---
+```
+
 ## SKILL.md stays lean
 
 Knowledge lives in `references/`, loaded on demand — not inlined in
