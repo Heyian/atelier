@@ -130,12 +130,17 @@ function New-SkillStage {
   $src = Join-Path (Join-Path $SkillsDir $Canonical) $Locale
   $neutral = Join-Path (Join-Path $SkillsDir $Canonical) 'shared'
   $skillMd = Join-Path $src 'SKILL.md'
-  if (-not (Test-Path -LiteralPath $skillMd)) { throw "ERROR: $Canonical/$Locale: SKILL.md not found" }
+  # NOTE: ${Locale}: not $Locale: — inside a double-quoted string, PowerShell
+  # parses "$word:" as an attempted scope-qualified variable reference (like
+  # $env: or $script:) and fails to parse the whole script if the word after
+  # $ isn't a valid scope name. ${} disambiguates so the colon is read as a
+  # literal character, not the start of a scope reference.
+  if (-not (Test-Path -LiteralPath $skillMd)) { throw "ERROR: $Canonical/${Locale}: SKILL.md not found" }
 
   $name = Get-FrontmatterField -Path $skillMd -Field 'name'
   $expected = Get-ExpectedName -Canonical $Canonical -Locale $Locale
-  if (-not $name) { throw "ERROR: $Canonical/$Locale: frontmatter has no 'name'" }
-  if ($name -cne $expected) { throw "ERROR: $Canonical/$Locale: frontmatter name '$name' != names.tsv '$expected'" }
+  if (-not $name) { throw "ERROR: $Canonical/${Locale}: frontmatter has no 'name'" }
+  if ($name -cne $expected) { throw "ERROR: $Canonical/${Locale}: frontmatter name '$name' != names.tsv '$expected'" }
 
   if (Test-Path -LiteralPath $Stage) { Remove-Item -Recurse -Force -LiteralPath $Stage }
   New-Item -ItemType Directory -Force -Path (Join-Path $Stage 'references') | Out-Null
@@ -190,21 +195,23 @@ function Test-Frontmatter {
   $name = Get-FrontmatterField -Path $Path -Field 'name'
   $desc = Get-FrontmatterField -Path $Path -Field 'description'
   $version = Get-FrontmatterField -Path $Path -Field 'version'
-  if (-not $name) { Add-CheckFailure "$Path: frontmatter has no 'name'" }
-  if (-not $desc) { Add-CheckFailure "$Path: frontmatter has no 'description'" }
-  if (-not $version) { Add-CheckFailure "$Path: frontmatter has no 'version'" }
+  # NOTE: ${Path}: not $Path: — see the ${Locale}: comment in New-SkillStage
+  # above; the same double-quoted-string parsing hazard applies here.
+  if (-not $name) { Add-CheckFailure "${Path}: frontmatter has no 'name'" }
+  if (-not $desc) { Add-CheckFailure "${Path}: frontmatter has no 'description'" }
+  if (-not $version) { Add-CheckFailure "${Path}: frontmatter has no 'version'" }
   # Unconditional, like build.sh's bare `[[ "$name" =~ ^[a-z0-9-]+$ ]]`: an
   # empty $name also fails this regex, so a missing name yields two failures
   # here, same as build.sh (not short-circuited by the "has no 'name'" check
   # above).
-  if ($name -cnotmatch '^[a-z0-9-]+$') { Add-CheckFailure "$Path: name '$name' is not [a-z0-9-]+" }
+  if ($name -cnotmatch '^[a-z0-9-]+$') { Add-CheckFailure "${Path}: name '$name' is not [a-z0-9-]+" }
   # PowerShell .Length counts UTF-16 code units, which equals the character
   # count for the accented-Latin text these descriptions use — already
   # character-correct with no change needed. (build.sh's byte-vs-char nuance
   # is handled separately by pinning a UTF-8 locale in CI.)
   $combined = $name.Length + $desc.Length
   if ($combined -gt 1024) {
-    Add-CheckFailure "$Path: name+description is $combined chars, max 1024"
+    Add-CheckFailure "${Path}: name+description is $combined chars, max 1024"
   }
 }
 
@@ -224,12 +231,12 @@ function Test-SharedText {
   # `[[ "$body" != *"$pointer"* ]]`, not a line-oriented `grep -F` (which
   # would OR the pointer's lines instead of requiring the whole block).
   if (-not $body.Contains($pointer)) {
-    Add-CheckFailure "$Path: Company Profile pointer missing or drifted from skills/shared/$Locale/profile-pointer.md"
+    Add-CheckFailure "${Path}: Company Profile pointer missing or drifted from skills/shared/$Locale/profile-pointer.md"
   }
   # The glossary's title line is a reliable probe for an inlined copy.
   $glossaryProbe = (Get-Content -LiteralPath (Join-Path (Join-Path $SharedDir $Locale) 'glossary.md'))[0]
   if ($body.Contains($glossaryProbe)) {
-    Add-CheckFailure "$Path: glossary content is inlined; it belongs in references/ only"
+    Add-CheckFailure "${Path}: glossary content is inlined; it belongs in references/ only"
   }
 }
 
@@ -240,7 +247,7 @@ function Test-StagedReferences {
     $a = Get-Content -LiteralPath (Join-Path $Stage "references/$file") -Raw
     $b = Get-Content -LiteralPath (Join-Path (Join-Path $SharedDir $Locale) $file) -Raw
     if ($a -cne $b) {
-      Add-CheckFailure "$Canonical/$Locale: staged references/$file differs from skills/shared/$Locale/$file"
+      Add-CheckFailure "$Canonical/${Locale}: staged references/$file differs from skills/shared/$Locale/$file"
     }
   }
 }
