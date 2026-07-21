@@ -507,7 +507,7 @@ Deferred Items.
 ## Acceptance Criteria
 
 *(AC18–AC27 were added by the Stage 2 cross-model critique, AC28–AC35
-by the Kinezen back-port pass, AC36–AC37 by the memory revision pass;
+by the corporate-memory pass, AC36–AC37 by the memory revision pass;
 all are grouped thematically, so numbering is not monotonic in
 document order. Ids are stable — never renumber.)*
 
@@ -692,7 +692,7 @@ Repo & CI:
 No repo glossary (`CONTEXT.md`) exists — glossary discipline not
 applicable to this pass. ADRs: **ADR-0003** (Company Profile file is the
 source of truth) created in the rigorous pass; **ADR-0004** (two-regime
-corporate memory) created in the Kinezen back-port pass and **amended
+corporate memory) created in the corporate-memory pass and **amended
 after the three-lens adversarial review** (immutable entries, propagation
 rule, Cowork-only writes, lexicon absorbed into the profile);
 ADR-0001/0002 unchanged; no conflicts surfaced. The shipped exec-facing
