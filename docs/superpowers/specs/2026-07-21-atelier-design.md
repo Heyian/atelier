@@ -43,12 +43,12 @@ document the exec owns:
 
 ## The five skills
 
-| Skill | Purpose |
-|-------|---------|
+| Skill (FR / EN) | Purpose |
+|-----------------|---------|
 | `atelier` | Hub: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
-| `atelier-ventes` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
-| `atelier-reunions` | Meeting prep, note processing, decision logs, board/team communications drafting. |
+| `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
+| `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
 | `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions. |
 
 ## Languages
@@ -56,6 +56,12 @@ document the exec owns:
 - **Skill sources are localized: every skill ships in French and English.**
   Each skill folder holds locale variants; the build assembles one ZIP per
   skill per locale (e.g. `atelier-marketing-fr.zip`, `atelier-marketing-en.zip`).
+- **Skill names are localized too.** The repo folder name is the canonical
+  French name; each locale's SKILL.md frontmatter carries the localized
+  `name` (`atelier-ventes` → `atelier-sales`, `atelier-reunions` →
+  `atelier-meetings`; `atelier`, `atelier-marketing`, and `atelier-forge`
+  are identical in both languages). ZIPs are named after the localized skill
+  name plus a locale suffix.
 - Regardless of locale, every skill adapts its conversation to the language
   the exec actually writes in.
 - `atelier-forge` generates skills in the exec's working language.
@@ -73,7 +79,7 @@ atelier/
 │       ├── en/SKILL.md        # + references/ as needed
 │       └── fr/SKILL.md
 ├── scripts/
-│   ├── build.sh               # Linux/macOS: zips each skill+locale into dist/
+│   ├── build.sh               # Linux/macOS: zips skills into dist/
 │   └── build.ps1              # Windows equivalent, same outputs
 ├── docs/
 │   ├── INSTALL.fr.md          # illustrated self-serve guide
@@ -85,6 +91,13 @@ Locale folders each contain a complete skill (SKILL.md at folder root) so a
 ZIP of `skills/<name>/<locale>/` is directly uploadable. Shared assets that
 are language-neutral may live in `skills/<name>/shared/` and be copied into
 both ZIPs at build time.
+
+**Build behavior:** run interactively, both scripts ask which language to
+build (français / English / both) and produce that locale's ZIPs, named
+after the localized skill name (e.g. choosing English yields
+`atelier-sales-en.zip`, not `atelier-ventes-en.zip`). A non-interactive flag
+(`--lang fr|en|all`) skips the prompt; the CI release workflow uses
+`--lang all` to attach every ZIP to the release.
 
 ## Distribution
 

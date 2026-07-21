@@ -20,7 +20,7 @@ Conçu pour Claude Cowork et l'application Claude Desktop. Aucun terminal requis
 | `atelier` | Le cœur : entrevue d'intégration, profil d'entreprise, et l'art de travailler avec Claude (délégation, relais de session, gestion du contexte) |
 | `atelier-marketing` | Création de contenu, planification de campagnes, capture de la voix de marque |
 | `atelier-ventes` | Revues de pipeline, suivis, propositions, hygiène CRM |
-| `atelier-reunions` | Préparation de réunions, traitement de notes, journaux de décisions, communications |
+| `atelier-reunions` | Cycle complet des réunions : préparation, procès-verbaux (PV), journaux de décisions, communications |
 | `atelier-forge` | Le créateur de compétences : une entrevue en langage clair qui génère vos propres compétences sur mesure |
 
 Chaque compétence est offerte en français et en anglais.
@@ -48,8 +48,8 @@ Built for Claude Cowork and the Claude Desktop app. No terminal required.
 |-------|---------|
 | `atelier` | The hub: onboarding interview, company profile, and the Claude-craft curriculum (delegation, session handoffs, context management) |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture |
-| `atelier-ventes` | Pipeline reviews, follow-ups, proposals, CRM hygiene |
-| `atelier-reunions` | Meeting prep, note processing, decision logs, communications |
+| `atelier-sales` | Pipeline reviews, follow-ups, proposals, CRM hygiene |
+| `atelier-meetings` | Full meeting lifecycle: prep, minutes, decision logs, communications |
 | `atelier-forge` | The skill-builder: a plain-language interview that generates their own custom skills |
 
 Every skill ships in both French and English.
