@@ -162,8 +162,8 @@ fires; no separate skills, no extra descriptions in context):
 
 **Collapse — conditional, before the plan d'action** (adapted from the
 to-spec step): the map is an index for the people doing the thinking; a
-brief is for readers who weren't in the journey. When the map exceeds a
-handful of decisions, **or** the exec indicates the outcome is for someone
+brief is for readers who weren't in the journey. When the map records
+more than five decisions, **or** the exec indicates the outcome is for someone
 else's eyes ("pour le CA", "for my team"), boussole proposes collapsing
 the map into a single coherent brief in `{root}/docs/<initiative>/` —
 what was decided, why, what happens next. Writing it doubles as a
@@ -507,9 +507,10 @@ Deferred Items.
 ## Acceptance Criteria
 
 *(AC18–AC27 were added by the Stage 2 cross-model critique, AC28–AC35
-by the corporate-memory pass, AC36–AC37 by the memory revision pass;
-all are grouped thematically, so numbering is not monotonic in
-document order. Ids are stable — never renumber.)*
+by the corporate-memory pass, AC36–AC37 by the memory revision pass,
+AC38–AC48 by the apply-critique pass; all are grouped thematically, so
+numbering is not monotonic in document order. Ids are stable — never
+renumber.)*
 
 Build & packaging:
 
@@ -520,9 +521,10 @@ Build & packaging:
 - **AC2** — Every built ZIP's SKILL.md has valid frontmatter: `name`
   (letters/numbers/hyphens only) and `description` present, ≤1024
   characters combined, and a version.
-- **AC3** — Given no `--lang` flag, both build scripts prompt for
-  français / English / both; given `--lang fr|en|all`, they run without
-  prompting.
+- **AC3** — Given no language option, `scripts/build.sh` and
+  `scripts/build.ps1` each prompt for français / English / both; given
+  the script's own non-interactive language option — `build.sh --lang
+  fr|en|all`, `build.ps1 -Lang fr|en|all` — each runs without prompting.
 - **AC4** — Given a SKILL.md whose inline Company Profile pointer
   paragraph differs from its locale's canonical text in `skills/shared/`,
   the build exits non-zero naming the file. (The glossary is never
@@ -549,11 +551,19 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   the FR réunions description contains « procès-verbal », « PV »,
   « compte rendu » and the EN meetings description contains "minutes"
   and "meeting prep".
-- **AC7** — Given a fresh conversation with the hub installed, when the
-  exec starts onboarding, the interview establishes the project root
-  folder (explained in plain language) and produces
-  `{root}/docs/atelier/company-profile.md` including an AI-ambitions
-  section, then instructs copying it to project knowledge.
+- **AC7** — Given a fresh Cowork conversation with the hub installed,
+  when the exec starts onboarding, the interview establishes the project
+  root folder (explained in plain language) and writes
+  `{root}/docs/atelier/company-profile.md` carrying a section for each
+  of: role, company, offer, market, tone of voice, priorities, team
+  context, **Vocabulaire**, and **AI ambitions** — then instructs the
+  exec to copy it into project knowledge.
+- **AC38** — Given the same onboarding run in a Desktop chat (no folder
+  access), the hub delivers the identical Company Profile as a
+  downloadable file — presented in full for copy-paste when file
+  creation is unavailable — with instructions to save it at
+  `{root}/docs/atelier/company-profile.md` and place a copy in project
+  knowledge; it never states or implies that it wrote the file itself.
 - **AC8** — Given any Atelier skill invoked when neither the canonical
   profile file nor project knowledge contains a Company Profile, the
   skill asks for the profile or offers onboarding before continuing
@@ -563,29 +573,62 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   relais document — delivered as a downloadable file when file creation
   is available, otherwise presented in full for copy-paste — containing:
   state of work, decisions, next steps, and which skill the next
-  conversation uses; it references existing documents instead of
-  duplicating them and redacts credentials/PII.
-- **AC10** — Given "what can Atelier do?", mentor enumerates the exec's
-  skills including role-registry entries from
-  `{root}/docs/atelier/roles.md` when present.
+  conversation uses; it links to existing documents by path rather than
+  reproducing their substantive contents, keeps the names needed to
+  understand the work, and omits credentials and sensitive personal data
+  (account or card numbers, home addresses, health, compensation).
+- **AC10** — Given "what can Atelier do?", mentor names every core skill
+  (`atelier`, `atelier-mentor`, `atelier-boussole`, `atelier-forge`) and
+  every role skill listed in `{root}/docs/atelier/roles.md`, saying when
+  each applies; when the registry is absent it names the core skills plus
+  the role skills it can see enabled, and offers onboarding to create the
+  registry.
 - **AC11** — Mentor reads `{root}/docs/atelier/progression.md` at session
   start when present, and updates it only after the exec explicitly
   confirms adopting a practice — recording the practice, any stated
   struggle, and the agreed next step.
 - **AC12** — Given a large fuzzy initiative, boussole opens by
-  recommending the heavy or light path and asking the exec to confirm
-  it, and separately asks the intensity preference (grilled or
-  light-footed) with a recommended answer.
-- **AC13** — A completed boussole heavy path leaves:
-  `{root}/docs/<initiative>/map.md`, ticket files in
-  `{root}/docs/tickets/` each carrying delivers / blocked-by /
-  who-does-it, and (when the collapse condition fired) a brief in
-  `{root}/docs/<initiative>/`.
+  recommending the **heavy** path and asking the exec to confirm; given a
+  request resolvable in one conversation it recommends the **light**
+  path. In both cases it separately asks the intensity preference
+  (grilled or light-footed) with a recommended answer.
+- **AC13** — A completed boussole heavy path leaves
+  `{root}/docs/<initiative>/map.md` and ticket files in
+  `{root}/docs/tickets/`, each ticket carrying delivers / blocked-by /
+  who-does-it.
+- **AC47** — Boussole proposes collapsing the map into a brief in
+  `{root}/docs/<initiative>/` when either collapse condition holds — the
+  map records more than five decisions, or the exec states the outcome is
+  for someone else ("pour le CA", "for my team") — and goes straight to
+  the plan d'action when neither holds. The brief states what was
+  decided, why, and what happens next.
+- **AC39** — Boussole asks one question at a time, each carrying its
+  recommended answer; on the light path it asks 3–5 questions, all
+  outcome-changing; and when the exec changes intensity mid-path
+  (« grille-moi sur cette partie »), the new intensity applies from the
+  next question onward.
+- **AC40** — Each heavy-path conversation resolves exactly one decision,
+  records it, updates `map.md`, and ends by producing a relais handoff
+  naming the next decision and the skill for the next conversation.
+- **AC41** — Before writing action tickets, boussole quizzes the exec on
+  granularity (too coarse / too fine / merge / split); the resulting
+  tickets are written in dependency order; boussole states the frontier
+  rule (work any ticket whose blockers are done) and routes each ticket
+  to the exec, a named role skill from the registry, or a human
+  delegate — it does not execute the ticket's own work.
 - **AC14** — Given a scripted forge interview, forge produces a valid
   uploadable skill ZIP in the exec's working language and ends with the
   test-phrases step; if the generated skill is a role skill, forge
   appends it to `{root}/docs/atelier/roles.md`; if it is a core skill,
   it does not.
+- **AC44** — Forge's delivery includes the ZIP, step-by-step upload
+  instructions, and 2–3 test phrases to try in a fresh conversation; when
+  the exec reports a test phrase that did not trigger, forge revises the
+  generated skill and re-delivers the ZIP rather than only explaining the
+  failure.
+- **AC45** — Every forge-generated ZIP contains, in `references/`, the
+  exec's working locale's glossary and memory-protocol reference,
+  byte-identical to the canonical copies in `skills/shared/`.
 - **AC19** — A completed boussole light path leaves a decision brief in
   `{root}/docs/` containing destination, decisions, assumptions, and
   next actions.
@@ -593,15 +636,18 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   including ones Claude itself proposes — a ticket file with context is
   written to `{root}/docs/tickets/` in the same conversation.
 - **AC21** — A research detour files a cited brief in
-  `{root}/docs/research/` referenced from the map; a maquette detour
-  files its artifact under `{root}/docs/maquettes/` and records the
-  resulting decision in the map.
+  `{root}/docs/research/`; a maquette detour files its artifact under
+  `{root}/docs/maquettes/`. Each detour is referenced, and the decision
+  it produced recorded, in the heavy path's `map.md` — or, on the light
+  path where no map exists, in that path's decision brief (AC19).
 - **AC22** — Given a Company Profile present in both the canonical file
   and project knowledge with differing content, skills use the file's
   content.
-- **AC23** — Onboarding seeds `{root}/docs/atelier/roles.md` with the
-  installed role skills; re-running onboarding updates the existing
-  `company-profile.md` instead of starting a new one.
+- **AC23** — Onboarding creates `{root}/docs/atelier/roles.md` seeded
+  with the installed role skills. Re-running onboarding updates the
+  existing `company-profile.md` in place instead of starting a new one,
+  and reconciles installed role skills into the existing registry without
+  removing forge-created entries or creating duplicates.
 - **AC24** — Given the scripted-interview test of AC14, the generated
   skill is then run against its own exec-voice scenarios in a fresh
   session and triggers on them.
@@ -610,16 +656,35 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   exec's language.
 - **AC26** — Given a raw meeting transcript and a PV request (« Voici le
   transcript brut, fais-moi le PV » / "turn this transcript into
-  minutes"), réunions/meetings produces a formatted PV / minutes
-  document, not a summary-only reply.
-- **AC27** — Given an AI-practice question, mentor recommends exactly
-  one next practice per the graduation ladder (never the full roadmap);
-  given "can Claude do X?", it verifies against and cites one of its
+  minutes"), réunions/meetings produces a PV / minutes document carrying
+  at minimum: meeting date, participants, topics discussed, decisions
+  taken, and action items each with a named owner — not a summary-only
+  reply.
+- **AC27** — Given an AI-practice question and a `progression.md`
+  recording the exec's current practice, mentor recommends exactly one
+  next practice per the graduation ladder (never the full roadmap); when
+  `progression.md` is absent or records no current practice, mentor
+  establishes the current practice in conversation before recommending
+  one. Given "can Claude do X?", it verifies against and cites one of its
   listed high-trust sources.
-- **AC28** — Onboarding creates no empty memory scaffolds: `decisions.md`
-  and each `memory/<canonical-name>.md` come into existence on their
-  first confirmed durable entry, and re-running onboarding never
-  overwrites or empties an existing memory file.
+- **AC42** — Given a business question (pricing, hiring, strategy),
+  mentor does not advise on the business substance and instead redirects
+  to the AI-practice angle or to the role skill / boussole that owns it.
+- **AC43** — When the recommended practice can be exercised in the
+  current conversation, mentor's advice ends by inviting the exec to try
+  it now on their real work.
+- **AC46** — Given the exec asks how to organize their work by
+  department, or mentor reaches the workspace rung of the graduation
+  ladder, the hub or mentor walks through creating one Claude Project per
+  department — producing that project's custom instructions and naming
+  what goes into its knowledge: the Company Profile, the role's memory
+  file once it exists, and the role's domain assets.
+- **AC28** — Onboarding creates no memory scaffolds.
+  `{root}/docs/atelier/decisions.md` is created only by the first
+  confirmed decision-journal write; `memory/<canonical-name>.md` is
+  created only by that role's first confirmed durable-knowledge write —
+  neither write creates the other file. Re-running onboarding never
+  overwrites or empties either.
 - **AC29** — Given a decision settled in a hub, boussole, or réunions
   Cowork session, the skill proposes a dated self-sufficient journal
   entry (date, decision, why inline) and writes to `decisions.md` only
@@ -647,15 +712,18 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   authoring standards — triggers in the description, task workflows
   with completion criteria in the body, the canonical Memory block, no
   company facts in the body; forge does not pre-seed its memory file.
-- **AC36** — Before its first proposed memory write in a session, the
-  skill has loaded the memory-protocol reference from `references/`
-  (the Memory block's pointer fires — AC34 checks distribution, this
-  checks use).
-- **AC37** — Given a Desktop-chat session (no folder access) where a
-  decision is settled, the skill records it in the session's
-  deliverable (PV, brief, relais doc) and does not deliver a
-  regenerated `decisions.md` or memory file for manual replacement;
-  it states that the next Cowork session folds it in.
+- **AC36** — Given a scenario whose correct handling depends on a rule
+  stated only in the memory-protocol reference (e.g. an item on the
+  do-not-persist list, or the propose-before-writing step), the skill's
+  observable proposal and subsequent write comply with that rule — which
+  is how the Memory block's pointer having fired is checked. AC34 checks
+  the reference ships; this checks it is used.
+- **AC37** — Given any Desktop-chat session (no folder access) in which a
+  decision is settled, the skill records the decision in that session's
+  primary deliverable — creating a decision-bearing deliverable when the
+  session has produced none — and states that the next Cowork session
+  folds it into the journal; it never delivers a regenerated
+  `decisions.md` or memory file for manual replacement.
 
 Repo & CI:
 
@@ -670,6 +738,8 @@ Repo & CI:
   the Capabilities toggle, the upload flow, and an updating section, and
   link directly to each ZIP asset via the release's stable
   `/releases/latest/download/<zip>` URLs.
+- **AC48** — Each install guide embeds screenshots for the Capabilities
+  toggle and for every step of the upload flow.
 
 ## Deferred Items
 
@@ -756,6 +826,6 @@ docs-and-scripts repo.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC27) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC48) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
