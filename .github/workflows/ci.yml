@@ -56,26 +56,27 @@ jobs:
             Write-Host "SKIPPED: no ZIPs in dist/ yet (no skills exist before Task 7) — nothing to inspect."
             exit 0
           }
-          $zip = $zips | Select-Object -First 1
-          Write-Host "Inspecting $($zip.Name)"
           Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $archive = [System.IO.Compression.ZipFile]::OpenRead($zip.FullName)
-          try {
-            $entries = $archive.Entries.FullName
-            $bad = $entries | Where-Object { $_ -like '*\*' }
-            if ($bad) {
-              Write-Host "FAIL: entries with backslash separators found in $($zip.Name):"
-              $bad | ForEach-Object { Write-Host "  $_" }
-              throw "ZIP entry names must use forward slashes, not backslashes"
+          foreach ($zip in $zips) {
+            Write-Host "Inspecting $($zip.Name)"
+            $archive = [System.IO.Compression.ZipFile]::OpenRead($zip.FullName)
+            try {
+              $entries = $archive.Entries.FullName
+              $bad = $entries | Where-Object { $_ -like '*\*' }
+              if ($bad) {
+                Write-Host "FAIL: entries with backslash separators found in $($zip.Name):"
+                $bad | ForEach-Object { Write-Host "  $_" }
+                throw "ZIP entry names must use forward slashes, not backslashes"
+              }
+              if ($entries -cnotcontains 'SKILL.md') {
+                Write-Host "FAIL: SKILL.md is not at the archive root of $($zip.Name). Entries:"
+                $entries | ForEach-Object { Write-Host "  $_" }
+                throw "SKILL.md must be at the ZIP root, not nested"
+              }
+              Write-Host "OK: all $($entries.Count) entries use forward slashes; SKILL.md is at the archive root."
+            } finally {
+              $archive.Dispose()
             }
-            if ($entries -notcontains 'SKILL.md') {
-              Write-Host "FAIL: SKILL.md is not at the archive root of $($zip.Name). Entries:"
-              $entries | ForEach-Object { Write-Host "  $_" }
-              throw "SKILL.md must be at the ZIP root, not nested"
-            }
-            Write-Host "OK: all $($entries.Count) entries use forward slashes; SKILL.md is at the archive root."
-          } finally {
-            $archive.Dispose()
           }
       - name: Verify Windows ZIPs match the expected roster
         shell: pwsh

@@ -10,6 +10,14 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # AC2's 1024-char cap is measured with bash's ${#var}, which counts
+    # characters only under a UTF-8-aware LC_CTYPE. Under the runner's
+    # default LC_ALL=C it would count bytes instead, over-counting every
+    # accented French description. Pin a UTF-8 locale so the check measures
+    # what AC2 actually specifies.
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
     steps:
       - uses: actions/checkout@v4
       - name: Mechanical checks
