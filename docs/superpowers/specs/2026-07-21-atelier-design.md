@@ -99,6 +99,39 @@ markdown files in the project folder:
 Dropped from wayfinder: issue-tracker tickets, labels, claiming, blocking
 edges, research subagents — machinery the surfaces don't have.
 
+**Detours — callable only from within boussole**, each living in its
+`references/` behind progressive disclosure (loaded only when the detour
+fires; no separate skills, no extra descriptions in context):
+
+- **Research** (adapted from the research skill): when a decision is
+  blocked on a fact, run web research — inline, or as its own conversation
+  bridged by relais for big questions — and always produce a **cited brief
+  in `{root}/docs/research/`**, referenced from the map. Cited and filed,
+  never an ephemeral chat answer.
+- **Maquette** (adapted from the prototype skill): raise the fidelity of
+  the discussion with a cheap, concrete artifact to react to — a mock
+  one-pager, sample email sequence, deck outline, interactive HTML mock,
+  simple spreadsheet model. Explicitly disposable: the artifact exists to
+  answer one question; the decision is the keeper, recorded in the map.
+  Artifacts filed under `{root}/docs/maquettes/`.
+
+**Closing phase — plan d'action** (adapted from the to-tickets skill):
+when the map is clear, boussole breaks execution into action tickets in
+`{root}/docs/tickets/` — one file each, in dependency order, with:
+
+- what it delivers, in the exec's language;
+- "Blocked by" in plain language ("after: pricing decided");
+- **who does it** — the exec themselves, Claude with a named Atelier skill
+  (worked in the matching department workspace), or a human they delegate
+  to.
+
+Boussole quizzes the exec on granularity before writing the files (too
+coarse / too fine / merge / split), then explains the frontier rule: work
+any ticket whose blockers are done. Boussole itself never executes —
+execution belongs to the domain skills; its ending routes each action to
+the right skill or workspace. Dropped from to-tickets: vertical-slice and
+expand–contract mechanics, triage labels — developer machinery.
+
 **Paper trail is never optional.** Light path always ends with a decision
 brief in `{root}/docs/` (destination, decisions, assumptions, next
 actions). Heavy path maintains the map and ticket files. Any deferral
@@ -115,7 +148,9 @@ Executives have no issue tracker; the filesystem is the tracker.
   your computer where everything about this project lives — Claude and you
   will both always know where to look").
 - All documentation produced by any Atelier skill goes under
-  `{root}/docs/`.
+  `{root}/docs/` (research briefs in `docs/research/`, disposable
+  discussion artifacts in `docs/maquettes/`, initiative maps in
+  `docs/<initiative>/`).
 - All tasks, deferrals, open questions, and tickets are markdown files in
   `{root}/docs/tickets/`.
 - On Desktop chat (no folder access), the same documents are delivered as
