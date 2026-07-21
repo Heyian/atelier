@@ -11,6 +11,28 @@ LOCALES=(fr en)
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
+# --- Staging dirs are mktemp'd throughout the script; die() exits before any
+# per-call `rm -rf` runs, so track every one in a manifest file and sweep them
+# on exit. A file (not an array) is required: make_stage_dir is invoked as
+# `x="$(make_stage_dir)"`, which runs in a subshell, so an array append there
+# would never be visible to the parent shell.
+STAGE_MANIFEST="$(mktemp)"
+cleanup_stage_dirs() {
+  local d
+  while IFS= read -r d; do
+    [[ -n "$d" ]] && rm -rf "$d"
+  done < "$STAGE_MANIFEST"
+  rm -f "$STAGE_MANIFEST"
+}
+trap cleanup_stage_dirs EXIT
+
+make_stage_dir() {
+  local d
+  d="$(mktemp -d)"
+  echo "$d" >> "$STAGE_MANIFEST"
+  echo "$d"
+}
+
 usage() {
   cat <<'EOF'
 Usage: build.sh [--lang fr|en|all] [--check]
@@ -109,7 +131,7 @@ build_locale() {
   local locale="$1" out_dir="$2" canonical stage name zip
   for canonical in $(list_skills); do
     [[ -d "$SKILLS_DIR/$canonical/$locale" ]] || continue
-    stage="$(mktemp -d)"
+    stage="$(make_stage_dir)"
     name="$(stage_skill "$canonical" "$locale" "$stage")"
     zip="$out_dir/$name-$locale.zip"
     rm -f "$zip"
@@ -167,7 +189,113 @@ main() {
   fi
 }
 
-# Defined in Task 4; a no-op stub until then so --check does not break the build.
-run_checks() { :; }
+CHECK_FAILURES=0
+check_fail() { echo "CHECK FAIL: $*" >&2; CHECK_FAILURES=$((CHECK_FAILURES + 1)); }
+
+# AC2 — frontmatter contract.
+check_frontmatter() {
+  local file="$1" name desc version combined
+  name="$(frontmatter_field "$file" name)"
+  desc="$(frontmatter_field "$file" description)"
+  version="$(frontmatter_field "$file" version)"
+
+  [[ -n "$name" ]] || check_fail "$file: frontmatter has no 'name'"
+  [[ -n "$desc" ]] || check_fail "$file: frontmatter has no 'description'"
+  [[ -n "$version" ]] || check_fail "$file: frontmatter has no 'version'"
+  [[ "$name" =~ ^[a-z0-9-]+$ ]] || check_fail "$file: name '$name' is not [a-z0-9-]+"
+
+  combined=$(( ${#name} + ${#desc} ))
+  [[ "$combined" -le 1024 ]] \
+    || check_fail "$file: name+description is $combined chars, max 1024"
+}
+
+# AC4 — the inlined Company Profile pointer must match canonical byte for byte.
+# AC18 — the glossary must never be inlined.
+check_shared_text() {
+  local file="$1" locale="$2" pointer glossary_probe body
+  pointer="$(cat "$SHARED_DIR/$locale/profile-pointer.md")"
+  body="$(cat "$file")"
+  # A true multi-line substring check: `grep -F` on a multi-line pattern would
+  # match on any single line of it, not the whole block.
+  if [[ "$body" != *"$pointer"* ]]; then
+    check_fail "$file: Company Profile pointer missing or drifted from skills/shared/$locale/profile-pointer.md"
+  fi
+  # The glossary's title line is a reliable probe for an inlined copy.
+  glossary_probe="$(head -1 "$SHARED_DIR/$locale/glossary.md")"
+  if grep -qF -- "$glossary_probe" "$file"; then
+    check_fail "$file: glossary content is inlined; it belongs in references/ only"
+  fi
+}
+
+# AC18 / AC34 — the staged references must be byte-identical to canonical.
+check_staged_references() {
+  local stage="$1" locale="$2"
+  cmp -s "$stage/references/glossary.md" "$SHARED_DIR/$locale/glossary.md" \
+    || check_fail "$stage: references/glossary.md differs from canonical"
+  cmp -s "$stage/references/memory-protocol.md" "$SHARED_DIR/$locale/memory-protocol.md" \
+    || check_fail "$stage: references/memory-protocol.md differs from canonical"
+}
+
+# AC15 — every skill has at least one scenario per locale.
+check_scenarios() {
+  local canonical="$1" locale="$2" dir count
+  dir="$REPO_ROOT/tests/$canonical/$locale"
+  if [[ ! -d "$dir" ]]; then
+    check_fail "tests/$canonical/$locale/: no scenario directory"
+    return
+  fi
+  count=$(find "$dir" -maxdepth 1 -name '*.md' -type f | wc -l)
+  [[ "$count" -ge 1 ]] || check_fail "tests/$canonical/$locale/: no scenario files"
+}
+
+# AC6 — every trigger term a scenario declares appears in that locale's description.
+check_triggers() {
+  local canonical="$1" locale="$2" skill_md desc scenario term
+  skill_md="$SKILLS_DIR/$canonical/$locale/SKILL.md"
+  desc="$(frontmatter_field "$skill_md" description)"
+  [[ -d "$REPO_ROOT/tests/$canonical/$locale" ]] || return
+  while IFS= read -r scenario; do
+    while IFS= read -r term; do
+      [[ -z "$term" ]] && continue
+      if ! grep -qF -- "$term" <<<"$desc"; then
+        check_fail "$scenario: trigger '$term' is absent from the $locale description of $canonical"
+      fi
+    done < <(awk '
+      NR == 1 && $0 == "---" { inside = 1; next }
+      inside && $0 == "---" { exit }
+      inside && $0 == "triggers:" { collecting = 1; next }
+      inside && collecting && /^  - / { sub(/^  - /, ""); print; next }
+      inside && collecting && !/^  - / { collecting = 0 }
+    ' "$scenario")
+  done < <(find "$REPO_ROOT/tests/$canonical/$locale" -maxdepth 1 -name '*.md' -type f)
+}
+
+run_checks() {
+  local out_dir="$1"; shift
+  local selected=("$@")
+  local locale canonical stage
+
+  for locale in "${selected[@]}"; do
+    for canonical in $(list_skills); do
+      [[ -d "$SKILLS_DIR/$canonical/$locale" ]] || continue
+      local skill_md="$SKILLS_DIR/$canonical/$locale/SKILL.md"
+      check_frontmatter "$skill_md"
+      check_shared_text "$skill_md" "$locale"
+      check_scenarios "$canonical" "$locale"
+      check_triggers "$canonical" "$locale"
+
+      stage="$(make_stage_dir)"
+      stage_skill "$canonical" "$locale" "$stage" >/dev/null
+      check_staged_references "$stage" "$locale"
+      rm -rf "$stage"
+    done
+  done
+
+  if [[ "$CHECK_FAILURES" -gt 0 ]]; then
+    echo "STATUS: FAIL ($CHECK_FAILURES check failures)" >&2
+    exit 1
+  fi
+  echo "STATUS: PASS (mechanical checks)"
+}
 
 main "$@"

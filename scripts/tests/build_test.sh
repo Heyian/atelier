@@ -127,5 +127,122 @@ else
 fi
 rm -rf "$d"
 
+# --- AC2: a name with illegal characters fails the check
+d="$(make_fixture_repo)"
+sed -i 's/^name: atelier-ventes$/name: Atelier Ventes/' "$d/skills/atelier-ventes/fr/SKILL.md"
+printf 'atelier-ventes\tAtelier Ventes\tatelier-sales\n' > "$d/skills/names.tsv"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC2 accepted a name with spaces and capitals"
+else
+  pass "AC2 rejects a name outside [a-z0-9-]"
+fi
+rm -rf "$d"
+
+# --- AC2: a missing version fails the check
+d="$(make_fixture_repo)"
+sed -i '/^version: /d' "$d/skills/atelier-ventes/fr/SKILL.md"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC2 accepted a SKILL.md with no version"
+else
+  pass "AC2 rejects a missing version"
+fi
+rm -rf "$d"
+
+# --- AC2: name+description over 1024 chars fails the check
+d="$(make_fixture_repo)"
+long="$(head -c 1100 /dev/zero | tr '\0' 'a')"
+sed -i "s/^description: .*/description: $long/" "$d/skills/atelier-ventes/fr/SKILL.md"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC2 accepted name+description over 1024 chars"
+else
+  pass "AC2 rejects name+description over 1024 chars"
+fi
+rm -rf "$d"
+
+# --- AC4: a drifted profile pointer fails the check, naming the file
+d="$(make_fixture_repo)"
+sed -i 's/le fichier fait foi/la connaissance du projet fait foi/' "$d/skills/atelier-ventes/fr/SKILL.md"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] && grep -q "atelier-ventes/fr/SKILL.md" <<<"$out"; then
+  pass "AC4 rejects a drifted profile pointer and names the file"
+else
+  fail "AC4 did not reject drifted profile pointer (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- AC4: a SKILL.md missing the pointer entirely fails the check
+d="$(make_fixture_repo)"
+python3 - "$d/skills/atelier-ventes/en/SKILL.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1])
+# split('---') on a file with exactly one frontmatter block yields 3 parts:
+# ['', frontmatter, body]. Keep the frontmatter, closed, and replace the body
+# so it no longer carries the inlined Company Profile pointer.
+parts = p.read_text().split('---')
+p.write_text('---' + parts[1] + '---\n\n# Sales\n')
+PY
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC4 accepted a SKILL.md with no profile pointer"
+else
+  pass "AC4 rejects a SKILL.md with no profile pointer"
+fi
+rm -rf "$d"
+
+# --- AC18 / AC34: every built ZIP carries byte-identical shared references
+d="$(make_fixture_repo)"
+( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
+x="$(mktemp -d)"; unzip -q "$d/dist/atelier-ventes-fr.zip" -d "$x"
+if cmp -s "$x/references/glossary.md" "$d/skills/shared/fr/glossary.md"; then
+  pass "AC18 ZIP glossary is byte-identical to canonical"
+else
+  fail "AC18 ZIP glossary differs from canonical"
+fi
+if cmp -s "$x/references/memory-protocol.md" "$d/skills/shared/fr/memory-protocol.md"; then
+  pass "AC34 ZIP memory protocol is byte-identical to canonical"
+else
+  fail "AC34 ZIP memory protocol differs from canonical"
+fi
+rm -rf "$x" "$d"
+
+# --- AC18: inlined glossary content in a SKILL.md fails the check
+d="$(make_fixture_repo)"
+cat "$d/skills/shared/fr/glossary.md" >> "$d/skills/atelier-ventes/fr/SKILL.md"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC18 accepted inlined glossary content in SKILL.md"
+else
+  pass "AC18 rejects inlined glossary content in SKILL.md"
+fi
+rm -rf "$d"
+
+# --- AC15: a skill with no scenarios in a locale fails the check
+d="$(make_fixture_repo)"
+rm -rf "$d/tests/atelier-ventes/en"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC15 accepted a skill with no EN scenarios"
+else
+  pass "AC15 rejects a skill with no EN scenarios"
+fi
+rm -rf "$d"
+
+# --- AC6: a trigger term absent from the description fails the check
+d="$(make_fixture_repo)"
+sed -i 's/^  - pipeline$/  - relance téléphonique/' "$d/tests/atelier-ventes/fr/pipeline.md"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  fail "AC6 accepted a trigger term absent from the description"
+else
+  pass "AC6 rejects a trigger term absent from the description"
+fi
+rm -rf "$d"
+
+# --- a clean fixture passes every check
+d="$(make_fixture_repo)"
+if ( cd "$d" && bash scripts/build.sh --check >/dev/null 2>&1 ); then
+  pass "clean fixture passes --check"
+else
+  fail "clean fixture failed --check"
+fi
+[[ ! -d "$d/dist" ]] && pass "--check leaves dist/ untouched" || fail "--check wrote to dist/"
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
