@@ -23,6 +23,7 @@ Conçu pour Claude Cowork et l'application Claude Desktop. Aucun terminal requis
 | `atelier-ventes` | Revues de pipeline, suivis, propositions, hygiène CRM |
 | `atelier-reunions` | Cycle complet des réunions : préparation, procès-verbaux (PV), journaux de décisions, communications |
 | `atelier-forge` | Le créateur de compétences : une entrevue en langage clair qui génère vos propres compétences sur mesure |
+| `atelier-boussole` | Le processus de réflexion : nomme la destination, cartographie les décisions, une décision par conversation |
 
 Chaque compétence est offerte en français et en anglais.
 
@@ -53,6 +54,7 @@ Built for Claude Cowork and the Claude Desktop app. No terminal required.
 | `atelier-sales` | Pipeline reviews, follow-ups, proposals, CRM hygiene |
 | `atelier-meetings` | Full meeting lifecycle: prep, minutes, decision logs, communications |
 | `atelier-forge` | The skill-builder: a plain-language interview that generates their own custom skills |
+| `atelier-compass` | The thinking process: name the destination, map the decisions, one decision per conversation |
 
 Every skill ships in both French and English.
 

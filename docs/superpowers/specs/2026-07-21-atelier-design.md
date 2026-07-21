@@ -48,16 +48,91 @@ document the exec owns:
   locale's SKILL.md. Consistent language is what makes cross-skill reference
   firing reliable.
 
-## The six skills
+## The seven skills
 
 | Skill (FR / EN) | Purpose |
 |-----------------|---------|
-| `atelier` | Hub: onboarding interview, Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. Includes the **relais** (handoff) capability: on triggers like « on continue dans une nouvelle conversation » / "summarize so I can start fresh", it produces a handoff document — a downloadable file (copy-paste fallback) covering where the work stands, decisions made, what's next, and which Atelier skill the next conversation should use. Rules carried from the source skill: reference existing documents instead of duplicating them; redact sensitive information. The exec saves it to their Claude Project or pastes it to open the new chat. |
+| `atelier` | Hub: onboarding interview (which establishes the **project root folder** early — see Documentation convention — explained in non-techie terms), Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. Includes the **relais** (handoff) capability: on triggers like « on continue dans une nouvelle conversation » / "summarize so I can start fresh", it produces a handoff document — a downloadable file (copy-paste fallback) covering where the work stands, decisions made, what's next, and which Atelier skill the next conversation should use. Rules carried from the source skill: reference existing documents instead of duplicating them; redact sensitive information. The exec saves it to their Claude Project or pastes it to open the new chat. |
 | `atelier-mentor` | **Router + AI-practice advisor** — the exec's single "I'm lost / what should I do?" entry point. As router, its body names every sibling skill and when each applies, so "what can Atelier do?" gets a real answer (execs won't remember skill names — mentor is the index). As advisor, it counsels **exclusively on AI practice** — use cases, best practices, workflow optimization, when to use which Claude feature — never business wisdom. Its corpus in `references/` is distilled from the author's real AI practice (see Mentor corpus below). |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
 | `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
 | `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
 | `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them. |
+| `atelier-boussole` / `atelier-compass` | The thinking process — an executive adaptation of wayfinder + grilling + brainstorming. See "Boussole: the thinking process" below. |
+
+## Boussole: the thinking process
+
+For decisions and initiatives too fuzzy to just execute. Adapted from
+developer skills (wayfinder, grilling, grill-with-docs) with the
+issue-tracker machinery removed.
+
+**Entry triage — the skill recommends, the exec confirms.** Boussole
+assesses the request and opens with its recommendation: light path for
+something resolvable in one conversation, heavy path ("this looks big —
+several decisions over several conversations; I suggest we map it") for
+foggy initiatives. It also asks the intensity preference: challenged hard
+(« grille-moi ») or light-footed. Every question it ever asks comes with
+its recommended answer — the exec reacts, never invents from scratch.
+
+**One interview engine, a depth dial.** Both intensities interview one
+question at a time. Light asks only the questions that change the outcome
+(3–5); grilled walks every branch until nothing stays fuzzy. Intensity is
+re-askable at any moment ("grill me on this part") and applies inside each
+heavy-path decision conversation too.
+
+**Heavy path — the map.** Concepts kept from wayfinder, translated to
+markdown files in the project folder:
+
+- **Destination-first:** name what "done" looks like before anything else;
+  it fixes scope and shapes every question.
+- **The map** lives at `{root}/docs/<initiative>/map.md` — an index of
+  decisions made (one line each, pointing to detail), open questions, a
+  **Not yet specified** section (fog of war: questions sensed but not yet
+  sharp — resolving decisions graduates fog into new open questions), and
+  an **Out of scope** log (consciously ruled-out work, with why).
+- **Open questions are ticket files** in `{root}/docs/tickets/`, one per
+  question, per the documentation convention below.
+- **One decision per conversation:** each heavy-path session resolves one
+  decision, records it, updates the map, then hands off via the hub's
+  relais. Fresh conversation per decision keeps thinking sharp.
+
+Dropped from wayfinder: issue-tracker tickets, labels, claiming, blocking
+edges, research subagents — machinery the surfaces don't have.
+
+**Paper trail is never optional.** Light path always ends with a decision
+brief in `{root}/docs/` (destination, decisions, assumptions, next
+actions). Heavy path maintains the map and ticket files. Any deferral
+surfaced on either path — including ones Claude itself proposes — is
+written to `{root}/docs/tickets/` immediately, with context, because
+context is freshest now.
+
+## Documentation convention (all skills)
+
+Executives have no issue tracker; the filesystem is the tracker.
+
+- Every project has a **root folder**, established during the hub's
+  onboarding interview and explained in plain terms ("the one folder on
+  your computer where everything about this project lives — Claude and you
+  will both always know where to look").
+- All documentation produced by any Atelier skill goes under
+  `{root}/docs/`.
+- All tasks, deferrals, open questions, and tickets are markdown files in
+  `{root}/docs/tickets/`.
+- On Desktop chat (no folder access), the same documents are delivered as
+  downloadable files with instructions to store them in the project folder
+  and/or project knowledge; Cowork sessions read and write the folder
+  directly.
+
+## Department workspaces (taught pattern)
+
+The agent-like experience without losing versioned, shippable skills: the
+hub (with mentor advising) walks the exec through creating one Claude
+Project per department — "Marketing", "Ventes" — generating its short
+custom instructions and placing the Company Profile plus domain assets in
+its knowledge. Skills are enabled account-wide, so they fire inside every
+workspace; the workspace supplies standing context and a familiar "place
+to go talk to my Marketing." Recurring unattended jobs graduate to Cloud
+Routines, which mentor introduces when the exec is ready.
 
 ## Mentor corpus
 
@@ -85,9 +160,10 @@ localized reference file.
 - **Skill names are localized too.** The repo folder name is the canonical
   French name; each locale's SKILL.md frontmatter carries the localized
   `name` (`atelier-ventes` → `atelier-sales`, `atelier-reunions` →
-  `atelier-meetings`; `atelier`, `atelier-marketing`, `atelier-mentor`, and
-  `atelier-forge` are identical in both languages). ZIPs are named after the
-  localized skill name plus a locale suffix.
+  `atelier-meetings`, `atelier-boussole` → `atelier-compass`; `atelier`,
+  `atelier-marketing`, `atelier-mentor`, and `atelier-forge` are identical
+  in both languages). ZIPs are named after the localized skill name plus a
+  locale suffix.
 - Regardless of locale, every skill adapts its conversation to the language
   the exec actually writes in.
 - `atelier-forge` generates skills in the exec's working language.
