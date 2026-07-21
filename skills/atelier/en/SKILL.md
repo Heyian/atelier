@@ -24,8 +24,6 @@ Memory sources: the decision log `{root}/docs/atelier/decisions.md` and the role
 registry `{root}/docs/atelier/roles.md`. Read `references/memory-protocol.md`
 before proposing any memory write.
 
-No company fact lives in this skill — facts live in the Company Profile.
-
 ## Onboarding interview
 
 Load `references/onboarding.md` and follow it.

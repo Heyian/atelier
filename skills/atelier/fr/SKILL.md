@@ -24,9 +24,6 @@ Sources de mémoire : le journal des décisions `{racine}/docs/atelier/decisions
 et le registre des rôles `{racine}/docs/atelier/roles.md`. Avant toute écriture
 en mémoire, lis `references/memory-protocol.md`.
 
-Aucun fait d'entreprise ne vit dans cette compétence — les faits vivent dans le
-Profil d'entreprise.
-
 ## Entretien d'accueil
 
 Charge `references/onboarding.md` et suis-le. `references/company-profile-example.md`

@@ -120,8 +120,11 @@ Règles du registre :
   rôle. Le registre le nomme ; l'accueil ne le crée pas.
 - La colonne **Espace de travail** nomme le projet Claude du département, même
   s'il n'est pas encore créé (voir `workspaces.md`).
-- Le nom de la compétence est toujours son **nom canonique français**, quelle
-  que soit la langue installée.
+- La colonne **Compétence** porte le nom que la personne a réellement
+  installé — en français, c'est déjà le nom canonique. La colonne **Mémoire**
+  est différente : elle nomme toujours le fichier par le nom canonique
+  français de la compétence, quelle que soit la langue installée, pour qu'un
+  changement de langue n'orpheline jamais la mémoire.
 
 **Critère d'achèvement :** `roles.md` existe et liste chaque compétence de rôle
 installée, aucune compétence socle.
@@ -165,7 +168,9 @@ créé ton profil ».
 
 ## Si l'accueil est relancé
 
-Une deuxième exécution **met à jour**, elle ne recommence pas.
+Une deuxième exécution **met à jour**, elle ne recommence pas, et elle ne
+touche jamais ni ne vide `decisions.md` ni aucun fichier sous `memory/` — une
+relance ne modifie que `company-profile.md` et `roles.md`.
 
 1. Lis `{racine}/docs/atelier/company-profile.md` au complet.
 2. Ne repose que les questions dont la réponse a changé ou manquait. Pour les
@@ -175,7 +180,9 @@ Une deuxième exécution **met à jour**, elle ne recommence pas.
 4. Réconcilie `roles.md` : ajoute les compétences de rôle installées depuis la
    dernière fois, **garde les lignes créées par `atelier-forge`**, et ne
    duplique aucune ligne existante. Une compétence désinstallée reste au
-   registre avec la mention « retirée » plutôt que d'être effacée.
+   registre, mais dans la colonne **Compétence** son nom est barré et suivi de
+   la mention « (retirée) » — par exemple `~~atelier-marketing~~ (retirée)` —
+   plutôt que la ligne effacée.
 
 **Critère d'achèvement :** le profil et le registre sont à jour, aucune ligne
 créée par forge n'a disparu, aucun doublon n'est apparu.

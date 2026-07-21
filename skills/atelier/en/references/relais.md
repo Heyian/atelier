@@ -73,7 +73,7 @@ Opening line to type: "..."
 
 **Name things.** Keep the names of people, products, customers, files and
 dates: without them the relay is a document about nothing and the next
-conversation starts from zero. "The launch" says nothing; "the Boréal line
+conversation starts from zero. "The launch" says nothing; "the Iron line
 launch" can be picked up.
 
 **Link by path.** For every existing document, write its path and one line on

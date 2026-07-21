@@ -99,16 +99,12 @@ Write `{root}/docs/atelier/roles.md` with the installed **role skills**:
 ```markdown
 # Role registry
 
-| Compétence | Rôle servi | Ce qu'elle fait | Espace de travail | Mémoire |
+| Skill | Role served | What it does | Workspace | Memory |
 |---|---|---|---|---|
 | `atelier-marketing` | Marketing | Content, campaigns, brand voice | Marketing | `memory/atelier-marketing.md` |
-| `atelier-ventes` | Sales | Pipeline, follow-ups, proposals | Sales | `memory/atelier-ventes.md` |
-| `atelier-reunions` | Meetings | Minutes, prep, decision follow-through | Meetings | `memory/atelier-reunions.md` |
+| `atelier-sales` | Sales | Pipeline, follow-ups, proposals | Sales | `memory/atelier-ventes.md` |
+| `atelier-meetings` | Meetings | Minutes, prep, decision follow-through | Meetings | `memory/atelier-reunions.md` |
 ```
-
-The column headers stay in French: every Atelier skill in every locale reads
-this one table, so its shape does not change with the installed language. The
-cell contents are written in the executive's language.
 
 Registry rules:
 
@@ -117,14 +113,15 @@ Registry rules:
   registry.
 - You can see which skills are enabled in the conversation. When unsure, ask:
   "which ones have you uploaded so far?"
-- The **Mémoire** column names the file that will serve this role. That file
+- The **Memory** column names the file that will serve this role. That file
   does not exist yet — it appears with the role's first durable piece of
   knowledge. The registry names it; onboarding does not create it.
-- The **Espace de travail** column names the department's Claude Project, even
+- The **Workspace** column names the department's Claude Project, even
   if it hasn't been created yet (see `workspaces.md`).
-- The skill name is always its **canonical French name**, whatever language is
-  installed — `atelier-ventes`, not `atelier-sales`. That's what keeps a
-  language switch from orphaning the memory.
+- The **Skill** column carries the name the executive actually has installed
+  — `atelier-sales`, not `atelier-ventes`. The **Memory** column is different:
+  it always keys the file by the skill's canonical French name, whatever
+  language is installed, so a language switch never orphans the memory.
 
 **Done when:** `roles.md` exists and lists every installed role skill and no
 core skill.
@@ -165,7 +162,9 @@ Say "here's your profile, save it here", never "I've created your profile".
 
 ## When onboarding is run again
 
-A second run **updates**; it does not start over.
+A second run **updates**; it does not start over, and it never overwrites or
+empties `decisions.md` or anything under `memory/` — a re-run only ever
+touches `company-profile.md` and `roles.md`.
 
 1. Read `{root}/docs/atelier/company-profile.md` in full.
 2. Only re-ask the questions whose answer changed or was missing. For the rest,
@@ -174,7 +173,9 @@ A second run **updates**; it does not start over.
    that still holds. Update the date.
 4. Reconcile `roles.md`: add role skills installed since last time, **keep the
    rows `atelier-forge` created**, and duplicate nothing. An uninstalled skill
-   stays in the registry marked "removed" rather than being deleted.
+   stays in the registry, but in the **Skill** column its name is struck
+   through and followed by "(removed)" — e.g. `~~atelier-marketing~~
+   (removed)` — rather than the row being deleted.
 
 **Done when:** profile and registry are current, no forge-created row has
 disappeared, and no duplicate row has appeared.
