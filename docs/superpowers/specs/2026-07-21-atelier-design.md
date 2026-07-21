@@ -73,7 +73,9 @@ filtered through two gates:
 
 The corpus lives in mentor's `references/`, organized by question shape
 ("how do I get consistent outputs?", "when should I start a new
-conversation?", "can Claude do X?").
+conversation?", "can Claude do X?"). The distilled source outline is
+`docs/mentor-corpus.md`; implementation turns each of its sections into a
+localized reference file.
 
 ## Languages
 
