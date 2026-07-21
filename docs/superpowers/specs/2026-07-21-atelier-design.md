@@ -38,18 +38,21 @@ document the exec owns:
   exec hopes AI takes off their plate and what success looks like. Mentor
   grounds every recommendation in this section; ungrounded advice reads as
   abstract and gets ignored.
-- The hub instructs the exec to keep it in a Claude Project (or re-attach it
-  to conversations).
-- Every Atelier skill starts by looking for the profile in project knowledge
-  and asks for it (or offers to run onboarding) if missing.
+- **Canonical home: `{root}/docs/atelier/company-profile.md`** (ADR-0003).
+  The hub also instructs the exec to keep a copy in Claude Project
+  knowledge for Desktop-chat sessions; when both exist, the file wins.
+- Every Atelier skill starts by looking for the profile (file first, then
+  project knowledge) and asks for it (or offers to run onboarding) if
+  missing.
 - Human-readable, editable, and updatable by re-running the interview.
 - **"Company Profile" / « Profil d'entreprise » is a deliberate leading
   word:** the exact same term appears in every skill, the install guide, and
   onboarding. Each skill opens with the same standardized pointer paragraph
-  ("start by looking for the Company Profile in project knowledge…"), kept
-  as a single-source template in `skills/shared/` and stamped into each
-  locale's SKILL.md. Consistent language is what makes cross-skill reference
-  firing reliable.
+  ("start by looking for the Company Profile…"). The canonical text per
+  locale lives in `skills/shared/`; each SKILL.md carries it **authored
+  inline** (complete and uploadable as-is), and the build fails if any
+  copy drifts from canonical. Consistent language is what makes
+  cross-skill reference firing reliable.
 
 ## The seven skills
 
@@ -324,6 +327,12 @@ No skill ships untested. Adapted from skill-TDD, scaled to this project:
 - Forge's output is tested the same way: generate a skill from a scripted
   interview, then verify the generated skill triggers and runs on its own
   scenarios.
+- **Execution split (decided):** scenario runs are **manual** — the author
+  dispatches subagents from Claude Code when authoring or changing a
+  skill and judges results. **CI is mechanical only**: ZIPs build,
+  frontmatter valid, shared text matches canonical, every skill has
+  scenarios in both locales. No API calls in CI. (Scripted harness
+  deferred: #4.)
 
 ## Repo structure
 
@@ -372,13 +381,18 @@ after the localized skill name (e.g. choosing English yields
 - Self-serve: the guide is written for a non-technical reader, with
   screenshots, covering the Capabilities toggle (Settings → Capabilities →
   code execution and file creation) and the upload flow.
+- **Updates (v1, decided):** every SKILL.md carries a version; each
+  release ships a plain-language changelog; the install guides include a
+  short « Mettre à jour » / "Updating" section (download the new ZIP,
+  re-upload, done). Richer update experience deferred: #3.
 - The structure stays one `marketplace.json` away from becoming a real
   Claude Code plugin later; not part of v1.
 
 ## Out of scope for v1
 
-MCP connectors, hooks, a download webpage, per-industry skill variants,
-automated skill updates.
+MCP connectors (#6), hooks, a download webpage (#1), per-industry skill
+variants (#5), automated skill updates (#3). All tracked as GitHub
+issues — see Deferred Items.
 
 ## Success criteria
 
@@ -390,3 +404,152 @@ automated skill updates.
   skill via `atelier-forge` without outside help.
 - Every skill passes its `tests/` scenarios in both locales — triggers fire,
   the Company Profile is sought, output matches expected behaviors.
+
+## Acceptance Criteria
+
+Build & packaging:
+
+- **AC1** — `scripts/build.sh --lang all` (and `scripts/build.ps1 -Lang all`)
+  from a clean checkout produce one ZIP per skill per locale in `dist/`,
+  each named `<localized-skill-name>-<locale>.zip`, each with `SKILL.md`
+  at the ZIP root.
+- **AC2** — Every built ZIP's SKILL.md has valid frontmatter: `name`
+  (letters/numbers/hyphens only) and `description` present, ≤1024
+  characters combined, and a version.
+- **AC3** — Given no `--lang` flag, both build scripts prompt for
+  français / English / both; given `--lang fr|en|all`, they run without
+  prompting.
+- **AC4** — Given a SKILL.md whose shared paragraph (Company Profile
+  pointer or glossary reference) differs from its locale's canonical text
+  in `skills/shared/`, the build exits non-zero naming the file.
+- **AC5** — Localized names are exact: `atelier-ventes`→`atelier-sales`,
+  `atelier-reunions`→`atelier-meetings`, `atelier-boussole`→
+  `atelier-compass`; `atelier`, `atelier-marketing`, `atelier-mentor`,
+  `atelier-forge` identical across locales.
+
+Skill behavior (verified via `tests/` scenarios, judged manually):
+
+- **AC6** — Each skill's description states only triggering conditions
+  (no workflow summary) and contains its locale's trigger vocabulary; the
+  FR réunions description contains « procès-verbal », « PV », « compte
+  rendu »; the EN meetings description contains "minutes" and "meeting
+  prep".
+- **AC7** — Given a fresh conversation with the hub installed, when the
+  exec starts onboarding, the interview establishes the project root
+  folder (explained in plain language) and produces
+  `{root}/docs/atelier/company-profile.md` including an AI-ambitions
+  section, then instructs copying it to project knowledge.
+- **AC8** — Given any Atelier skill invoked with no Company Profile
+  findable (file or knowledge), it asks for the profile or offers
+  onboarding before producing role-specific output.
+- **AC9** — Given a handoff trigger (« on continue dans une nouvelle
+  conversation », "summarize so I can start fresh"), the hub produces a
+  relais document (downloadable, copy-paste fallback) containing: state
+  of work, decisions, next steps, and which skill the next conversation
+  uses; it references existing documents instead of duplicating them and
+  redacts credentials/PII.
+- **AC10** — Given "what can Atelier do?", mentor enumerates the exec's
+  skills including role-registry entries from
+  `{root}/docs/atelier/roles.md` when present.
+- **AC11** — Mentor reads `{root}/docs/atelier/progression.md` at session
+  start when present, and updates it when a practice is adopted.
+- **AC12** — Given a large fuzzy initiative, boussole opens with a
+  heavy/light path recommendation plus an intensity question, each with
+  a recommended answer.
+- **AC13** — A completed boussole heavy path leaves:
+  `{root}/docs/<initiative>/map.md`, ticket files in
+  `{root}/docs/tickets/` each carrying delivers / blocked-by /
+  who-does-it, and (when the collapse condition fired) a brief in
+  `{root}/docs/<initiative>/`.
+- **AC14** — Given a scripted forge interview, forge produces a valid
+  uploadable skill ZIP in the exec's language, appends the skill to
+  `{root}/docs/atelier/roles.md`, and ends with the test-phrases step.
+
+Repo & CI:
+
+- **AC15** — `tests/` contains at least one scenario per skill per
+  locale; the mechanical CI check fails otherwise.
+- **AC16** — Pushing a tag runs the release workflow: builds all ZIPs
+  (`--lang all`) and attaches them to the GitHub release; push/PR runs
+  the mechanical checks (AC2, AC4, AC15).
+- **AC17** — `docs/INSTALL.fr.md` and `docs/INSTALL.en.md` exist, cover
+  the Capabilities toggle, the upload flow, and an updating section, and
+  link to the latest release assets.
+
+## Deferred Items
+
+- #1 — Build a download webpage for skill distribution
+- #2 — Package Atelier as a Claude Code plugin marketplace
+- #3 — Richer skill-update experience (mentor-assisted or automated)
+- #4 — Scripted API scenario-test harness
+- #5 — Per-industry skill variants
+- #6 — MCP connector integrations for role skills
+- #7 — Mentor: community/wisdom pointers
+
+## Glossary Updates & ADRs
+
+No repo glossary (`CONTEXT.md`) exists — glossary discipline not
+applicable to this pass. ADRs: **ADR-0003** (Company Profile file is the
+source of truth) created this pass; ADR-0001/0002 unchanged; no
+conflicts surfaced.
+
+## Config & Infrastructure Impact
+
+| File | Change |
+| --- | --- |
+| `scripts/build.sh` | Create — interactive language prompt, `--lang` flag, per-locale ZIPs, shared-text verification (AC1–AC5) |
+| `scripts/build.ps1` | Create — Windows equivalent, same behavior and outputs |
+| `.github/workflows/release.yml` | Create — tag → build `--lang all` → attach ZIPs to release; push/PR → mechanical checks (AC16) |
+| `CLAUDE.md` | Add one-line build/test command entries once scripts exist |
+
+No containers, env vars, IaC, or schemas — scanned; none exist in this
+docs-and-scripts repo.
+
+## Documentation Updates
+
+| Doc | Change |
+| --- | --- |
+| `docs/INSTALL.fr.md`, `docs/INSTALL.en.md` | Create — illustrated guide: Capabilities toggle, upload flow, updating section (AC17) |
+| `docs/AUTHORING.md` | Create — the authoring standards (single source; forge's references derive from it) |
+| `README.md` | Keep tables in sync with final skill roster; add release/install links when first release ships |
+| `docs/mentor-corpus.md` | No change (source outline; consumed during implementation) |
+
+## Implementation Plan Guidance
+
+> **For the plan author (`superpowers:writing-plans`):**
+>
+> Before writing tasks, read the repo's agent index (`CLAUDE.md`/`AGENTS.md`) for architecture, commands, and conventions.
+>
+> The plan must include the tasks described under **Required Tasks** below, AND must apply every rule under **Per-Task Policies** to every implementation task.
+>
+> ---
+>
+> ### Required Tasks (each item produces explicit numbered tasks in the plan)
+>
+> 1. **Isolated workspace** — IF the session is not already isolated, add as the first task: *"Create an isolated workspace via superpowers:using-git-worktrees."*
+> 2. **Glossary application** — dropped: this repo has no `CONTEXT.md` glossary.
+> 3. **ADR creation** — ADR-0001/0002/0003 already exist on `main`; no new ADRs listed. IF implementation surfaces a decision passing the three-criteria gate, add a task to create the next sequential ADR.
+> 4. **Deferred-item verification** — Add a task: *"Confirm every issue referenced in the 'Deferred Items' section (#1–#7) exists and has all four required body sections (Context, Required, Integration Points, Priority)."* Run `gh issue view <#> --json body | jq -r .body` and grep for the four headings.
+> 5. **Config file tasks** — FOR EACH file listed in the spec's "Config & Infrastructure Impact" section, add one explicit task: *"Update `<path>`."*
+> 6. **Docs update tasks** — FOR EACH entry in the spec's "Documentation Updates" section, add one explicit task: *"Update `<doc-path>`."* Design content goes in the docs dir, not the agent index; the index gets at most a 1-line pointer, a ≤3-sentence area summary, or a 1-line command/env-var entry.
+> 7. **Post-implementation check** — Add as the second-to-last task: *"Verify every Required Task above was actually executed — config files updated, docs written, ADRs created."* Read the diff; don't trust plan markings.
+> 8. **Final build task** — Add as the last task: *"Run `bash scripts/build.sh --lang all` and fix any issues until it builds successfully."* Non-negotiable. (The build script is itself a deliverable of this plan; early tasks create it, the final task proves it.)
+>
+> ---
+>
+> ### Per-Task Policies (apply to every implementation task)
+>
+> These are not separate tasks; they are rules every task must follow.
+>
+> - **Testing (TDD)** — Follow `superpowers:test-driven-development`, adapted per the spec's Testing section: skill behavior is verified through `tests/` scenarios (write the scenario before the skill content; run baseline, then with-skill); build-script behavior through executable checks (AC1–AC5).
+> - **Verification before completion** — Before claiming a task done, invoke `superpowers:verification-before-completion`.
+> - **Commit hygiene** — One focused commit per task, matching the commit-message convention visible in this repo's history. Commit frequently.
+> - **Pre-commit verification (mandatory)** — Before EVERY `git commit`, dispatch a verification subagent that runs `bash scripts/build.sh --lang all` from the repo root (once the script exists; before that, verify the task's own stated checks) and reports `STATUS: PASS` or `STATUS: FAIL` with a terse per-issue list (no raw output). Wait for `STATUS: PASS` before committing; if FAIL, fix in the current task and re-run. Never use `git commit --no-verify`.
+>
+> ---
+>
+> ### Before finishing the branch (advisory cross-model review)
+>
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC17) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+>
+> This **never gates a merge** — the gate stays `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
