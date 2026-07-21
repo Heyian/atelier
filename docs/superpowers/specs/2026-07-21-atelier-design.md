@@ -58,12 +58,12 @@ document the exec owns:
 
 | Skill (FR / EN) | Purpose |
 |-----------------|---------|
-| `atelier` | Hub: onboarding interview (which establishes the **project root folder** early — see Documentation convention — explained in non-techie terms), Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. Includes the **relais** (handoff) capability: on triggers like « on continue dans une nouvelle conversation » / "summarize so I can start fresh", it produces a handoff document — a downloadable file (copy-paste fallback) covering where the work stands, decisions made, what's next, and which Atelier skill the next conversation should use. Rules carried from the source skill: reference existing documents instead of duplicating them; redact sensitive information. The exec saves it to their Claude Project or pastes it to open the new chat. |
+| `atelier` | Hub: onboarding interview (which establishes the **project root folder** early — see Documentation convention — explained in non-techie terms), Company Profile generation, and the Claude-craft curriculum — delegation framing, when to start a fresh session, how to hand off context — taught in context when the moment calls for it, not as lectures. Includes the **relais** (handoff) capability: on triggers like « on continue dans une nouvelle conversation » / "summarize so I can start fresh", it produces a handoff document — a downloadable file (copy-paste fallback) covering where the work stands, decisions made, what's next, and which Atelier skill the next conversation should use. Rules carried from the source skill: reference existing documents instead of duplicating them; redact sensitive information. Before producing the document, the relais runs the memory consolidation sweep (see Corporate memory). The exec saves it to their Claude Project or pastes it to open the new chat. Onboarding also seeds the corporate-memory scaffolds: `decisions.md` and `lexicon.md`. |
 | `atelier-mentor` | **Router + AI-practice advisor** — the exec's single "I'm lost / what should I do?" entry point. As router, its body names every sibling skill and when each applies, so "what can Atelier do?" gets a real answer (execs won't remember skill names — mentor is the index). As advisor, it counsels **exclusively on AI practice** — use cases, best practices, workflow optimization, when to use which Claude feature — never business wisdom. Its corpus in `references/` is distilled from the author's real AI practice (see Mentor corpus below). |
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
 | `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
-| `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
-| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them. |
+| `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Executive decisions found in a PV are proposed as decision-journal entries pointing at the PV (see Corporate memory). Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
+| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them; generated role skills follow the role-skill body template (a flexible baseline forge may expand) and arrive with their per-role memory file seeded. |
 | `atelier-boussole` / `atelier-compass` | The thinking process — an executive adaptation of wayfinder + grilling + brainstorming. See "Boussole: the thinking process" below. |
 
 ## Skill categories: role skills vs core skills
@@ -83,7 +83,8 @@ respects this distinction**:
 
 **The role registry** makes the open-ended set navigable:
 `{root}/docs/atelier/roles.md` lists every role skill the exec has — name,
-role/department it serves, what it does, which workspace it belongs to.
+role/department it serves, what it does, which workspace it belongs to,
+and its memory file (see Corporate memory).
 The hub seeds it at onboarding with the installed role skills; **forge
 appends an entry every time it generates a new role skill**. Core skills
 consult it:
@@ -188,7 +189,10 @@ expand–contract mechanics, triage labels — developer machinery.
 
 **Paper trail is never optional.** Light path always ends with a decision
 brief in `{root}/docs/` (destination, decisions, assumptions, next
-actions). Heavy path maintains the map and ticket files. Any deferral
+actions). Heavy path maintains the map and ticket files. Resolved
+decisions on either path are also indexed in the decision journal — a
+one-line dated entry pointing at the map or brief (see Corporate
+memory). Any deferral
 surfaced on either path — including ones Claude itself proposes — is
 written to `{root}/docs/tickets/` immediately, with context, because
 context is freshest now.
@@ -212,13 +216,65 @@ Executives have no issue tracker; the filesystem is the tracker.
   and/or project knowledge; Cowork sessions read and write the folder
   directly.
 
+## Corporate memory (all skills)
+
+Back-ported from the Kinezen skill session that seeded Atelier: memory
+is a **distilled knowledge base, never a log of interactions**. Two
+regimes, treated differently (ADR-0004):
+
+- **Executive decisions → dated append-only journal** at
+  `{root}/docs/atelier/decisions.md`. Each entry carries date, decision,
+  rationale (the why), and status (Active / Révisée le … / Annulée
+  le …). A decision that revises an earlier one is appended and the
+  earlier entry's status marked — history is never erased, because
+  « pourquoi a-t-on décidé X ? » must stay answerable months later.
+- **Durable knowledge → reconciled living state.** The Company Profile
+  holds global knowledge; each role skill's memory file (below) holds
+  domain knowledge. Writing means: read the whole target file,
+  integrate, dedupe, rewrite distilled — never raw accumulation.
+
+Two more memory surfaces, plus a rule keeping the journal thin:
+
+- **Lexicon** — `{root}/docs/atelier/lexicon.md`: the exec's own
+  business vocabulary (internal terms, acronyms, product names) and
+  nothing else — no decisions, no business facts. Distinct from the
+  shipped Atelier glossary, which defines *Atelier's* vocabulary.
+  Skills consult it at start and propose additions when a new term
+  appears.
+- **Per-role memory** — `{root}/docs/atelier/memory/<role-skill-name>.md`:
+  seeded when the role is registered (onboarding for shipped role
+  skills, forge for generated ones), read when the role skill starts,
+  listed in the role registry entry. Knowledge useful across roles
+  escalates to the Company Profile instead.
+- **The journal is a thin index — detail lives once.** Boussole appends
+  a one-line dated entry per resolved decision pointing at the map or
+  brief; réunions extracts executive decisions from a PV and proposes
+  journal entries pointing at the PV.
+
+**Write protocol** — canonical text per locale in `skills/shared/`,
+copied by the build into every ZIP's `references/` exactly like the
+glossary (AC34):
+
+- **Triggers:** an executive decision is taken; durable knowledge
+  emerges; a new internal term appears (→ lexicon); the exec says
+  « note ça » / "remember this"; the consolidation sweep.
+- **Never persisted:** unconcluded brainstorming, throwaway Q&A,
+  ephemeral details, duplicates of what's already recorded.
+- **Propose before writing:** the skill shows a short summary of what
+  it will persist and where, and waits for the exec's accord — except
+  on an explicit "note this".
+- **Consolidation sweep:** at the end of a substantial work session,
+  any skill may propose a short list of decisions and durable
+  knowledge worth persisting; the hub's **relais always runs the sweep**
+  before producing the handoff document.
+
 ## Department workspaces (taught pattern)
 
 The agent-like experience without losing versioned, shippable skills: the
 hub (with mentor advising) walks the exec through creating one Claude
 Project per department — "Marketing", "Ventes" — generating its short
-custom instructions and placing the Company Profile plus domain assets in
-its knowledge. Skills are enabled account-wide, so they fire inside every
+custom instructions and placing the Company Profile plus domain assets
+(including the role's memory file) in its knowledge. Skills are enabled account-wide, so they fire inside every
 workspace; the workspace supplies standing context and a familiar "place
 to go talk to my Marketing." Recurring unattended jobs graduate to Cloud
 Routines, which mentor introduces when the exec is ready.
@@ -306,11 +362,21 @@ These rules govern every Atelier skill and are embedded in
 - **One excellent example per skill** where it earns its place: a sample
   Company Profile in the hub, a sample generated skill in forge.
 - **Shared glossary.** A small exec-facing glossary of Atelier vocabulary
-  (skill, workspace, Company Profile, relais, boussole, routine…) lives in
-  `skills/shared/` per locale and is adhered to by every skill — the
+  (skill, workspace, Company Profile, relais, boussole, routine, journal
+  des décisions / decision log, lexique / lexicon, mémoire d'entreprise /
+  corporate memory…) lives in `skills/shared/` per locale and is adhered to by every skill — the
   leading-words standard made into an artifact. It is never inlined in
   SKILL.md: the build copies each locale's glossary into every skill
   ZIP's `references/` (AC18). Forge gives it to generated skills too.
+- **Role-skill body template.** Role skills follow a proven baseline
+  shape (from the Kinezen skill): Mission / Context / Capabilities /
+  Cross-role collaboration / Memory sources. Trigger vocabulary stays in
+  the description, per the rules above. It is a baseline, not a
+  straitjacket — forge may expand or adapt it when the interview
+  warrants.
+- **Memory protocol adherence.** Every skill follows the shared write
+  protocol (see Corporate memory): two regimes, propose-before-writing,
+  the do-not-persist list.
 
 ## Testing
 
@@ -342,7 +408,7 @@ atelier/
 ├── README.md                  # bilingual FR/EN
 ├── LICENSE                    # MIT
 ├── skills/
-│   ├── shared/                # cross-skill templates (Company Profile pointer, FR+EN)
+│   ├── shared/                # canonical cross-skill texts (profile pointer, glossary, memory protocol — FR+EN)
 │   └── <skill-name>/
 │       ├── en/SKILL.md        # + references/ as needed
 │       └── fr/SKILL.md
@@ -405,12 +471,16 @@ issues — see Deferred Items.
   skill via `atelier-forge` without outside help.
 - Every skill passes its `tests/` scenarios in both locales — triggers fire,
   the Company Profile is sought, output matches expected behaviors.
+- A decision made in one conversation stays findable months later through
+  the decision journal — and no skill ever persists memory without the
+  exec's accord.
 
 ## Acceptance Criteria
 
-*(AC18–AC27 were added by the Stage 2 cross-model critique and grouped
-thematically, so numbering is not monotonic in document order. Ids are
-stable — never renumber.)*
+*(AC18–AC27 were added by the Stage 2 cross-model critique, AC28–AC35
+by the Kinezen back-port pass; both are grouped thematically, so
+numbering is not monotonic in document order. Ids are stable — never
+renumber.)*
 
 Build & packaging:
 
@@ -437,6 +507,10 @@ Build & packaging:
   `skills/shared/`; the build copies it in, and the mechanical check
   fails on a missing or drifted copy. SKILL.md files never inline
   glossary content.
+- **AC34** — Every built ZIP contains its locale's memory-protocol
+  reference in `references/`, byte-identical to the canonical copy in
+  `skills/shared/`; the mechanical check fails on a missing or drifted
+  copy.
 
 Skill behavior (verified via `tests/` scenarios, judged manually):
 
@@ -513,6 +587,36 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   one next practice per the graduation ladder (never the full roadmap);
   given "can Claude do X?", it verifies against and cites one of its
   listed high-trust sources.
+- **AC28** — Onboarding seeds `{root}/docs/atelier/decisions.md` and
+  `{root}/docs/atelier/lexicon.md` scaffolds alongside the Company
+  Profile and role registry; re-running onboarding preserves their
+  existing entries.
+- **AC29** — Given an executive decision settled in any Atelier skill,
+  the skill proposes a dated journal entry (decision, why, status) and
+  writes to `decisions.md` only after the exec agrees; a decision
+  revising an earlier one is appended while the earlier entry's status
+  is marked revised — no entry is ever deleted or rewritten.
+- **AC30** — Given a new internal term or acronym appearing in
+  conversation, the skill proposes adding it to `lexicon.md`; the
+  lexicon contains vocabulary definitions only — no decisions, no
+  business facts.
+- **AC31** — A role skill reads `{root}/docs/atelier/memory/<skill>.md`
+  at start when present; new durable domain knowledge is reconciled
+  into it (read whole file, integrate, dedupe, rewrite) — the file
+  never grows as a per-session log; knowledge useful across roles is
+  proposed for the Company Profile instead.
+- **AC32** — The relais runs the consolidation sweep before producing
+  the handoff document: it proposes a short list of decisions and
+  durable knowledge to persist and writes only the items the exec
+  approves.
+- **AC33** — A boussole-resolved decision yields a one-line dated entry
+  in `decisions.md` pointing at the map or brief; given a PV containing
+  executive decisions, réunions proposes journal entries pointing at
+  the PV.
+- **AC35** — A forge-generated role skill follows the role-skill body
+  template baseline (expanded where the interview warranted), and forge
+  seeds `{root}/docs/atelier/memory/<skill>.md` alongside the registry
+  entry of AC14.
 
 Repo & CI:
 
@@ -522,7 +626,7 @@ Repo & CI:
   ZIPs (`--lang all`), creates a GitHub release for the tag if none
   exists, and attaches every ZIP plus a plain-language changelog to
   that release; push/PR runs the mechanical checks (AC2, AC4, AC15,
-  AC18).
+  AC18, AC34).
 - **AC17** — `docs/INSTALL.fr.md` and `docs/INSTALL.en.md` exist, cover
   the Capabilities toggle, the upload flow, and an updating section, and
   link directly to each ZIP asset via the release's stable
@@ -542,16 +646,19 @@ Repo & CI:
 
 No repo glossary (`CONTEXT.md`) exists — glossary discipline not
 applicable to this pass. ADRs: **ADR-0003** (Company Profile file is the
-source of truth) created this pass; ADR-0001/0002 unchanged; no
-conflicts surfaced.
+source of truth) created in the rigorous pass; **ADR-0004** (two-regime
+corporate memory) created in the Kinezen back-port pass; ADR-0001/0002
+unchanged; no conflicts surfaced. The shipped exec-facing glossary gains
+« journal des décisions », « lexique », « mémoire d'entreprise » (and
+their EN equivalents).
 
 ## Config & Infrastructure Impact
 
 | File | Change |
 | --- | --- |
-| `scripts/build.sh` | Create — interactive language prompt, `--lang` flag, per-locale ZIPs, shared-text verification, glossary copy into `references/` (AC1–AC5, AC18) |
+| `scripts/build.sh` | Create — interactive language prompt, `--lang` flag, per-locale ZIPs, shared-text verification, glossary + memory-protocol copy into `references/` (AC1–AC5, AC18, AC34) |
 | `scripts/build.ps1` | Create — Windows equivalent, same behavior and outputs |
-| `.github/workflows/release.yml` | Create — tag → build `--lang all` → attach ZIPs to release; push/PR → mechanical checks (AC16) |
+| `.github/workflows/release.yml` | Create — tag → build `--lang all` → attach ZIPs to release; push/PR → mechanical checks (AC16, incl. AC34) |
 | `CLAUDE.md` | Add one-line build/test command entries once scripts exist |
 
 No containers, env vars, IaC, or schemas — scanned; none exist in this
@@ -562,7 +669,7 @@ docs-and-scripts repo.
 | Doc | Change |
 | --- | --- |
 | `docs/INSTALL.fr.md`, `docs/INSTALL.en.md` | Create — illustrated guide: Capabilities toggle, upload flow, updating section (AC17) |
-| `docs/AUTHORING.md` | Create — the authoring standards (single source; forge's references derive from it) |
+| `docs/AUTHORING.md` | Create — the authoring standards (single source; forge's references derive from it), including the role-skill body template and memory-protocol adherence |
 | `README.md` | Keep tables in sync with final skill roster; add release/install links when first release ships |
 | `docs/mentor-corpus.md` | No change (source outline; consumed during implementation) |
 
@@ -580,7 +687,7 @@ docs-and-scripts repo.
 >
 > 1. **Isolated workspace** — IF the session is not already isolated, add as the first task: *"Create an isolated workspace via superpowers:using-git-worktrees."*
 > 2. **Glossary application** — dropped: this repo has no `CONTEXT.md` glossary.
-> 3. **ADR creation** — ADR-0001/0002/0003 already exist on `main`; no new ADRs listed. IF implementation surfaces a decision passing the three-criteria gate, add a task to create the next sequential ADR.
+> 3. **ADR creation** — ADR-0001/0002/0003/0004 already exist on `main`; no new ADRs listed. IF implementation surfaces a decision passing the three-criteria gate, add a task to create the next sequential ADR.
 > 4. **Deferred-item verification** — Add a task: *"Confirm every issue referenced in the 'Deferred Items' section (#1–#7) exists and has all four required body sections (Context, Required, Integration Points, Priority)."* Run `gh issue view <#> --json body | jq -r .body` and grep for the four headings.
 > 5. **Config file tasks** — FOR EACH file listed in the spec's "Config & Infrastructure Impact" section, add one explicit task: *"Update `<path>`."*
 > 6. **Docs update tasks** — FOR EACH entry in the spec's "Documentation Updates" section, add one explicit task: *"Update `<doc-path>`."* Design content goes in the docs dir, not the agent index; the index gets at most a 1-line pointer, a ≤3-sentence area summary, or a 1-line command/env-var entry.
