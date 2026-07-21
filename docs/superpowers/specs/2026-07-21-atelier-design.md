@@ -650,6 +650,8 @@ Repo & CI:
 - #5 — Per-industry skill variants
 - #6 — MCP connector integrations for role skills
 - #7 — Mentor: community/wisdom pointers
+- #8 — Context importer in the atelier hub: bring over context from other
+  AI assistants
 - #9 — Mentor: interactive Claude-basics tutorial/refresh, offered at hub
   onboarding (corpus source doc `docs/tutorial-corpus.md`; refresh inline
   at onboarding, full tutorial in its own conversation, exit anytime)
