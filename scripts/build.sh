@@ -172,7 +172,9 @@ main() {
 
   local out_dir
   if [[ "$check" -eq 1 ]]; then
-    out_dir="$(mktemp -d)"
+    # Routed through make_stage_dir (not a bare mktemp -d) so the EXIT trap
+    # sweeps it on every exit path — die(), a failing check, or success alike.
+    out_dir="$(make_stage_dir)"
   else
     out_dir="$DIST_DIR"
     mkdir -p "$out_dir"
@@ -185,7 +187,6 @@ main() {
 
   if [[ "$check" -eq 1 ]]; then
     run_checks "$out_dir" "${selected[@]}"
-    rm -rf "$out_dir"
   fi
 }
 
@@ -229,11 +230,11 @@ check_shared_text() {
 
 # AC18 / AC34 — the staged references must be byte-identical to canonical.
 check_staged_references() {
-  local stage="$1" locale="$2"
+  local stage="$1" canonical="$2" locale="$3"
   cmp -s "$stage/references/glossary.md" "$SHARED_DIR/$locale/glossary.md" \
-    || check_fail "$stage: references/glossary.md differs from canonical"
+    || check_fail "$canonical/$locale: staged references/glossary.md differs from skills/shared/$locale/glossary.md"
   cmp -s "$stage/references/memory-protocol.md" "$SHARED_DIR/$locale/memory-protocol.md" \
-    || check_fail "$stage: references/memory-protocol.md differs from canonical"
+    || check_fail "$canonical/$locale: staged references/memory-protocol.md differs from skills/shared/$locale/memory-protocol.md"
 }
 
 # AC15 — every skill has at least one scenario per locale.
@@ -286,7 +287,7 @@ run_checks() {
 
       stage="$(make_stage_dir)"
       stage_skill "$canonical" "$locale" "$stage" >/dev/null
-      check_staged_references "$stage" "$locale"
+      check_staged_references "$stage" "$canonical" "$locale"
       rm -rf "$stage"
     done
   done

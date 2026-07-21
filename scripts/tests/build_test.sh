@@ -244,5 +244,20 @@ fi
 [[ ! -d "$d/dist" ]] && pass "--check leaves dist/ untouched" || fail "--check wrote to dist/"
 rm -rf "$d"
 
+# --- a failing --check leaves no leaked temp directory behind
+# Build the fixture first (make_fixture_repo itself calls mktemp -d, which
+# would honor a repointed TMPDIR and pollute the emptiness check below).
+d="$(make_fixture_repo)"
+sed -i '/^version: /d' "$d/skills/atelier-ventes/fr/SKILL.md"
+fresh_tmpdir="$(mktemp -d)"
+( cd "$d" && TMPDIR="$fresh_tmpdir" bash scripts/build.sh --check >/dev/null 2>&1 )
+leftover="$(find "$fresh_tmpdir" -mindepth 1 2>/dev/null)"
+if [[ -z "$leftover" ]]; then
+  pass "failing --check leaves no leaked temp directory"
+else
+  fail "failing --check leaked temp entries: $leftover"
+fi
+rm -rf "$fresh_tmpdir" "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
