@@ -63,6 +63,42 @@ document the exec owns:
 | `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them. |
 | `atelier-boussole` / `atelier-compass` | The thinking process — an executive adaptation of wayfinder + grilling + brainstorming. See "Boussole: the thinking process" below. |
 
+## Skill categories: role skills vs core skills
+
+Atelier distinguishes two categories, and **every Atelier skill states and
+respects this distinction**:
+
+- **Role skills** (« compétences de rôle ») are built for a specific role
+  or department: `atelier-marketing`, `atelier-ventes`, `atelier-reunions`
+  — plus any the exec creates with forge. They read the Company Profile,
+  typically live in a matching department workspace, and form an
+  **open-ended set**: the shipped three are a starting point, not the
+  roster.
+- **Core skills** (« compétences socle ») are the fixed foundation that
+  works across every role: `atelier` (hub), `atelier-mentor`,
+  `atelier-boussole`, `atelier-forge`.
+
+**The role registry** makes the open-ended set navigable:
+`{root}/docs/atelier/roles.md` lists every role skill the exec has — name,
+role/department it serves, what it does, which workspace it belongs to.
+The hub seeds it at onboarding with the installed role skills; **forge
+appends an entry every time it generates a new role skill**. Core skills
+consult it:
+
+- **Boussole** reads the registry at the start of a heavy path, so mapping
+  and the plan d'action route work to the exec's actual roster — including
+  forge-created skills boussole has never seen — not just the shipped
+  three. The "who does it" field names the role skill from the registry.
+- **Mentor** routes with the registry, so "what can Atelier do?" reflects
+  what this exec's Atelier can do.
+- The runtime signal (enabled-skill descriptions in context) complements
+  the registry; the registry is the durable, versioned index — brain, not
+  body.
+
+The glossary defines both category terms; forge teaches the distinction
+when interviewing ("is this for a department/role, or a task any role
+uses?") and marks generated skills accordingly.
+
 ## Boussole: the thinking process
 
 For decisions and initiatives too fuzzy to just execute. Adapted from
@@ -136,9 +172,9 @@ when the map is clear, boussole breaks execution into action tickets in
 
 - what it delivers, in the exec's language;
 - "Blocked by" in plain language ("after: pricing decided");
-- **who does it** — the exec themselves, Claude with a named Atelier skill
-  (worked in the matching department workspace), or a human they delegate
-  to.
+- **who does it** — the exec themselves, Claude with a named role skill
+  from the role registry (worked in the matching department workspace), or
+  a human they delegate to.
 
 Boussole quizzes the exec on granularity before writing the files (too
 coarse / too fine / merge / split), then explains the frontier rule: work
@@ -306,11 +342,16 @@ atelier/
 │   ├── build.sh               # Linux/macOS: zips skills into dist/
 │   └── build.ps1              # Windows equivalent, same outputs
 ├── docs/
+│   ├── adr/                   # architecture decision records for this repo
 │   ├── AUTHORING.md           # authoring standards (single source of truth)
 │   ├── INSTALL.fr.md          # illustrated self-serve guide
 │   └── INSTALL.en.md
 └── .github/workflows/release.yml   # tag → build ZIPs → attach to GitHub release
 ```
+
+Design decisions about Atelier itself (like the role/core skill
+distinction) are recorded as ADRs in `docs/adr/`, numbered sequentially —
+Status / Context / Decision / Consequences.
 
 Locale folders each contain a complete skill (SKILL.md at folder root) so a
 ZIP of `skills/<name>/<locale>/` is directly uploadable. Shared assets that
