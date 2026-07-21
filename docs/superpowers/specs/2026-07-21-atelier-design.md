@@ -63,7 +63,7 @@ document the exec owns:
 | `atelier-marketing` | Content creation, campaign planning, brand-voice capture. Author's marketing playbook in `references/`. |
 | `atelier-ventes` / `atelier-sales` | Pipeline reviews, follow-up drafting, proposals, CRM hygiene. |
 | `atelier-reunions` / `atelier-meetings` | Full meeting lifecycle: prep, note processing, decision logs, board/team communications drafting. Procès-verbaux (PV / compte rendu / minutes) are a first-class capability, explicitly listed in the skill description as triggers. Executive decisions found in a PV are proposed as decision-journal entries pointing at the PV (see Corporate memory). Deep PV specialization (legal formats, board templates) is deferred to custom skills via `atelier-forge`. |
-| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them; generated role skills follow the role-skill body template (a flexible baseline forge may expand) and arrive with their per-role memory file seeded. |
+| `atelier-forge` | Skill-builder: plain-language interview → generates a complete, valid skill (SKILL.md + references) in the exec's language → delivers the ZIP with upload instructions → ends with a test step: "try these 2–3 phrases in a fresh conversation; tell me what didn't work", then iterates. Its `references/` embed the Atelier authoring standards (below) so generated skills inherit them; generated role skills follow the workflow shape of the authoring standards (required Memory sources slot, no company facts in the body) and arrive with their per-role memory file seeded. |
 | `atelier-boussole` / `atelier-compass` | The thinking process — an executive adaptation of wayfinder + grilling + brainstorming. See "Boussole: the thinking process" below. |
 
 ## Skill categories: role skills vs core skills
@@ -352,9 +352,13 @@ These rules govern every Atelier skill and are embedded in
 - **SKILL.md stays lean; knowledge lives in `references/`.** The author's
   playbooks (marketing, sales, meetings) are reference files loaded on
   demand, not inlined. Target: SKILL.md under ~500 words.
-- **Positive recipes, not prohibition lists.** State what the output IS and
-  the steps to produce it; prohibitions measurably backfire on shaping
-  problems.
+- **Match the form to the failure.** Output shaping gets positive
+  recipes — state what the output IS and the steps to produce it;
+  prohibitions backfire there. A hard guardrail is allowed when paired
+  with the alternative behavior (« ne persiste pas X — garde-le pour le
+  balayage de fin de session »). Discipline rules an agent might skip
+  under pressure (propose-before-writing) are pressure-tested in
+  `tests/` scenarios.
 - **Checkable completion criteria.** Multi-step flows (onboarding, forge's
   interview) end each step on a condition Claude can verify — "profile
   document delivered and the exec told where to save it", not "help the
@@ -368,12 +372,14 @@ These rules govern every Atelier skill and are embedded in
   leading-words standard made into an artifact. It is never inlined in
   SKILL.md: the build copies each locale's glossary into every skill
   ZIP's `references/` (AC18). Forge gives it to generated skills too.
-- **Role-skill body template.** Role skills follow a proven baseline
-  shape (from the Kinezen skill): Mission / Context / Capabilities /
-  Cross-role collaboration / Memory sources. Trigger vocabulary stays in
-  the description, per the rules above. It is a baseline, not a
-  straitjacket — forge may expand or adapt it when the interview
-  warrants.
+- **Role-skill body shape.** Role skills are workflow-shaped, not
+  persona-shaped: triggers live in the description, the body holds task
+  workflows with checkable completion criteria, knowledge lives in
+  `references/`. One structural requirement: a **Memory sources** slot
+  naming the files the skill reads (Company Profile, its per-role
+  memory, lexicon). Company facts never live in a skill body — they
+  belong to the Company Profile. Forge's starter scaffold follows this
+  shape.
 - **Memory protocol adherence.** Every skill follows the shared write
   protocol (see Corporate memory): two regimes, propose-before-writing,
   the do-not-persist list.
@@ -613,10 +619,12 @@ Skill behavior (verified via `tests/` scenarios, judged manually):
   in `decisions.md` pointing at the map or brief; given a PV containing
   executive decisions, réunions proposes journal entries pointing at
   the PV.
-- **AC35** — A forge-generated role skill follows the role-skill body
-  template baseline (expanded where the interview warranted), and forge
-  seeds `{root}/docs/atelier/memory/<skill>.md` alongside the registry
-  entry of AC14.
+- **AC35** — A forge-generated role skill is workflow-shaped per the
+  authoring standards — triggers in the description, task workflows
+  with completion criteria in the body, a Memory sources slot, no
+  company facts in the body — and forge seeds
+  `{root}/docs/atelier/memory/<skill>.md` alongside the registry entry
+  of AC14.
 
 Repo & CI:
 
@@ -669,7 +677,7 @@ docs-and-scripts repo.
 | Doc | Change |
 | --- | --- |
 | `docs/INSTALL.fr.md`, `docs/INSTALL.en.md` | Create — illustrated guide: Capabilities toggle, upload flow, updating section (AC17) |
-| `docs/AUTHORING.md` | Create — the authoring standards (single source; forge's references derive from it), including the role-skill body template and memory-protocol adherence |
+| `docs/AUTHORING.md` | Create — the authoring standards (single source; forge's references derive from it), including the role-skill body shape and memory-protocol adherence |
 | `README.md` | Keep tables in sync with final skill roster; add release/install links when first release ships |
 | `docs/mentor-corpus.md` | No change (source outline; consumed during implementation) |
 
