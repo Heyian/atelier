@@ -464,8 +464,9 @@ after the localized skill name (e.g. choosing English yields
 ## Out of scope for v1
 
 MCP connectors (#6), hooks, a download webpage (#1), per-industry skill
-variants (#5), automated skill updates (#3). All tracked as GitHub
-issues — see Deferred Items.
+variants (#5), automated skill updates (#3), the Claude-basics
+tutorial/refresh in mentor (#9). All tracked as GitHub issues — see
+Deferred Items.
 
 ## Success criteria
 
@@ -649,6 +650,9 @@ Repo & CI:
 - #5 — Per-industry skill variants
 - #6 — MCP connector integrations for role skills
 - #7 — Mentor: community/wisdom pointers
+- #9 — Mentor: interactive Claude-basics tutorial/refresh, offered at hub
+  onboarding (corpus source doc `docs/tutorial-corpus.md`; refresh inline
+  at onboarding, full tutorial in its own conversation, exit anytime)
 
 ## Glossary Updates & ADRs
 
