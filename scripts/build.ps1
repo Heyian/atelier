@@ -1,3 +1,4 @@
+#requires -Version 7.0
 <#
 .SYNOPSIS
   Atelier build — assembles one uploadable ZIP per skill per locale into dist/.
@@ -74,11 +75,16 @@ function Get-CatLikeContent {
 function Get-FrontmatterField {
   param([string]$Path, [string]$Field)
   $lines = Get-Content -LiteralPath $Path
-  if ($lines.Count -eq 0 -or $lines[0] -ne '---') { return '' }
+  if ($lines.Count -eq 0 -or $lines[0] -cne '---') { return '' }
   for ($i = 1; $i -lt $lines.Count; $i++) {
-    if ($lines[$i] -eq '---') { break }
-    if ($lines[$i] -like "${Field}:*") {
-      return ($lines[$i].Substring($Field.Length + 1)).Trim()
+    if ($lines[$i] -ceq '---') { break }
+    if ($lines[$i] -clike "${Field}:*") {
+      # TrimStart, not Trim: bash's sub("^" field ":[ \t]*", "") strips only
+      # the leading run of spaces/tabs after the colon, never trailing
+      # whitespace. A plain .Trim() would also eat trailing spaces, giving a
+      # different character count for AC2's 1024 cap and a different $desc
+      # for AC6 substring tests than build.sh computes for the same file.
+      return ($lines[$i].Substring($Field.Length + 1)).TrimStart()
     }
   }
   return ''
@@ -86,22 +92,24 @@ function Get-FrontmatterField {
 
 function Get-ExpectedName {
   param([string]$Canonical, [string]$Locale)
-  $col = switch ($Locale) {
+  # switch -case: default PowerShell switch matching is case-insensitive,
+  # unlike bash's `case "$locale" in fr) ... esac`.
+  $col = switch -case ($Locale) {
     'fr' { 1 }
     'en' { 2 }
-    default { throw "unknown locale: $Locale" }
+    default { throw "ERROR: unknown locale: $Locale" }
   }
   foreach ($line in Get-Content -LiteralPath $NamesTsv) {
     if (-not $line.Trim()) { continue }
     $parts = $line -split "`t"
-    if ($parts[0] -eq $Canonical) { return $parts[$col] }
+    if ($parts[0] -ceq $Canonical) { return $parts[$col] }
   }
-  throw "skills/names.tsv has no row for '$Canonical'"
+  throw "ERROR: skills/names.tsv has no row for '$Canonical'"
 }
 
 function Get-SkillList {
   Get-ChildItem -LiteralPath $SkillsDir -Directory |
-    Where-Object { $_.Name -ne 'shared' } |
+    Where-Object { $_.Name -cne 'shared' } |
     Select-Object -ExpandProperty Name
 }
 
@@ -112,7 +120,7 @@ function Read-LocaleChoice {
   Write-Host '  all — les deux / both'
   $answer = Read-Host 'fr / en / all [all]'
   if (-not $answer) { $answer = 'all' }
-  if ($answer -notin @('fr', 'en', 'all')) { throw "unrecognized answer: $answer (expected fr, en, or all)" }
+  if ($answer -cnotin @('fr', 'en', 'all')) { throw "ERROR: unrecognized answer: $answer (expected fr, en, or all)" }
   return $answer
 }
 
@@ -122,12 +130,12 @@ function New-SkillStage {
   $src = Join-Path (Join-Path $SkillsDir $Canonical) $Locale
   $neutral = Join-Path (Join-Path $SkillsDir $Canonical) 'shared'
   $skillMd = Join-Path $src 'SKILL.md'
-  if (-not (Test-Path -LiteralPath $skillMd)) { throw "$Canonical/$Locale: SKILL.md not found" }
+  if (-not (Test-Path -LiteralPath $skillMd)) { throw "ERROR: $Canonical/$Locale: SKILL.md not found" }
 
   $name = Get-FrontmatterField -Path $skillMd -Field 'name'
   $expected = Get-ExpectedName -Canonical $Canonical -Locale $Locale
-  if (-not $name) { throw "$Canonical/$Locale: frontmatter has no 'name'" }
-  if ($name -ne $expected) { throw "$Canonical/$Locale: frontmatter name '$name' != names.tsv '$expected'" }
+  if (-not $name) { throw "ERROR: $Canonical/$Locale: frontmatter has no 'name'" }
+  if ($name -cne $expected) { throw "ERROR: $Canonical/$Locale: frontmatter name '$name' != names.tsv '$expected'" }
 
   if (Test-Path -LiteralPath $Stage) { Remove-Item -Recurse -Force -LiteralPath $Stage }
   New-Item -ItemType Directory -Force -Path (Join-Path $Stage 'references') | Out-Null
@@ -189,7 +197,7 @@ function Test-Frontmatter {
   # empty $name also fails this regex, so a missing name yields two failures
   # here, same as build.sh (not short-circuited by the "has no 'name'" check
   # above).
-  if ($name -notmatch '^[a-z0-9-]+$') { Add-CheckFailure "$Path: name '$name' is not [a-z0-9-]+" }
+  if ($name -cnotmatch '^[a-z0-9-]+$') { Add-CheckFailure "$Path: name '$name' is not [a-z0-9-]+" }
   # PowerShell .Length counts UTF-16 code units, which equals the character
   # count for the accented-Latin text these descriptions use — already
   # character-correct with no change needed. (build.sh's byte-vs-char nuance
@@ -231,7 +239,7 @@ function Test-StagedReferences {
   foreach ($file in @('glossary.md', 'memory-protocol.md')) {
     $a = Get-Content -LiteralPath (Join-Path $Stage "references/$file") -Raw
     $b = Get-Content -LiteralPath (Join-Path (Join-Path $SharedDir $Locale) $file) -Raw
-    if ($a -ne $b) {
+    if ($a -cne $b) {
       Add-CheckFailure "$Canonical/$Locale: staged references/$file differs from skills/shared/$Locale/$file"
     }
   }
@@ -245,7 +253,11 @@ function Test-Scenarios {
     Add-CheckFailure "tests/$Canonical/$Locale/: no scenario directory"
     return
   }
-  if (@(Get-ChildItem -LiteralPath $dir -Filter '*.md' -File).Count -lt 1) {
+  # -Filter '*.md' is a coarse pre-filter only: the FileSystem provider's
+  # legacy 8.3 short-name matching can also match e.g. '.mdx'/'.markdown',
+  # which bash's `find -name '*.md'` never would. -ceq '.md' makes the match
+  # exact and case-sensitive, same as bash.
+  if (@(Get-ChildItem -LiteralPath $dir -Filter '*.md' -File | Where-Object { $_.Extension -ceq '.md' }).Count -lt 1) {
     Add-CheckFailure "tests/$Canonical/$Locale/: no scenario files"
   }
 }
@@ -257,19 +269,25 @@ function Test-Triggers {
   if (-not (Test-Path -LiteralPath $dir)) { return }
   $skillMd = Join-Path (Join-Path (Join-Path $SkillsDir $Canonical) $Locale) 'SKILL.md'
   $desc = Get-FrontmatterField -Path $skillMd -Field 'description'
-  foreach ($scenario in Get-ChildItem -LiteralPath $dir -Filter '*.md' -File) {
+  # -Filter '*.md' is a coarse pre-filter only; -ceq '.md' below makes the
+  # match exact and case-sensitive, same as bash's `find -name '*.md'`.
+  foreach ($scenario in Get-ChildItem -LiteralPath $dir -Filter '*.md' -File | Where-Object { $_.Extension -ceq '.md' }) {
     $lines = Get-Content -LiteralPath $scenario.FullName
     # Matches build.sh's awk guard (`NR == 1 && $0 == "---"`): a scenario
     # file without an opening frontmatter delimiter yields no triggers,
     # not a scan starting mid-file.
-    if ($lines.Count -eq 0 -or $lines[0] -ne '---') { continue }
+    if ($lines.Count -eq 0 -or $lines[0] -cne '---') { continue }
     $collecting = $false
     for ($i = 1; $i -lt $lines.Count; $i++) {
-      if ($lines[$i] -eq '---') { break }
-      if ($lines[$i] -eq 'triggers:') { $collecting = $true; continue }
+      if ($lines[$i] -ceq '---') { break }
+      if ($lines[$i] -ceq 'triggers:') { $collecting = $true; continue }
       if ($collecting) {
-        if ($lines[$i] -like '  - *') {
-          $term = $lines[$i].Substring(4).Trim()
+        if ($lines[$i] -clike '  - *') {
+          # TrimStart, not Trim: bash keeps trailing whitespace on a term
+          # (its awk `sub(/^  - /, "")` only strips the leading marker), so
+          # `  - relance ` must still carry its trailing space here too, or
+          # AC6's Contains() check disagrees with build.sh's grep -qF.
+          $term = $lines[$i].Substring(4).TrimStart()
           if ($term -and -not $desc.Contains($term)) {
             Add-CheckFailure "$($scenario.FullName): trigger '$term' is absent from the $Locale description of $Canonical"
           }
@@ -305,12 +323,16 @@ function Invoke-Checks {
   }
 }
 
-if (-not (Test-Path -LiteralPath $NamesTsv)) { throw "missing $NamesTsv" }
+if (-not (Test-Path -LiteralPath $NamesTsv)) { throw "ERROR: missing $NamesTsv" }
 
 if (-not $Lang) {
   $Lang = if ($Check) { 'all' } else { Read-LocaleChoice }
 }
-$selected = if ($Lang -eq 'all') { $AllLocales } else { @($Lang) }
+# -ceq: mirrors bash's `if [[ "$lang" == "all" ]]`. ValidateSet above accepts
+# -Lang's value case-insensitively, so this is the one place left where a
+# non-lowercase 'all' (e.g. -Lang All) would otherwise be treated as the
+# all-locales case on Windows but not on Linux.
+$selected = if ($Lang -ceq 'all') { $AllLocales } else { @($Lang) }
 
 if ($Check) {
   # Routed through New-ManagedTempDir (not a bare temp path) so the
