@@ -124,7 +124,9 @@ Règles du registre :
   installé — en français, c'est déjà le nom canonique. La colonne **Mémoire**
   est différente : elle nomme toujours le fichier par le nom canonique
   français de la compétence, quelle que soit la langue installée, pour qu'un
-  changement de langue n'orpheline jamais la mémoire.
+  changement de langue n'orpheline jamais la mémoire. Exception : une
+  compétence bâtie avec `atelier-forge` n'existe qu'en une seule langue, et sa
+  colonne Mémoire reprend simplement son propre nom, inchangé.
 
 **Critère d'achèvement :** `roles.md` existe et liste chaque compétence de rôle
 installée, aucune compétence socle.

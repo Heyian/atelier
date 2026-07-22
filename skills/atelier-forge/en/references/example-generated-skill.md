@@ -75,7 +75,7 @@ nothing in it goes further than the documents support.
 and core skill mean. Use those words, as written.
 ```
 
-Body: 198 words. Two tasks, two checkable criteria, no triggers in the body, no
+Body: 292 words. Two tasks, two checkable criteria, no triggers in the body, no
 company facts.
 
 ## The folder

@@ -117,3 +117,34 @@ one name, and no mapping table exists for the invented French one.
 `scaffold.md` and `packaging.md` now state in both locales that a generated
 skill's memory file carries its own `name`, unchanged. Re-verified in
 isolation, not by a second full run.
+
+## AC24 verification
+
+Run 2026-07-21. Method: a further fresh agent, no tools, given only the
+generated skill's `name` + `description` alongside the four core skills'
+descriptions as distractors, plus one control message no installed skill
+covers. This agent had not seen the generation run.
+
+Skills tested: `atelier-ops-report` and `atelier-brief`, on their own
+delivered test phrases.
+
+| Message | Result |
+|---|---|
+| "do the weekly ops report" | `atelier-ops-report` |
+| "pull the site numbers for me" | `atelier-ops-report` |
+| "what drifted this week" | `atelier-ops-report` |
+| "kick off the Monday pack" | `atelier-ops-report` |
+| "turn this into a one-page brief" | `atelier-brief` |
+| "give me a one-page brief of this" | `atelier-brief` |
+| "brief me on this" (lease attached) | `atelier-brief` |
+| control: "book me a flight to Manchester next Tuesday" | NONE |
+
+All seven test phrases fired the intended skill; the control message fired
+nothing. This run covered the FR-generated skill too
+(`atelier-revues-franchises`), recorded in
+`tests/atelier-forge/fr/creer-une-competence.md`; combined across both
+locales: **AC24: PASS, 11/11 test phrases fired, both controls correctly
+declined.** No change to `scaffold.md`'s description guidance was needed.
+
+Source: `.superpowers/sdd/task-10-report.md`, section "AC24 — the third-agent
+trigger test, in full".

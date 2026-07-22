@@ -24,14 +24,20 @@ memory files: switching language never strands the skills already built.
 summarize them, don't rewrite them, don't translate them. The copy has to match
 byte for byte, or two skills end up speaking different languages.
 
-**Done when:** the folder exists, `SKILL.md` sits at its top level, and
-`references/` holds at minimum the glossary and the memory protocol.
+**Done when:** once you have folder access, the folder exists, `SKILL.md` sits
+at its top level, and every `references/` file the body of `SKILL.md` names
+actually exists in there — a pointer to a missing file breaks the skill the
+first time it loads. On Desktop chat, with no folder access, this criterion
+doesn't apply; move to step 2.
 
 ## 2. Make the archive
 
 Compress the **contents** of the folder, not the folder itself. This is the one
 mistake that makes a skill unuploadable: if the archive contains a folder that
 contains `SKILL.md`, it gets rejected.
+
+The archive is named `atelier-<short-name>.zip` and lands next to the source
+folder, in `{root}/docs/atelier/competences/`.
 
 Check before delivering: open the archive and you should see `SKILL.md` right
 away, at the top level, next to `references/`.
@@ -84,7 +90,7 @@ a general task, and no existing row has moved.
 All three in the same message. The ZIP on its own is not a delivery — nobody
 guesses where a skill gets uploaded.
 
-> **Your file:** `atelier-<short-name>.zip`
+> **Your file:** `{root}/docs/atelier/competences/atelier-<short-name>.zip`
 >
 > **To install it:**
 > 1. Open Claude in your browser.

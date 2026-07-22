@@ -23,14 +23,20 @@ d'Atelier ; ne les résume pas, ne les réécris pas, ne les traduis pas. La cop
 doit être identique au caractère près, sinon deux compétences finissent par ne
 plus parler la même langue.
 
-**Critère d'achèvement :** le dossier existe, `SKILL.md` est à sa racine, et
-`references/` contient au minimum le glossaire et le protocole de mémoire.
+**Critère d'achèvement :** quand tu as accès aux dossiers, le dossier existe,
+`SKILL.md` est à sa racine, et chaque fichier `references/` que le corps du
+`SKILL.md` nomme existe réellement dedans — un renvoi vers un fichier absent
+casse la compétence au premier chargement. Sur Desktop, sans accès aux
+dossiers, ce critère ne s'applique pas ; passe à l'étape 2.
 
 ## 2. Faire l'archive
 
 Compresse le **contenu** du dossier, pas le dossier lui-même. C'est l'erreur
 qui empêche le téléversement : si l'archive contient un dossier qui contient
 `SKILL.md`, elle sera refusée.
+
+L'archive s'appelle `atelier-<nom-court>.zip` et se retrouve à côté du dossier
+source, dans `{racine}/docs/atelier/competences/`.
 
 Vérifie avant de livrer : ouvre l'archive, tu dois voir `SKILL.md` tout de
 suite, au premier niveau, à côté de `references/`.
@@ -87,7 +93,7 @@ n'a bougé.
 Les trois ensemble, dans le même message. Le ZIP seul ne suffit pas : personne
 ne devine où ça se téléverse.
 
-> **Ton fichier :** `atelier-<nom-court>.zip`
+> **Ton fichier :** `{racine}/docs/atelier/competences/atelier-<nom-court>.zip`
 >
 > **Pour l'installer :**
 > 1. Ouvre Claude dans ton navigateur.
@@ -102,8 +108,8 @@ ne devine où ça se téléverse.
 > - « <phrase 2, une autre formulation> »
 > - « <phrase 3, la version pressée d'un lundi matin> »
 >
-> **Si rien ne se passe, reviens me le dire.** C'est normal que ça arrive du
-> premier coup sur trois ; je corrige et je te redonne le fichier.
+> **Si rien ne se passe, reviens me le dire.** Ça arrive à peu près une fois
+> sur trois du premier coup ; je corrige et je te redonne le fichier.
 
 Les phrases de test viennent de la question 2 de l'entretien, pas de ton
 imagination. Une phrase de test que la personne n'écrirait jamais ne teste

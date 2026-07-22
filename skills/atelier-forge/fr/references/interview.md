@@ -22,6 +22,10 @@ proposition ; elle n'invente pas devant une page blanche.
 Si une réponse est vague, reformule ce que tu as compris et demande si c'est
 juste. Une seule relance, puis passe.
 
+**La langue du corps.** Demande aussi dans quelle langue écrire la
+compétence — elle peut différer de la langue de cet entretien, et de celle de
+`atelier-forge` lui-même.
+
 ## Les six questions
 
 Ce tableau est ta liste de contrôle, pas un formulaire à envoyer.
@@ -65,8 +69,8 @@ serait dans quelle équipe ? » Pas de réponse claire, c'est une tâche génér
 **Ce que la réponse change concrètement :** une compétence de rôle obtient une
 ligne au registre `{racine}/docs/atelier/roles.md` et un fichier de mémoire à
 son nom ; une compétence socle n'a ni l'une ni l'autre. Une ligne au registre
-pour une tâche générale déraille l'aiguillage de `atelier-mentor` pour des
-mois.
+pour une tâche générale fait dérailler l'aiguillage de `atelier-mentor` pour
+des mois.
 
 **Critère d'achèvement :** la personne a confirmé « de rôle » ou « socle », et
 si c'est « de rôle », le département est nommé.
@@ -88,7 +92,7 @@ la première ligne du `SKILL.md` soit écrite.
 ## Quand la personne veut aller vite
 
 « Fais-la juste, tu as compris. » Ne conduis pas l'entretien complet contre son
-gré — rétrécis. Les questions 1, 2 et 6 sont incompressibles : sans le travail,
+gré — resserre. Les questions 1, 2 et 6 sont incompressibles : sans le travail,
 sans les mots déclencheurs et sans le type, tu fabriques une compétence qui ne
 se déclenchera jamais. Pour les trois autres, propose tes hypothèses en bloc et
 demande un seul « oui ». Puis continue.

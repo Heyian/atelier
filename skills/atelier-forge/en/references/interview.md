@@ -20,6 +20,10 @@ suggestion instead of facing a blank page.
 If an answer is vague, play back what you understood and ask whether that's
 right. One follow-up, then move on.
 
+**The body's language.** Also ask which language the skill should be written
+in — it can differ from the language of this interview, and from
+`atelier-forge`'s own.
+
 ## The six questions
 
 This table is your checklist, not a form to send.

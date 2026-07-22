@@ -240,6 +240,31 @@ function Test-SharedText {
   }
 }
 
+# Fix 1 (drift check extension) — any references/*.md file that echoes the
+# profile pointer's opening line must carry the whole pointer, byte-exact —
+# not just SKILL.md. atelier-forge inlines the pointer into scaffold.md and
+# example-generated-skill.md, and every generated skill inherits whatever is
+# in those files, so a drift there is silent until an executive uploads it.
+function Test-ReferencePointerDrift {
+  param([string]$Canonical, [string]$Locale)
+  $refsDir = Join-Path (Join-Path (Join-Path $SkillsDir $Canonical) $Locale) 'references'
+  if (-not (Test-Path -LiteralPath $refsDir)) { return }
+  $pointer = Get-CatLikeContent -Path (Join-Path (Join-Path $SharedDir $Locale) 'profile-pointer.md')
+  $pointerHead = (Get-Content -LiteralPath (Join-Path (Join-Path $SharedDir $Locale) 'profile-pointer.md'))[0]
+  # -Filter '*.md' is a coarse pre-filter only; -ceq '.md' below makes the
+  # match exact and case-sensitive, same as bash's glob `"$refs_dir"/*.md`.
+  foreach ($file in Get-ChildItem -LiteralPath $refsDir -Filter '*.md' -File | Where-Object { $_.Extension -ceq '.md' }) {
+    $body = Get-CatLikeContent -Path $file.FullName
+    # True multi-line substring check via .Contains() — already ordinal, so
+    # already case-sensitive, matching bash's `[[ "$body" == *"$pointer_head"* ]]`.
+    if ($body.Contains($pointerHead)) {
+      if (-not $body.Contains($pointer)) {
+        Add-CheckFailure "$($file.FullName): Company Profile pointer missing or drifted from skills/shared/$Locale/profile-pointer.md"
+      }
+    }
+  }
+}
+
 # AC18 / AC34 — the staged references must be byte-identical to canonical.
 function Test-StagedReferences {
   param([string]$Stage, [string]$Canonical, [string]$Locale)
@@ -318,6 +343,7 @@ function Invoke-Checks {
       Test-SharedText -Path $skillMd -Locale $locale
       Test-Scenarios -Canonical $canonical -Locale $locale
       Test-Triggers -Canonical $canonical -Locale $locale
+      Test-ReferencePointerDrift -Canonical $canonical -Locale $locale
 
       $stage = New-ManagedTempDir
       New-SkillStage -Canonical $canonical -Locale $locale -Stage $stage | Out-Null

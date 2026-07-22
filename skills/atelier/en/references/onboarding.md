@@ -122,6 +122,8 @@ Registry rules:
   — `atelier-sales`, not `atelier-ventes`. The **Memory** column is different:
   it always keys the file by the skill's canonical French name, whatever
   language is installed, so a language switch never orphans the memory.
+  Exception: a skill built with `atelier-forge` exists in one language only,
+  and its Memory column simply repeats its own name, unchanged.
 
 **Done when:** `roles.md` exists and lists every installed role skill and no
 core skill.

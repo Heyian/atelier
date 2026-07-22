@@ -36,6 +36,9 @@ the skill's **French name**, regardless of the installed locale — so a locale
 switch never orphans the memory. Created **lazily** on the first durable entry,
 never pre-created empty. Read at skill startup, listed in the role registry.
 
+Exception: a skill built with `atelier-forge` exists in one language only, so
+its memory file simply keeps its own name, unchanged.
+
 ## When to write
 
 **Triggers:** a decision is settled (the common case); durable knowledge

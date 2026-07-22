@@ -121,7 +121,7 @@ d'entreprise, ou dans la mémoire du rôle.
 Un gabarit maison — la trame d'ordre du jour, la grille de relance — n'est pas
 un fait d'entreprise : il va dans `references/`.
 
-## Le glossaire et le protocole ne s'inlinent jamais
+## Le glossaire et le protocole ne se recopient jamais dans le corps
 
 `references/glossary.md` et `references/memory-protocol.md` sont des textes
 communs à toutes les compétences. Ils voyagent dans `references/`, recopiés

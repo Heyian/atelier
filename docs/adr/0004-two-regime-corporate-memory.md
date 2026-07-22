@@ -1,7 +1,7 @@
 # 0004 — Two-regime corporate memory
 
 **Status:** Accepted — 2026-07-21 (amended same day after adversarial
-review)
+review; amended again same day for forge-generated skills)
 
 ## Context
 
@@ -47,6 +47,14 @@ internally contradictory: marking a status rewrites the entry, and no
 mechanism enforces append-only over hand-edited markdown); a separate
 lexicon file (undecidable boundary with the profile; every naming
 decision double-writes).
+
+**Amendment (same day):** the canonical-French memory key above governs
+skills that ship in two locales. A skill built with `atelier-forge` has
+exactly one name — there is no second-locale file to reconcile with — so
+its memory file is keyed by that one `name`, unchanged. `atelier-forge`'s
+own reference docs (`scaffold.md`, `packaging.md`) already state this;
+this amendment brings the shared memory protocol and `atelier`'s
+onboarding into agreement with them.
 
 ## Consequences
 

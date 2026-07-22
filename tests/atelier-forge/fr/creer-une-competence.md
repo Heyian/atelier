@@ -102,3 +102,31 @@ this repo. Seven scripted turns, hostile turns built in from the start.
   *after* the re-delivery, in one sentence.
 
 All ten boxes pass.
+
+## AC24 verification
+
+Run 2026-07-21. Method: a further fresh agent, no tools, given only the
+generated skill's `name` + `description` alongside the four core skills'
+descriptions as distractors, plus one control message no installed skill
+covers. This agent had not seen the generation run.
+
+Skill tested: `atelier-revues-franchises`, on the three test phrases it
+delivered plus the phrase from the AC44 repair.
+
+| Message | Result |
+|---|---|
+| « Prépare ma revue trimestrielle. » | `atelier-revues-franchises` |
+| « Sors-moi les chiffres par territoire. » | `atelier-revues-franchises` |
+| « C'est le temps du tour. » | `atelier-revues-franchises` |
+| « Faut que je prépare le tour de septembre. » | `atelier-revues-franchises` |
+| control: « Peux-tu me réécrire ce courriel … ? » | NONE |
+
+All four test phrases fired the skill; the control message fired nothing. This
+run covered the EN-generated skills too (`atelier-ops-report`,
+`atelier-brief`), recorded in `tests/atelier-forge/en/create-a-skill.md`;
+combined across both locales: **AC24: PASS, 11/11 test phrases fired, both
+controls correctly declined.** No change to `scaffold.md`'s description
+guidance was needed.
+
+Source: `.superpowers/sdd/task-10-report.md`, section "AC24 — the third-agent
+trigger test, in full".

@@ -38,6 +38,10 @@ qu'un changement de langue n'orpheline jamais la mémoire. Créé **paresseuseme
 à la première entrée durable, jamais pré-créé vide. Lu au démarrage de la
 compétence, listé dans le registre des rôles.
 
+Exception : une compétence fabriquée avec `atelier-forge` n'existe qu'en une
+seule langue ; son fichier de mémoire garde donc simplement son propre nom,
+sans changement.
+
 ## Quand écrire
 
 **Déclencheurs :** une décision est tranchée (le cas courant) ; une connaissance

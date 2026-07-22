@@ -76,7 +76,7 @@ avant de cliquer envoyer.
 compétence de rôle et compétence socle. Emploie ces mots-là, tels quels.
 ```
 
-Corps : 214 mots. Deux tâches, deux critères vérifiables, zéro déclencheur dans
+Corps : 309 mots. Deux tâches, deux critères vérifiables, zéro déclencheur dans
 le corps, zéro fait d'entreprise.
 
 ## Le dossier

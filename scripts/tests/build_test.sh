@@ -259,5 +259,24 @@ else
 fi
 rm -rf "$fresh_tmpdir" "$d"
 
+# --- Fix 1: a drifted profile-pointer copy in a references/*.md file (not
+# SKILL.md) fails the check and names the offending file
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/fr/references"
+fr_pointer_head="$(head -1 "$REPO_ROOT/skills/shared/fr/profile-pointer.md")"
+cat > "$d/skills/atelier-ventes/fr/references/scaffold.md" <<EOF
+# Gabarit
+
+$fr_pointer_head
+la connaissance du projet fait foi, jamais le fichier.
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] && grep -q "atelier-ventes/fr/references/scaffold.md" <<<"$out"; then
+  pass "Fix1 rejects a drifted profile pointer in a references/*.md file and names it"
+else
+  fail "Fix1 did not reject drifted reference pointer (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi

@@ -90,7 +90,9 @@ on its completion criterion.
 **The references.** Each section points at the `references/` file holding its
 detailed procedure, its templates and its examples. Create the `references/`
 folder even if it starts out holding only the glossary and the memory protocol
-— `packaging.md` says which files to place there.
+— `packaging.md` says which files to place there. Never name a file in the
+body that you don't actually put in `references/`: a pointer to a missing
+file breaks the skill the first time it loads.
 
 ## What the template does not do
 

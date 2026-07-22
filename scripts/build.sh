@@ -228,6 +228,34 @@ check_shared_text() {
   fi
 }
 
+# Fix 1 (drift check extension) — any references/*.md file that echoes the
+# profile pointer's opening line must carry the whole pointer, byte-exact —
+# not just SKILL.md. atelier-forge inlines the pointer into scaffold.md and
+# example-generated-skill.md, and every generated skill inherits whatever is
+# in those files, so a drift there is silent until an executive uploads it.
+check_reference_pointer_drift() {
+  local canonical="$1" locale="$2" refs_dir pointer pointer_head file body
+  refs_dir="$SKILLS_DIR/$canonical/$locale/references"
+  # Explicit `return 0`, not a bare `return`: under `set -e`, a bare `return`
+  # after `||` on a failed `[[ -d ]]` test would propagate that test's own
+  # nonzero status and abort the whole script — this is a normal "nothing to
+  # check here" case, not a failure.
+  [[ -d "$refs_dir" ]] || return 0
+  pointer="$(cat "$SHARED_DIR/$locale/profile-pointer.md")"
+  pointer_head="$(head -1 "$SHARED_DIR/$locale/profile-pointer.md")"
+  for file in "$refs_dir"/*.md; do
+    [[ -f "$file" ]] || continue
+    body="$(cat "$file")"
+    if [[ "$body" == *"$pointer_head"* ]]; then
+      # A true multi-line substring check: `grep -F` on a multi-line pattern
+      # would match on any single line of it, not the whole block.
+      if [[ "$body" != *"$pointer"* ]]; then
+        check_fail "$file: Company Profile pointer missing or drifted from skills/shared/$locale/profile-pointer.md"
+      fi
+    fi
+  done
+}
+
 # AC18 / AC34 — the staged references must be byte-identical to canonical.
 check_staged_references() {
   local stage="$1" canonical="$2" locale="$3"
@@ -284,6 +312,7 @@ run_checks() {
       check_shared_text "$skill_md" "$locale"
       check_scenarios "$canonical" "$locale"
       check_triggers "$canonical" "$locale"
+      check_reference_pointer_drift "$canonical" "$locale"
 
       stage="$(make_stage_dir)"
       stage_skill "$canonical" "$locale" "$stage" >/dev/null

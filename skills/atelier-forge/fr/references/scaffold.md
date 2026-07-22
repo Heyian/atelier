@@ -91,7 +91,9 @@ séparées. Chacune finit sur son critère d'achèvement.
 **Les références.** Chaque section renvoie au fichier `references/` qui porte
 sa marche à suivre détaillée, ses gabarits et ses exemples. Crée le dossier
 `references/` même s'il ne contient au départ que le glossaire et le protocole
-de mémoire — `packaging.md` dit lesquels y placer.
+de mémoire — `packaging.md` dit lesquels y placer. Ne nomme dans le corps
+aucun fichier que tu ne mets pas réellement dans `references/` : un renvoi
+vers un fichier absent casse la compétence au premier chargement.
 
 ## Ce que le gabarit ne fait pas
 
