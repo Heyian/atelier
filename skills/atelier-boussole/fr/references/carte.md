@@ -36,7 +36,7 @@ secondes et pointe vers le détail.
 - AAAA-MM-JJ — <décision, une ligne> — parce que <raison>. Détail : `<chemin>`
 
 ## Questions ouvertes
-- <la question> — billet : `{racine}/docs/tickets/<nom>.md`
+- <la question> — billet : `{racine}/docs/tickets/NN-<nom-court>.md`
 
 ## Pas encore précisé
 - <ce qu'on pressent sans savoir encore le formuler>
@@ -57,7 +57,8 @@ revient dans trois mois et on refait le débat au complet.
 
 Une question ouverte vit dans `{racine}/docs/tickets/`, un fichier par
 question, avec son contexte. La carte n'en garde que la ligne et le chemin.
-Même format que les billets du plan d'action :
+Même format — et même règle de nommage, on lit le dossier d'abord — que les
+billets du plan d'action :
 
 ```markdown
 # <ce que ça livre, en une ligne>

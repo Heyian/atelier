@@ -34,7 +34,7 @@ points at the detail.
 - YYYY-MM-DD — <decision, one line> — because <reason>. Detail: `<path>`
 
 ## Open questions
-- <the question> — ticket: `{root}/docs/tickets/<name>.md`
+- <the question> — ticket: `{root}/docs/tickets/NN-<short-name>.md`
 
 ## Not yet specified
 - <what you sense but can't yet turn into a sharp question>
@@ -54,8 +54,8 @@ back in three months and the whole debate runs again.
 ## Open questions are files
 
 An open question lives in `{root}/docs/tickets/`, one file per question, with
-its context. The map keeps only the line and the path. Same format as the
-action-plan tickets:
+its context. The map keeps only the line and the path. Same format — and the
+same naming rule, read the folder first — as the action-plan tickets:
 
 ```markdown
 # <what it delivers, in one line>

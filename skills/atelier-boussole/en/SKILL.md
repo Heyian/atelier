@@ -24,7 +24,9 @@ folder: when naming a file to the executive, always write the real folder path,
 never the token as-is.
 
 Memory sources: the decision log `{root}/docs/atelier/decisions.md`. Read
-`references/memory-protocol.md` before writing.
+`references/memory-protocol.md` before writing to memory — the log, the
+profile, a role memory. Its propose-and-wait rule covers those files. Tickets
+are working documents, not memory: they follow the action plan's rules.
 
 ## Triage — always first
 
@@ -85,8 +87,9 @@ here.
 ## Deferred means a ticket, right now
 
 The moment anyone says "we'll deal with that later" — including you — write the
-ticket to `{root}/docs/tickets/` right away, with its context. Don't save it
-for the end: the context will never be fresher.
+ticket to `{root}/docs/tickets/` right away, with its context, named the way
+the action plan names them. Don't save it for the end: the context will never
+be fresher.
 
 ## Atelier's words
 

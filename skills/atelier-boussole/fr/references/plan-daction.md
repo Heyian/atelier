@@ -26,8 +26,16 @@ aucun fichier avant d'avoir la réponse.
 
 ## Un fichier par billet, dans l'ordre des dépendances
 
-Dans `{racine}/docs/tickets/`, numérotés dans l'ordre où le travail se
-débloque — pas dans l'ordre d'importance.
+Dans `{racine}/docs/tickets/`, un fichier par billet, nommé
+`NN-<nom-court>.md` — numérotés dans l'ordre où le travail se débloque, pas
+dans l'ordre d'importance.
+
+Ce dossier est partagé : toutes les initiatives y écrivent, et les billets
+rédigés en cours de conversation aussi. Donc **lis le dossier avant d'écrire le
+premier fichier**. La numérotation reprend après le plus grand numéro déjà
+présent — elle ne repart jamais à 01 — et une question déjà sur le disque n'a
+pas droit à un deuxième fichier. Les numéros servent à parler du travail ; les
+dépendances qui comptent sont dans les lignes « bloqué par ».
 
 ```markdown
 # <ce que ça livre, en une ligne>

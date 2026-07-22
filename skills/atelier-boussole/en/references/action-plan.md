@@ -25,8 +25,15 @@ answer.
 
 ## One file per ticket, in dependency order
 
-In `{root}/docs/tickets/`, numbered in the order the work unblocks — not in
-order of importance.
+In `{root}/docs/tickets/`, one file per ticket, named `NN-<short-name>.md` —
+numbered in the order the work unblocks, not in order of importance.
+
+That folder is shared: every initiative writes into it, and so does every
+ticket written mid-conversation. So **read the folder before writing the first
+file**. Numbering carries on after the highest number already there — it never
+restarts at 01 — and a question already sitting on disk gets no second file.
+The numbers are handles for talking about the work; the dependencies that
+matter live in the "blocked by" lines.
 
 ```markdown
 # <what it delivers, in one line>

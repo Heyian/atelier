@@ -24,8 +24,11 @@ l'entretien d'accueil de `atelier` — avant toute action qui dépend du profil.
 racine à la personne, jamais `{racine}` tel quel.
 
 Sources de mémoire : le journal des décisions
-`{racine}/docs/atelier/decisions.md`. Avant d'écrire, lis
-`references/memory-protocol.md`.
+`{racine}/docs/atelier/decisions.md`. Avant d'écrire en mémoire — le journal,
+le profil, une mémoire de rôle —, lis `references/memory-protocol.md` : sa
+règle « proposer puis attendre » couvre ces fichiers-là. Les billets sont des
+documents de travail, pas de la mémoire : ils suivent les règles du plan
+d'action.
 
 ## Triage — toujours en premier
 
@@ -88,7 +91,8 @@ n'a été exécuté ici.
 ## Reporté = billet, tout de suite
 
 Dès que quelqu'un dit « on verra plus tard » — toi y compris — écris le billet
-dans `{racine}/docs/tickets/`, avec son contexte. Ne le garde pas pour la fin.
+dans `{racine}/docs/tickets/`, avec son contexte, nommé comme le plan d'action
+les nomme. Ne le garde pas pour la fin.
 
 ## Les mots d'Atelier
 
