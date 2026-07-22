@@ -5,7 +5,12 @@
 **Amended:** 2026-07-22 — `dev` becomes the default branch and `main` becomes
 the release branch. See *Branch model* below; AC49, AC54, AC55, AC58, AC60,
 AC62 and AC63 were rewritten, AC63a, AC63b, AC68, AC69, AC69a and AC70 added,
-and #13 and #14 filed.
+and #13 filed.
+
+**Amended:** 2026-07-22 — release-please authenticates as a GitHub App rather
+than with a PAT, folding in what was #14 (now closed). Requiring signed commits
+is dropped as a consequence; see *Why the branches do not require signed
+commits*. AC49, AC68, AC69 and AC69a rewritten, AC71 added.
 **Supersedes:** the tag-triggered `.github/workflows/release.yml` and the
 `build.sh --release-version` gate added on 2026-07-22 (uncommitted at the time
 of writing)
@@ -64,12 +69,13 @@ merge to dev                                    ← default branch
 promotion PR  dev → main   MERGE COMMIT, never squash
    └─ merge to main                             ← releases only
       └─ release-please.yml (push: main)
-         job 1: release-please · PAT · manifest mode · target-branch main
+         job 1: mint App token · release-please · manifest mode
+                · target-branch main
                 maintains a release PR against main that bumps
                 version.txt · manifest · 14 SKILL.md · README ×2
                 and regenerates CHANGELOG.md
-                └─ ci.yml RUNS on that PR (PAT) and is RED until a human
-                   commits the bilingual ## vX.Y.Z entry to
+                └─ ci.yml RUNS on that PR (App token) and is RED until a
+                   human commits the bilingual ## vX.Y.Z entry to
                    docs/WHATS-NEW.md on the release-please branch
                 └─ required status checks on main BLOCK the merge
          merge the release PR
@@ -143,11 +149,15 @@ trivially. On a release PR, `version.txt` has moved and `WHATS-NEW.md` has not,
 so CI lands red until a human writes the bilingual entry. The file executives
 depend on cannot silently skip a release.
 
-### Why release-please authenticates with a PAT
+### Why release-please authenticates as a GitHub App
 
 Anything an action does while authenticating as `GITHUB_TOKEN` produces events
 that do not start new workflow runs — a platform rule that exists to stop
-workflows from recursively triggering themselves.
+workflows from recursively triggering themselves. release-please's own
+documentation states it plainly:
+
+> When you use the repository's `GITHUB_TOKEN` to perform tasks, events
+> triggered by the `GITHUB_TOKEN` will not create a new workflow run.
 
 release-please uses that token for two things. It pushes the tag, addressed
 below. It also **opens and force-pushes the release PR**, and the identical
@@ -157,16 +167,79 @@ until a human writes the bilingual `docs/WHATS-NEW.md` entry — never fires. Th
 same-workflow `needs:` trick cannot help: the thing that must run is scoped to
 a PR living between two separate workflow runs.
 
-A PAT is a user credential rather than the bot token, so the events it creates
-are ordinary user events and `ci.yml` runs on the release PR normally. The
-action therefore authenticates with a `RELEASE_PLEASE_TOKEN` repository secret
-— a fine-grained PAT with `contents: write` and `pull-requests: write`.
-`traction-app` carries the same secret for the same reason.
+Any credential that is not `GITHUB_TOKEN` lifts the suppression. Two qualify.
 
-The costs are real and accepted: a fine-grained PAT expires, and its expiry
-looks exactly like "no releasable commits"; and the token belongs to a person
-rather than to the repository. Migrating to a GitHub App token, which has
-neither property, is deferred to #14.
+A **PAT** is what release-please's docs recommend and what `traction-app` uses
+(`MY_RELEASE_PLEASE_TOKEN`). It works, and it carries two costs: a fine-grained
+PAT expires, and its expiry is indistinguishable from "nothing releasable"
+until someone reads the workflow log; and it is a person's credential, carrying
+that person's access and dying with their account.
+
+A **GitHub App installation token** has neither property. `atelier-release-please`
+is an App owned by the `Heyian` account and installed on `Heyian/atelier` alone,
+granted `contents: write` and `pull-requests: write`.
+`actions/create-github-app-token@v2` mints a token per run from the App's id and
+private key; the token expires in an hour and is scoped to one repository, so a
+leaked key reaches exactly one repo. The App was scoped to this repository
+rather than made account-wide deliberately: the narrower blast radius is worth
+registering a second App if `traction-app` is ever migrated.
+
+The remaining cost is the private key, which must be stored and eventually
+rotated. That is a smaller and better-signposted liability than a silently
+expiring PAT.
+
+The publish job (job 2) keeps `GITHUB_TOKEN`. It only uploads assets to an
+existing release and needs to trigger nothing, so it has no reason to hold the
+stronger credential.
+
+### Why the branches do not require signed commits
+
+The ruleset covering `main` today carries `required_signatures`, alongside
+`deletion` and `non_fast_forward`. It arrived with GitHub's suggested default
+ruleset on 2026-07-21 rather than from a decision about this repo. It is
+dropped, and here is why it has to be.
+
+release-please's commits are **unsigned**. This is observable in `traction-app`,
+where the release PR was once merged rather than squashed, leaving the
+machine-authored commit in the history:
+
+```
+4dab3af2 [N] chore(main): release 3.2.1
+```
+
+`[N]` is git's code for *no signature*. GitHub's own merge and squash commits
+are signed; release-please's are not, and its documentation says nothing about
+signing.
+
+GitHub's rule for a branch requiring signatures is:
+
+> you cannot squash and merge a pull request into the branch on GitHub unless
+> you are the author of the pull request.
+
+Under a PAT the release PR's author is the token's owner — a human — so
+squash-merging it into `main` stays legal. That is the only reason
+`traction-app` would get away with this, and `traction-app` has no branch
+protection at all, so it has never been tested. Under the App the author is
+`atelier-release-please[bot]`: the human merging is no longer the author, so
+squash is refused, and a merge commit is refused too because it would introduce
+unsigned commits.
+
+The back-merge PR fails the same way regardless of credential, since it carries
+those unsigned commits from `main` into `dev`.
+
+So the rule and the automation cannot both stand. Keeping the rule would mean
+granting the App a bypass — and because ruleset bypass is per-*ruleset* rather
+than per-rule, that means splitting each branch's rules across two rulesets so
+the App does not also bypass deletion, non-fast-forward and the required status
+checks. Four rulesets to buy "every commit is signed, unless the release bot
+wrote it".
+
+The rule is dropped instead. A bypassed rule is worse than an absent one: it
+still reads as a guarantee. Nothing else is given up — `deletion`,
+`non_fast_forward` and the new `required_status_checks` are all indifferent to
+who authored a commit — and commits written by hand stay signed by local git
+config either way. What goes is the enforcement, on the one rule this repo's
+own automation cannot satisfy.
 
 ### Why the publish job lives in the same workflow
 
@@ -174,7 +247,7 @@ A tag pushed by an action authenticating with `GITHUB_TOKEN` does not trigger
 other workflows. Keeping `release.yml` on its `v*` trigger would mean it
 silently never fires again.
 
-The PAT would in principle reopen that door. The publish job stays in the same
+The App token would in principle reopen that door. The publish job stays in the same
 workflow anyway: jobs 2 and 3, each with `needs:` and
 `if: release_created == 'true'`, avoid the cross-workflow hop entirely, keep
 the release and its assets in one run, and surface a failed upload next to the
@@ -194,10 +267,10 @@ So job 3 opens a back-merge PR (`base: dev`, `head: main`) whenever a release
 was created. Merging it carries the bumps and the generated changelog back, and
 promotion PRs stay conflict-free.
 
-It is a PR rather than a direct push because `dev` requires signed commits
-(AC69). A merge pushed from a runner with plain `git` would be unsigned and
-rejected; a merge made through the GitHub API is signed with GitHub's key and
-accepted.
+It is a PR rather than a direct push so that the merge is visible, runs `ci.yml`
+against `dev`'s would-be state before landing, and is trivially idempotent —
+"is a `main` → `dev` PR already open?" is one query, where "has this merge
+already been pushed?" is not.
 
 `traction-app` does not do this — 33 commits sit on its `main` and not on its
 `dev`. There the drift is a cosmetic `package.json` version. Here it is
@@ -265,7 +338,10 @@ the workflow it describes.
 1. Push `atelier-v1` to `origin` as `dev`; set `dev` as the repository's
    default branch; retarget the ruleset per AC69. `main` stays where it is,
    thirty-seven commits behind, until the first promotion.
-2. Provision the `RELEASE_PLEASE_TOKEN` secret.
+2. Register the `atelier-release-please` GitHub App under the `Heyian`
+   account with `contents: write` and `pull-requests: write`; install it on
+   `Heyian/atelier` only; store its id and private key as the
+   `RELEASE_PLEASE_APP_ID` and `RELEASE_PLEASE_APP_PRIVATE_KEY` secrets.
 3. Implement this spec on a branch cut from `dev`, and land it by PR into
    `dev` — the first real use of the new workflow.
 4. When v1 is ready, on `dev`'s tip: run `bash scripts/build.sh --lang all`,
@@ -299,7 +375,7 @@ hand-written.
 | Bilingual entry forgotten | `--check` red on the release PR; required checks on `main` block the merge |
 | Upload job fails | Visible in the same run; re-runnable, `gh release upload --clobber` |
 | Back-merge PR left unmerged | Next promotion PR conflicts on the eighteen version-bearing files |
-| PAT expired | Release PR never appears — indistinguishable from "nothing releasable" until the workflow log is read. Deferred to #14 |
+| App uninstalled, key rotated or permissions narrowed | The token-minting step fails, so the whole run fails loudly and visibly — unlike an expired PAT, which fails as an absence |
 | Promotion PR squash-merged | Release PR never appears. Caught for the first promotion by AC63a; **undetected** thereafter — deferred to #13 |
 | Non-conventional commit | **Undetected** — deferred to #12 |
 
@@ -339,8 +415,8 @@ combined output. "The 14 localized names" means the fr and en columns of
 
 **AC49** — `.github/workflows/release-please.yml` triggers on `push` to `main`,
 invokes `googleapis/release-please-action` with **no** `release-type` input,
-with `target-branch: main`, and with `token` set to the
-`RELEASE_PLEASE_TOKEN` secret rather than `GITHUB_TOKEN`, and declares
+with `target-branch: main`, and with `token` set to the App token minted per
+AC71 rather than to `GITHUB_TOKEN` or to any PAT secret, and declares
 `contents: write` and `pull-requests: write` permissions.
 `.github/workflows/ci.yml` triggers on `pull_request` with no `branches`
 filter — so it runs on PRs targeting `dev` and `main` alike, including the
@@ -380,8 +456,8 @@ no malformed case here; its structure is AC53's subject.
 **AC55** — Given every AC50–AC54 and AC59 invariant holds, When
 `bash scripts/build.sh --check` runs, Then it exits zero and its output
 contains the line `STATUS: PASS (mechanical checks)`. AC49, AC61, AC62, AC63,
-AC63a, AC63b, AC68, AC69, AC69a and AC70 are workflow and repository criteria,
-not fixture invariants, and are outside AC55's precondition.
+AC63a, AC63b and AC68–AC71 are workflow and repository criteria, not fixture
+invariants, and are outside AC55's precondition.
 
 **AC56** — Given every existing build dependency (`bash`, `awk`, `grep`,
 `find`, `zip`, `unzip`) remains on `PATH` and only `command -v jq` fails, When
@@ -474,8 +550,8 @@ contains no `**Français**` label, its bilingual content having moved to
 **AC68** — In `.github/workflows/release-please.yml`, a back-merge job declares
 `needs` on the release-please job, is gated on
 `needs.<release-job>.outputs.release_created == 'true'`, and opens a pull
-request with base `dev` and head `main` authenticating with
-`RELEASE_PLEASE_TOKEN`. Given a `main` → `dev` pull request is already open,
+request with base `dev` and head `main` authenticating with an App token minted
+per AC71. Given a `main` → `dev` pull request is already open,
 When **that same job is re-run** — so that it executes rather than being
 skipped by its own gate — Then it exits zero and the count of open `main` →
 `dev` pull requests is still one. A run in which the job is skipped does not
@@ -484,34 +560,48 @@ satisfy this criterion.
 **AC69** — Against `Heyian/atelier` with an authenticated `gh`: the
 repository's default branch is `dev`; no active ruleset targets
 `~DEFAULT_BRANCH`; the branches `refs/heads/dev` and `refs/heads/main` are each
-covered by an active ruleset carrying the `deletion`, `non_fast_forward` and
-`required_signatures` rules, whose `bypass_actors` is empty; and
-`refs/heads/main` is additionally covered by a `required_status_checks` rule
-naming both `checks-linux` and `checks-windows`, with
+covered by an active ruleset carrying the `deletion` and `non_fast_forward`
+rules, whose `bypass_actors` is empty; **no** active ruleset carries a
+`required_signatures` rule against either branch; and `refs/heads/main` is
+additionally covered by a `required_status_checks` rule naming both
+`checks-linux` and `checks-windows`, with
 `strict_required_status_checks_policy` **false** — strict mode would demand the
 release PR be rebased onto `main` after every intervening merge, for no gain on
 a branch whose only inbound PRs are promotions and releases.
 
 **AC69a** — Given the first release PR release-please opens after bootstrap,
 When it is inspected with `gh pr checks`, Then both `checks-linux` and
-`checks-windows` appear with a completed conclusion. This is the only criterion
-that proves the `RELEASE_PLEASE_TOKEN` secret is a credential of the right kind
-with sufficient permissions — facts no inspection of the workflow file can
-establish — and therefore the only one that proves AC53's forcing function can
-fire at all.
+`checks-windows` appear with a completed conclusion, and the pull request's
+author is the `atelier-release-please` App's bot account rather than a human.
+This is the only criterion that proves the App is installed, granted sufficient
+permissions, and minting a credential of the right kind — facts no inspection
+of the workflow file can establish — and therefore the only one that proves
+AC53's forcing function can fire at all.
 
 **AC70** — `docs/adr/0010-dev-default-main-release-branch.md` exists and
 carries Context, Decision, and Consequences sections, and
 `docs/adr/0009-release-automation-and-changelog-split.md`
-cross-references it for the `target-branch` pin. `CLAUDE.md` states that `dev`
-is the default branch, that `main` carries releases only, that the promotion PR
-`dev` → `main` is merged as a merge commit and never squashed, and that the
-back-merge PR `main` → `dev` is merged after each release.
+cross-references it for the `target-branch` pin. ADR-0010 records why
+`required_signatures` was dropped. `CLAUDE.md` states that `dev` is the default
+branch, that `main` carries releases only, that the promotion PR `dev` → `main`
+is merged as a merge commit and never squashed, and that the back-merge PR
+`main` → `dev` is merged after each release.
+
+**AC71** — In `.github/workflows/release-please.yml`, both the release-please
+job and the back-merge job mint a token with `actions/create-github-app-token`,
+passing `app-id` from the `RELEASE_PLEASE_APP_ID` secret and `private-key` from
+the `RELEASE_PLEASE_APP_PRIVATE_KEY` secret, and consume that step's `token`
+output. The publish job of AC61 does **not** mint one and authenticates with
+`GITHUB_TOKEN`. No job references a PAT secret, and the string
+`RELEASE_PLEASE_TOKEN` appears nowhere in `.github/`.
 
 ## Deferred Items
 
 - #12 — Enforce conventional commit messages in CI
 - #13 — Guard against squash-merging the dev → main promotion PR
+
+Closed by this spec rather than deferred:
+
 - #14 — Replace the release-please PAT with a GitHub App token
 
 ## Glossary Updates & ADRs
@@ -532,7 +622,8 @@ and nothing in this design changes an executive-facing term.
   frontmatter that is then stripped at packaging.
 - *Real trade-off* — annotate-and-strip versus single-source injection;
   split changelog versus one hand-edited file; same-workflow publish job
-  versus a tag-triggered second workflow.
+  versus a tag-triggered second workflow; a GitHub App versus the PAT that
+  release-please's own docs recommend.
 
 `docs/adr/0010-dev-default-main-release-branch.md`
 
@@ -540,11 +631,15 @@ and nothing in this design changes an executive-facing term.
   every PR's default base, the ruleset's `~DEFAULT_BRANCH` target and
   release-please's unpinned `target-branch`.
 - *Surprising without context* — `main` sits permanently behind `dev`, which
-  reads as neglect rather than as design; and the promotion PR's merge method
-  is load-bearing for reasons nothing in the diff explains.
+  reads as neglect rather than as design; the promotion PR's merge method is
+  load-bearing for reasons nothing in the diff explains; and a repo whose every
+  hand-written commit is signed does not require signatures, which reads as an
+  oversight rather than as a decision.
 - *Real trade-off* — a release branch versus trunk-based releases straight off
-  the default branch; and, given the release branch, an automated back-merge
-  versus resolving eighteen conflicts at each promotion.
+  the default branch; given the release branch, an automated back-merge versus
+  resolving eighteen conflicts at each promotion; and dropping
+  `required_signatures` versus splitting four rulesets to grant the release App
+  a bypass.
 
 The branch model gets its own ADR rather than a section inside ADR-0009: it
 outlives release-please, and a reader asking why `main` is behind `dev` should
@@ -571,8 +666,9 @@ branches.
 | `README.md` | Annotate both version lines (35, 88) |
 | `.gitignore` | No change — already contains `dist/`, which the publish job builds into |
 | GitHub repository settings | **Change.** Default branch `main` → `dev` (AC69) |
-| GitHub ruleset `main` (id 19417109) | **Change.** Its condition is `~DEFAULT_BRANCH` today, so the flip would carry `deletion` / `non_fast_forward` / `required_signatures` onto `dev` and leave `main` bare. Retarget to name `refs/heads/main` and `refs/heads/dev` explicitly, and add `required_status_checks` (`checks-linux`, `checks-windows`) on `main` (AC69) |
-| Repository secret `RELEASE_PLEASE_TOKEN` | **Create.** Fine-grained PAT, `contents: write` + `pull-requests: write`. Without it the release PR receives no CI and AC53 cannot fire |
+| GitHub ruleset `main` (id 19417109) | **Change.** Its condition is `~DEFAULT_BRANCH` today, so the flip would carry its rules onto `dev` and leave `main` bare. Retarget to name `refs/heads/main` and `refs/heads/dev` explicitly, **drop `required_signatures`**, and add `required_status_checks` (`checks-linux`, `checks-windows`) on `main` (AC69) |
+| GitHub App `atelier-release-please` | **Create.** Owned by `Heyian`, installed on `Heyian/atelier` only, `contents: write` + `pull-requests: write`. Without it the release PR receives no CI and AC53 cannot fire |
+| Repository secrets `RELEASE_PLEASE_APP_ID`, `RELEASE_PLEASE_APP_PRIVATE_KEY` | **Create.** The App's id and private key, consumed by `actions/create-github-app-token` (AC71) |
 
 No new environment variables, containers, IaC, schemas, or API collections.
 
@@ -627,13 +723,13 @@ no developer glossary file, and this design adds no terms.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC70, including AC63a, AC63b and AC69a) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC71, including AC63a, AC63b and AC69a) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus the three test suites, and `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
 **Implementation ordering note.** Bootstrap steps 1 and 2 — pushing `dev`,
-flipping the default branch, retargeting the ruleset, provisioning
-`RELEASE_PLEASE_TOKEN` — come *before* the implementation branch is cut, so
+flipping the default branch, retargeting the ruleset, registering the App and
+storing its two secrets — come *before* the implementation branch is cut, so
 that this spec lands through the workflow it defines. They are repository
 configuration, not code, and produce no commit; verify them against AC69 rather
 than against a diff.
