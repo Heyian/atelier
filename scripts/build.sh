@@ -322,7 +322,7 @@ check_whats_new() {
 # checks that it is *correct*; it checks that every place declaring it agrees,
 # and that a new skill cannot silently opt out of being maintained.
 check_version_coherence() {
-  local f version vcount tsv body t p rel line declared found n_any n_generic
+  local f version vcount tsv body t p rel line declared found n_any n_generic required_paths
 
   # AC54 / AC59 — the files this check reads must exist and be non-empty.
   # An early return: with the reference file missing there is nothing left to
@@ -391,6 +391,9 @@ check_version_coherence() {
     tsv+="$t"$'\t'"$p"$'\n'
   done < <(extra_files_entries "$REPO_ROOT/release-please-config.json")
 
+  required_paths="$( { find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md -type f \
+                | sed "s|^$REPO_ROOT/||" | sort; echo "README.md"; } )"
+
   while IFS= read -r rel; do
     n_any="$(printf '%s' "$tsv" | awk -F'\t' -v p="$rel" '$2 == p { n++ } END { print n + 0 }')"
     n_generic="$(printf '%s' "$tsv" | awk -F'\t' -v p="$rel" '$1 == "generic" && $2 == p { n++ } END { print n + 0 }')"
@@ -399,8 +402,20 @@ check_version_coherence() {
     elif [[ "$n_generic" -ne 1 ]]; then
       check_fail "release-please-config.json: the extra-files entry for $rel is not type 'generic'"
     fi
-  done < <( { find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md -type f \
-                | sed "s|^$REPO_ROOT/||" | sort; echo "README.md"; } )
+  done <<<"$required_paths"
+
+  # Cardinality — extra-files must hold exactly the required set, no more.
+  # The loop above only checks that each required path is present; without
+  # this, a stale entry for a deleted skill, or an entry for an unrelated
+  # file, would sit in the array forever and pass silently — the same hole
+  # this whole check exists to close. The required set is computed from the
+  # tree above, not hardcoded, so it tracks the skill count automatically.
+  while IFS= read -r p; do
+    [[ -z "$p" ]] && continue
+    if ! grep -qxF "$p" <<<"$required_paths"; then
+      check_fail "release-please-config.json: extra-files lists $p, which is not a SKILL.md or README.md path"
+    fi
+  done < <(printf '%s' "$tsv" | awk -F'\t' '{ print $2 }')
 
   # AC59 — README.md carries exactly two annotated lines, each on version.
   n_any="$(grep -cF 'x-release-please-version' "$REPO_ROOT/README.md" || true)"
@@ -408,7 +423,12 @@ check_version_coherence() {
     check_fail "README.md: expected exactly 2 x-release-please-version annotations, found $n_any"
   fi
   while IFS= read -r line; do
-    declared="$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' <<<"$line" | head -1)"
+    # `|| true`: under set -euo pipefail, a line with no X.Y.Z at all makes
+    # `grep -o` exit 1 and pipefail would abort this assignment (and the
+    # whole script) before check_fail ever ran. Tolerate zero matches so
+    # `declared` is empty, the comparison below fails normally, and the
+    # offending path is still named in the output.
+    declared="$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' <<<"$line" | head -1 || true)"
     if [[ "$declared" != "$version" ]]; then
       check_fail "README.md: annotated line declares '$declared' but version.txt says $version"
     fi

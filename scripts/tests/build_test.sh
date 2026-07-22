@@ -411,6 +411,14 @@ expect_check_fail "$d" "skills/atelier-ventes/fr/SKILL.md" \
   "AC52 rejects an extra-files entry that is not type generic"
 rm -rf "$d"
 
+# --- AC52: an extra-files entry outside the required set fails, naming it
+d="$(make_fixture_repo)"
+sed -i '/"path": "README.md"/a\        { "type": "generic", "path": "docs/WHATS-NEW.md" },' \
+  "$d/release-please-config.json"
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC52 rejects an extra-files entry outside the required set"
+rm -rf "$d"
+
 # --- AC59: README.md missing an annotation fails, naming README.md
 d="$(make_fixture_repo)"
 sed -i '0,/^Version 0\.1\.0 <!-- x-release-please-version -->$/s//Version 0.1.0/' \
@@ -431,6 +439,15 @@ d="$(make_fixture_repo)"
 sed -i '/"path": "README.md"/d' "$d/release-please-config.json"
 expect_check_fail "$d" "README.md" \
   "AC59 rejects extra-files with no README.md entry"
+rm -rf "$d"
+
+# --- AC59: an annotated README line carrying no SemVer at all fails, naming
+# the path, and must not abort the script under set -euo pipefail.
+d="$(make_fixture_repo)"
+sed -i '0,/^Version 0\.1\.0 <!-- x-release-please-version -->$/s//<!-- x-release-please-version -->/' \
+  "$d/README.md"
+expect_check_fail "$d" "README.md" \
+  "AC59 rejects an annotated README line with no SemVer"
 rm -rf "$d"
 
 # --- AC53: a WHATS-NEW heading with an empty section fails, naming the path
