@@ -81,16 +81,15 @@ jobs:
       - name: Verify Windows ZIPs match the expected roster
         shell: pwsh
         run: |
-          Write-Host "Skipped: not all seven skills exist yet. Task 19 re-enables this."
-        # $zips = Get-ChildItem dist -Filter *.zip | Select-Object -ExpandProperty Name | Sort-Object
-        # Write-Host ($zips -join "`n")
-        # $expected = @(
-        #   'atelier-boussole-fr.zip','atelier-compass-en.zip',
-        #   'atelier-forge-en.zip','atelier-forge-fr.zip',
-        #   'atelier-marketing-en.zip','atelier-marketing-fr.zip',
-        #   'atelier-meetings-en.zip','atelier-mentor-en.zip',
-        #   'atelier-mentor-fr.zip','atelier-reunions-fr.zip',
-        #   'atelier-sales-en.zip','atelier-ventes-fr.zip',
-        #   'atelier-en.zip','atelier-fr.zip'
-        # ) | Sort-Object
-        # if (Compare-Object $zips $expected) { throw 'Windows ZIP roster does not match the expected 14' }
+          $zips = Get-ChildItem dist -Filter *.zip | Select-Object -ExpandProperty Name | Sort-Object
+          Write-Host ($zips -join "`n")
+          $expected = @(
+            'atelier-boussole-fr.zip','atelier-compass-en.zip',
+            'atelier-forge-en.zip','atelier-forge-fr.zip',
+            'atelier-marketing-en.zip','atelier-marketing-fr.zip',
+            'atelier-meetings-en.zip','atelier-mentor-en.zip',
+            'atelier-mentor-fr.zip','atelier-reunions-fr.zip',
+            'atelier-sales-en.zip','atelier-ventes-fr.zip',
+            'atelier-en.zip','atelier-fr.zip'
+          ) | Sort-Object
+          if (Compare-Object $zips $expected) { throw 'Windows ZIP roster does not match the expected 14' }
