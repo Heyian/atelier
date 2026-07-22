@@ -1,7 +1,7 @@
 ---
 name: atelier-marketing
 description: À utiliser quand la personne dirigeante veut créer du contenu, lancer une campagne, écrire une infolettre, ou capturer la voix de marque de l'entreprise.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-marketing — la compétence de rôle marketing

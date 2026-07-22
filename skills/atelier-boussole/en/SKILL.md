@@ -1,7 +1,7 @@
 ---
 name: atelier-compass
 description: Use when the executive has a decision to make, has to decide between two options, has an initiative or a project still too fuzzy to launch, or says they want to think this through, get clear on something, or structure something big.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-compass — the thinking process

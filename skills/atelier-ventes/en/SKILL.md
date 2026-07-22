@@ -1,7 +1,7 @@
 ---
 name: atelier-sales
 description: Use when the executive wants to review their sales pipeline, draft a follow-up, build a proposal, or clean up the CRM.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-sales — the sales role skill

@@ -1,7 +1,7 @@
 ---
 name: atelier-ventes
 description: À utiliser quand la personne dirigeante veut faire une revue de son pipeline, rédiger une relance, bâtir une proposition ou une soumission, ou faire le ménage dans son CRM.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-ventes — la compétence de rôle ventes

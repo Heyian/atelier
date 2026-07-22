@@ -1,7 +1,7 @@
 ---
 name: atelier-marketing
 description: Use when the executive wants to create content, plan a campaign, write a newsletter, or capture the company's brand voice.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-marketing — the marketing role skill

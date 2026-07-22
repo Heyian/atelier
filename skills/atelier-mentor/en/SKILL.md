@@ -1,7 +1,7 @@
 ---
 name: atelier-mentor
 description: Use when the executive feels lost and asks "where do I start" or "what can Atelier do," wants to know which skill to use, wants advice on their AI practice, wants better results from Claude, or asks whether Claude can do something — for example, can Claude read my SharePoint files?
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-mentor — the index and AI-practice advisor

@@ -1,7 +1,7 @@
 ---
 name: atelier-mentor
 description: À utiliser quand la personne dirigeante dit « je suis perdu », ne sait pas par quoi commencer, demande ce que peut faire Atelier ou quelle compétence utiliser, veut un conseil sur sa pratique IA, cherche à obtenir de meilleurs résultats avec Claude, ou demande si Claude peut faire quelque chose.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-mentor — l'index et le conseil de pratique IA

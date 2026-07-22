@@ -1,7 +1,7 @@
 ---
 name: atelier-boussole
 description: À utiliser quand la personne dirigeante a une décision à prendre, doit trancher entre deux options, a un chantier ou un projet encore trop flou pour être lancé, dit qu'elle veut y voir clair, réfléchir, ou structurer quelque chose de gros.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-boussole — le processus de réflexion

@@ -1,7 +1,7 @@
 ---
 name: atelier-meetings
 description: Use when the executive wants meeting prep, asks for the minutes of a meeting, needs the action items pulled together, or wants something added to the decision log.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-meetings — the meetings role skill

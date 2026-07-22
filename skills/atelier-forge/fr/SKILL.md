@@ -1,7 +1,7 @@
 ---
 name: atelier-forge
 description: À utiliser quand la personne dirigeante veut créer une compétence, parle d'une nouvelle compétence, dit « j'aimerais que Claude sache faire X », veut automatiser une tâche récurrente, ou veut adapter Atelier à son métier.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-forge — la fabrique de compétences
