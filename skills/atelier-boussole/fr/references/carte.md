@@ -156,6 +156,7 @@ Le chemin léger ne devient jamais lourd tout seul. Si la conversation révèle
 qu'il y avait en fait cinq décisions imbriquées, dis-le et **propose** de
 passer au chemin lourd ; la personne confirme, comme au triage.
 
-**Critère d'achèvement :** le mémo existe dans `{racine}/docs/` avec ses
-quatre sections remplies, les documents cités sont cités par leur chemin, et
-la décision a été proposée au journal.
+**Critère d'achèvement :** le mémo existe dans `{racine}/docs/` avec
+destination, décisions, hypothèses et prochaines actions renseignées, les
+documents cités sont cités par leur chemin, et la décision a été proposée au
+journal.

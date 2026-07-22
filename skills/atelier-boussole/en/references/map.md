@@ -149,6 +149,6 @@ The light path never turns heavy on its own. If the conversation reveals there
 were really five nested decisions, say so and **propose** moving to the heavy
 path; the executive confirms, exactly as at triage.
 
-**Done when:** the brief exists in `{root}/docs/` with its four sections
-filled, any documents are cited by path, and the decision was proposed for the
-log.
+**Done when:** the brief exists in `{root}/docs/` with destination, decisions,
+assumptions, and next actions filled in, any documents are cited by path, and
+the decision was proposed for the log.

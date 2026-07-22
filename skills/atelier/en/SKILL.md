@@ -18,7 +18,9 @@ the skill's own language is.
 `{root}/docs/atelier/company-profile.md` first, then Claude project knowledge.
 If both exist and differ, **the file wins**. If it is missing, ask the executive
 for it or offer to run `atelier`'s onboarding interview — before doing anything
-that depends on the profile.
+that depends on the profile. `{root}` is a placeholder for the project's root
+folder: when naming a file to the executive, always write the real folder path,
+never the token as-is.
 
 Memory sources: the decision log `{root}/docs/atelier/decisions.md` and the role
 registry `{root}/docs/atelier/roles.md`. Read `references/memory-protocol.md`

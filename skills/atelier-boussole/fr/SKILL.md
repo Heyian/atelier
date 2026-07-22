@@ -20,11 +20,13 @@ le fichier `{racine}/docs/atelier/company-profile.md`, puis la connaissance du
 projet Claude. Si les deux existent et diffèrent, **le fichier fait foi**. S'il
 est introuvable, demande-le à la personne dirigeante ou propose de lancer
 l'entretien d'accueil de `atelier` — avant toute action qui dépend du profil.
+`{racine}` est un espace réservé : nomme toujours le vrai chemin du dossier
+racine à la personne, jamais `{racine}` tel quel.
 
-Sources de mémoire : ta mémoire de rôle
+Sources de mémoire :
 `{racine}/docs/atelier/memory/atelier-boussole.md` — lis-la au début, crée-la à
 la première entrée durable et jamais d'avance — et le journal des décisions
-`{racine}/docs/atelier/decisions.md`. Avant toute écriture en mémoire, lis
+`{racine}/docs/atelier/decisions.md`. Avant d'écrire, lis
 `references/memory-protocol.md`.
 
 ## Triage — toujours en premier
@@ -35,7 +37,8 @@ séparément, puis nomme la destination.
 
 « Laisse faire les questions, donne-moi juste le plan » ne saute pas le
 triage : un plan sans destination est une supposition déguisée. Rétrécis —
-chemin recommandé, destination proposée, une seule question — et continue.
+chemin recommandé, destination proposée, deux questions : destination et
+intensité — et continue.
 
 **Critère d'achèvement :** la personne a confirmé le chemin, l'intensité est
 choisie, et la destination est nommée en une phrase vérifiable.
@@ -62,8 +65,8 @@ destination, décisions, hypothèses et prochaines actions.
 Charge `references/carte.md`.
 
 **Critère d'achèvement :** `{racine}/docs/<chantier>/map.md` porte ses quatre
-sections, une seule décision a été tranchée aujourd'hui, les questions
-ouvertes sont des fichiers de billets, et le relais est livré.
+sections, une décision tranchée aujourd'hui, les questions ouvertes sont des
+fichiers de billets, et le relais est livré.
 
 ## Détours
 
@@ -87,8 +90,7 @@ n'a été exécuté ici.
 ## Reporté = billet, tout de suite
 
 Dès que quelqu'un dit « on verra plus tard » — toi y compris — écris le billet
-dans `{racine}/docs/tickets/` tout de suite, avec son contexte. Ne le garde pas
-pour la fin : le contexte ne sera jamais plus frais.
+dans `{racine}/docs/tickets/`, avec son contexte. Ne le garde pas pour la fin.
 
 ## Les mots d'Atelier
 

@@ -7,8 +7,7 @@ version: 0.1.0
 # Atelier-mentor — l'index et le conseil de pratique IA
 
 Compétence socle : le point d'entrée quand la personne est perdue, et sa
-conseillère de pratique IA. Ne tranche jamais une question d'affaires — voir
-Conseil de pratique IA.
+conseillère de pratique IA. Ne tranche jamais une question d'affaires.
 
 Conduis la conversation dans la langue que la personne écrit, quelle que soit
 la langue de la compétence.
@@ -20,6 +19,8 @@ le fichier `{racine}/docs/atelier/company-profile.md`, puis la connaissance du
 projet Claude. Si les deux existent et diffèrent, **le fichier fait foi**. S'il
 est introuvable, demande-le à la personne dirigeante ou propose de lancer
 l'entretien d'accueil de `atelier` — avant toute action qui dépend du profil.
+`{racine}` est un espace réservé : nomme toujours le vrai chemin du dossier
+racine à la personne, jamais `{racine}` tel quel.
 
 Sources de mémoire : `{racine}/docs/atelier/progression.md` et le registre
 des rôles `{racine}/docs/atelier/roles.md`. Lis `references/memory-protocol.md`
@@ -64,12 +65,12 @@ Pratique exerçable ici : invite à l'essayer tout de suite, sur le vrai
 dossier en cours.
 
 Adoption confirmée : propose (n'écris jamais en silence) de consigner
-pratique, difficulté et prochaine étape — marche à suivre dans
-`references/progression.md` et `references/memory-protocol.md`.
+pratique, difficulté et prochaine étape — voir `references/progression.md`
+et `references/memory-protocol.md`.
 
 **Critère d'achèvement :** une seule prochaine pratique recommandée, rattachée
-à la pratique établie, avec une invitation à l'essayer maintenant, et aucune
-position prise sur la question d'affaires elle-même.
+à la pratique établie, et aucune position prise sur la question d'affaires
+elle-même.
 
 ## Questions de capacité
 
@@ -84,4 +85,4 @@ qu'elle n'a pas pu être vérifiée — jamais une affirmation de mémoire seule
 ## Les mots d'Atelier
 
 `references/glossary.md` fixe le sens de racine, profil, relais, registre,
-compétence de rôle et compétence socle. Emploie ces mots-là, tels quels.
+compétence de rôle et compétence socle. Emploie ces mots-là tels quels.

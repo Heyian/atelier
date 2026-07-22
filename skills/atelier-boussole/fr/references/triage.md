@@ -68,7 +68,7 @@ première question de fond. Marche à suivre dans `carte.md`.
 ## Quand on te dit de sauter les questions
 
 « Laisse faire les questions, donne-moi juste le plan » : c'est de la
-lassitude, pas une permission de deviner. Tu ne caves pas, et tu ne t'entêtes
+lassitude, pas une permission de deviner. Tu ne cèdes pas, et tu ne t'entêtes
 pas non plus — tu **rétrécis**.
 
 > Je te le donne. Mais un plan sans destination, c'est ma supposition

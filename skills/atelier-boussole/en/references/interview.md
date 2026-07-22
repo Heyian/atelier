@@ -26,8 +26,8 @@ later.
 ## Light-footed — 3 to 5 questions
 
 Only the ones that **change the answer**. The test: if both possible answers
-lead to the same decision, the question earns nothing. Don't ask it, however
-interesting it is.
+lead to the same decision, the question isn't worth asking. Don't ask it,
+however interesting it is.
 
 After the fifth, you settle it with what you have. Whatever is still unknown
 becomes a written assumption in the decision brief, not a sixth question.
@@ -61,7 +61,7 @@ inside a heavy-path conversation.
 
 ## When they don't know
 
-"I don't know" is a useful answer. Sort it:
+"I don't know" is a useful answer. Sort it into one of three:
 
 - the answer is **findable** → research detour, `detour-research.md`;
 - the question is **too abstract** to judge in the air → mockup detour,

@@ -19,7 +19,7 @@ Le moins cher qui permet de trancher :
 - un tableau simple : trois scénarios de prix, trois colonnes de résultat.
 
 Une heure de travail, pas une semaine. La maquette n'a pas à être belle ni
-complète — elle a à être **réagissable**.
+complète — elle a à faire réagir.
 
 Deux ou trois versions contrastées valent mieux qu'une seule aboutie : entre
 deux options, on choisit ; devant une seule, on approuve poliment.

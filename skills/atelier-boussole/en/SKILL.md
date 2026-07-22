@@ -19,13 +19,15 @@ the skill's own language is.
 `{root}/docs/atelier/company-profile.md` first, then Claude project knowledge.
 If both exist and differ, **the file wins**. If it is missing, ask the executive
 for it or offer to run `atelier`'s onboarding interview — before doing anything
-that depends on the profile.
+that depends on the profile. `{root}` is a placeholder for the project's root
+folder: when naming a file to the executive, always write the real folder path,
+never the token as-is.
 
-Memory sources: your role memory
+Memory sources:
 `{root}/docs/atelier/memory/atelier-boussole.md` — read it at the start, create
 it on the first durable entry and never in advance — and the decision log
 `{root}/docs/atelier/decisions.md`. Read `references/memory-protocol.md` before
-proposing any memory write.
+writing.
 
 ## Triage — always first
 
@@ -35,7 +37,7 @@ then name the destination.
 
 "Skip the questions, just give me the plan" does not skip triage — a plan with
 no destination is a guess in a suit. Shrink instead: recommended path, proposed
-destination, one question. Then carry on.
+destination, two questions — destination and intensity. Then carry on.
 
 **Done when:** the executive has confirmed the path, the intensity is chosen,
 and the destination is named in one checkable sentence.

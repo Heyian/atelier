@@ -10,7 +10,7 @@ Propose collapsing when **either** is true:
 1. the map records **more than five** decisions;
 2. the executive says the outcome is for someone else's eyes — "this is for
    the board," "I have to present this to my team," "the bank needs to be on
-   side."
+   board."
 
 Neither one holds: **don't collapse**. A three-decision map already reads like
 a brief, and collapsing for its own sake adds one more document to keep
@@ -58,7 +58,7 @@ makes contradictions surface: the March decision that assumed a low price, the
 May decision that raised it.
 
 When you find one, **stop and name it**. Don't smooth it into a diplomatic
-sentence that honours both:
+sentence that honors both:
 
 > Writing them together, two of these don't hold together: in March we aimed
 > at small customers because the sales cycle is short; in May we set a price no
