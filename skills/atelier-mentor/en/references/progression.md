@@ -12,10 +12,9 @@ Three rungs, in order:
 1. **Skills** — uploading and using Atelier as-is, conversation by
    conversation. Everyone starts here.
 2. **Department workspaces** — one Claude Project per department, with its
-   own instructions and standing knowledge. See
-   `skills/atelier/*/references/workspaces.md` in the `atelier` skill for the
-   full walkthrough — `atelier-mentor` doesn't repeat it, it recommends this
-   rung and points there when it's the right moment.
+   own instructions and standing knowledge. `atelier-mentor` doesn't run this
+   walkthrough — recommend the rung, then hand off to the `atelier` skill for
+   the department-workspaces walkthrough.
 3. **Cloud Routines** — recurring work Claude runs on a fixed schedule
    without the executive opening a conversation. Setup details change with
    the product: verify against `sources.md` when the moment comes, don't
@@ -53,7 +52,7 @@ but the concrete recommendation always stays a single practice at a time.
 # AI progression — Ambrose Orchard Systems
 
 ## Current practice
-Uses `atelier` and `atelier-ventes` conversation by conversation; no
+Uses `atelier` and `atelier-sales` conversation by conversation; no
 dedicated workspace yet.
 
 ## Practices adopted

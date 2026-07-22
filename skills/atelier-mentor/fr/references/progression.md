@@ -12,10 +12,10 @@ Trois marches, dans l'ordre :
 1. **Les compétences** — téléverser et utiliser Atelier tel quel, conversation
    par conversation. C'est là que tout le monde commence.
 2. **Les espaces de travail par département** — un projet Claude dédié par
-   département, avec ses instructions et sa connaissance permanente. Voir
-   `skills/atelier/*/references/workspaces.md` de la compétence `atelier` pour
-   la marche à suivre complète — `atelier-mentor` ne la répète pas, il
-   recommande cette marche et pointe vers elle quand c'est le bon moment.
+   département, avec ses instructions et sa connaissance permanente.
+   `atelier-mentor` ne fait pas cette marche à suivre — il la recommande, puis
+   relaie vers la compétence `atelier` pour la marche à suivre des espaces de
+   travail par département.
 3. **Les routines infonuagiques (Cloud Routines)** — un travail récurrent que
    Claude exécute à intervalle fixe, sans que la personne ouvre une
    conversation. Les détails de mise en place changent avec le produit :

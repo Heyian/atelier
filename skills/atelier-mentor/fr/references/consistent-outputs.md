@@ -17,7 +17,7 @@ trésor au lieu d'une modification à un seul endroit.
 **Le ton de voix comme objet, pas comme feeling.** Fais extraire par Claude un
 guide de ton à partir de ce que l'entreprise a déjà produit — site, publications,
 présentations — puis fais noter les brouillons contre ce guide au lieu de
-juger à l'oreille. Un guide écrit se applique de la même façon d'une
+juger à l'oreille. Un guide écrit s'applique de la même façon d'une
 conversation à l'autre ; une impression, non.
 
 **Prochaine pratique typique :** si le ton de voix vit déjà dans le Profil
