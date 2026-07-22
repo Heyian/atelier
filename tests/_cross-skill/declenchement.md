@@ -30,7 +30,7 @@ and one that legitimately spans two skills.
 
 ## Expected behaviors
 
-- [x] The right skill fires for each locale's trigger vocabulary (7/7 unambiguous cases per locale)
+- [x] The right skill fires for each locale's trigger vocabulary (7/7 correct per locale — but only 6/7 unambiguously; one was resolved by tie-break judgment, not by the descriptions alone, see finding below)
 - [x] No skill fires for the off-domain prompt, in both locales
 - [x] The cross-skill prompt is routed sensibly rather than forced into a false single answer
 - [ ] Every prompt resolves unambiguously — not established; one genuine two-way tie surfaced independently in both locales (see finding below)
