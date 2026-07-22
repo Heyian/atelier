@@ -16,7 +16,10 @@ jamais une entrée.
 **Connaissance durable → état vivant réconcilié.** Le Profil d'entreprise (dont
 sa section Vocabulaire), les mémoires de rôle, la progression du mentor, le
 registre des rôles. Écrire veut dire : lire le fichier au complet, intégrer,
-dédupliquer, réécrire distillé — jamais accumuler brut.
+dédupliquer, réécrire distillé — jamais accumuler brut. Relis le fichier une
+dernière fois juste avant de le remplacer : une autre session a pu écrire
+entretemps, et une réécriture bâtie sur une lecture périmée efface son travail
+sans laisser de trace.
 
 ## Où va quoi
 

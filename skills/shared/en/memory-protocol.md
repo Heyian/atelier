@@ -15,7 +15,9 @@ the old one by its date. An entry is never edited or deleted.
 **Durable knowledge → reconciled living state.** The Company Profile (including
 its Vocabulary section), role memories, mentor progression, the role registry.
 Writing means: read the file in full, integrate, deduplicate, rewrite distilled
-— never accumulate raw.
+— never accumulate raw. Reread the file one last time just before replacing it:
+another session may have written in between, and a rewrite built on a stale
+read erases their work without a trace.
 
 ## What goes where
 
