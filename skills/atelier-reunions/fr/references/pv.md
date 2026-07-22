@@ -52,12 +52,12 @@ complète.
 
 ## Avant de livrer
 
-Un PV est un document qui sort de chez vous : il se rédige dans le Ton de
-voix du Profil d'entreprise et avec le Vocabulaire de la personne
-dirigeante — ses mots à elle pour ses rôles, ses services, ses dossiers.
-Avant de le livrer, relis-le terme par terme contre le Vocabulaire du
-profil : un mot générique là où la personne a un mot maison, c'est le mot
-maison qui gagne.
+Un PV est un document qui sort de chez vous, avec le nom de la personne
+dirigeante dessus : il se rédige dans le Ton de voix du Profil d'entreprise
+et avec le Vocabulaire de la personne dirigeante — ses mots à elle pour ses
+rôles, ses services, ses dossiers. Avant de le livrer, relis-le terme par
+terme au regard du Vocabulaire du profil : un mot générique là où la
+personne a un mot maison, c'est le mot maison qui gagne.
 
 ## Hors périmètre pour la v1
 

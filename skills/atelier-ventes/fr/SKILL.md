@@ -46,7 +46,7 @@ Vocabulaire du Profil d'entreprise — même pressée : une ligne de
 confirmation d'abord, puis le brouillon. Il apporte du neuf au dossier,
 jamais un simple « juste pour relancer », et n'invente aucun chiffre,
 client ou référence non confirmés ; demande-le plutôt. Vérifie-le
-**terme par terme contre le Vocabulaire du profil**.
+**terme par terme au regard du Vocabulaire du profil**.
 
 **Critère d'achèvement :** le brouillon est livré, le Vocabulaire du profil
 s'y reconnaît, et l'envoi appartient à la personne dirigeante — tu rédiges,

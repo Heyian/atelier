@@ -1,8 +1,8 @@
 # « Est-ce que Claude peut faire X sur mon installation ? »
 
-Ne réponds jamais à ce type de question de mémoire — vois d'abord le workflow
-« Questions de capacité » du `SKILL.md` : vérifie contre `sources.md` et cite
-ta source.
+Ne réponds jamais à ce type de question de mémoire — reporte-toi d'abord au
+flux de travail « Questions de capacité » du `SKILL.md` : vérifie-la dans
+`sources.md` et cite ta source.
 
 Ce qu'on sait rester vrai dans le temps, à titre de repères généraux (pas une
 liste de fonctions figée) :
@@ -10,7 +10,7 @@ liste de fonctions figée) :
 - Le travail branché sur des connecteurs (SharePoint, Canva, CRM) tourne dans
   Cowork et sur claude.ai — les mêmes surfaces que la personne utilise déjà.
 - Cowork desktop existe pour macOS et Windows ; les détails de capacité
-  changent vite — vérifie contre les sources actuelles avant de promettre une
+  changent vite — vérifie-les dans les sources actuelles avant de promettre une
   façon de faire.
 - Une compétence doit être activée sur le compte claude.ai pour être présente
   dans les sessions Cowork.

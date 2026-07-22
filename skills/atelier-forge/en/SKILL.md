@@ -22,9 +22,7 @@ that depends on the profile. `{root}` is a placeholder for the project's root
 folder: when naming a file to the executive, always write the real folder path,
 never the token as-is.
 
-Memory sources: `{root}/docs/atelier/memory/atelier-forge.md` — read it at the
-start, create it on the first durable entry and never in advance — and the
-decision log `{root}/docs/atelier/decisions.md`. Read
+Memory sources: the decision log `{root}/docs/atelier/decisions.md`. Read
 `references/memory-protocol.md` before proposing any memory write.
 
 ## The interview

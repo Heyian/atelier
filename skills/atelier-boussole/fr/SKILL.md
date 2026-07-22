@@ -23,9 +23,7 @@ l'entretien d'accueil de `atelier` — avant toute action qui dépend du profil.
 `{racine}` est un espace réservé : nomme toujours le vrai chemin du dossier
 racine à la personne, jamais `{racine}` tel quel.
 
-Sources de mémoire :
-`{racine}/docs/atelier/memory/atelier-boussole.md` — lis-la au début, crée-la à
-la première entrée durable et jamais d'avance — et le journal des décisions
+Sources de mémoire : le journal des décisions
 `{racine}/docs/atelier/decisions.md`. Avant d'écrire, lis
 `references/memory-protocol.md`.
 

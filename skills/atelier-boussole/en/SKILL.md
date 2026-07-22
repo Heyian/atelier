@@ -23,11 +23,8 @@ that depends on the profile. `{root}` is a placeholder for the project's root
 folder: when naming a file to the executive, always write the real folder path,
 never the token as-is.
 
-Memory sources:
-`{root}/docs/atelier/memory/atelier-boussole.md` — read it at the start, create
-it on the first durable entry and never in advance — and the decision log
-`{root}/docs/atelier/decisions.md`. Read `references/memory-protocol.md` before
-writing.
+Memory sources: the decision log `{root}/docs/atelier/decisions.md`. Read
+`references/memory-protocol.md` before writing.
 
 ## Triage — always first
 

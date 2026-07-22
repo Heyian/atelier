@@ -36,8 +36,8 @@ a verifiable fact, never a gut feeling. Sort out the stalled deals and
 propose a concrete next action for each, not just a flag that it's stuck.
 
 **Done when:** every stalled deal is named with a specific next action, and
-the review is written to `{root}/docs/ventes/` if the executive wants to
-keep it.
+the review is written to `{root}/docs/ventes/` — the canonical French folder
+name, unchanged in this locale — if the executive wants to keep it.
 
 ## Draft a follow-up
 
@@ -61,7 +61,8 @@ with a question next to it, until confirmed.
 
 **Done when:** the proposal contains only facts the executive has confirmed;
 if the executive wants it kept as a file, it is written to
-`{root}/docs/ventes/`, named for the customer it's for.
+`{root}/docs/ventes/` — the canonical French folder name, unchanged in this
+locale — named for the customer it's for.
 
 ## Clean up the CRM
 

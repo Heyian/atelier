@@ -97,8 +97,7 @@ ne devine où ça se téléverse.
 >
 > **Pour l'installer :**
 > 1. Ouvre Claude dans ton navigateur.
-> 2. Va dans tes réglages, section **Capacités** (ou **Compétences** selon la
->    version que tu vois).
+> 2. Va dans **Personnaliser → Compétences**.
 > 3. Clique **Téléverser une compétence** et choisis le ZIP.
 > 4. Vérifie qu'elle apparaît dans la liste, activée.
 >

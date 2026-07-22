@@ -11,8 +11,8 @@ La description est le seul texte que Claude voit avant de décider s'il ouvre la
 compétence. Elle énumère les situations qui la déclenchent, dans les mots de la
 personne dirigeante — pas les étapes de son travail.
 
-Une description qui résume la marche à suivre se fait suivre **à la place** du
-corps : Claude croit savoir quoi faire et n'ouvre jamais le fichier.
+Une description qui résume la marche à suivre se substitue **au** corps :
+Claude croit savoir quoi faire et n'ouvre jamais le fichier.
 
 Forme : « À utiliser quand… » suivi de situations concrètes.
 
@@ -80,7 +80,7 @@ quatre sections » se vérifie.
 > 10 % est nommé avec son territoire, et chaque point porte le nom de la
 > personne qui l'amène.
 
-## La forme suit la faute
+## La forme suit la défaillance
 
 Pour façonner un livrable, donne la recette : dis ce que le résultat **est** et
 les étapes pour l'obtenir. Une liste d'interdits ne dit pas quoi faire à la

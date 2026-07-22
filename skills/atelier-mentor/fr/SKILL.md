@@ -75,7 +75,7 @@ elle-même.
 ## Questions de capacité
 
 « Est-ce que Claude peut... » ne se répond jamais de mémoire — les capacités
-changent chaque mois. Vérifie contre une source fiable de
+changent chaque mois. Vérifie auprès d'une source fiable de
 `references/sources.md`, cite-la ; si tu ne peux pas la consulter maintenant,
 dis-le plutôt que de promettre une façon de faire non vérifiée.
 

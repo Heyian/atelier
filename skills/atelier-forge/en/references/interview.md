@@ -22,7 +22,11 @@ right. One follow-up, then move on.
 
 **The body's language.** Also ask which language the skill should be written
 in — it can differ from the language of this interview, and from
-`atelier-forge`'s own.
+`atelier-forge`'s own. When it differs from `atelier-forge`'s own language,
+say so plainly: the shared `glossary.md` and `memory-protocol.md` files will
+ship in `atelier-forge`'s language, not the new skill's. Offer the
+alternative — install the matching-language `atelier-forge` and build the
+skill there instead.
 
 ## The six questions
 

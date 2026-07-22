@@ -23,10 +23,9 @@ l'entretien d'accueil de `atelier` — avant toute action qui dépend du profil.
 `{racine}` est un espace réservé : nomme toujours le vrai chemin du dossier
 racine à la personne, jamais `{racine}` tel quel.
 
-Sources de mémoire : `{racine}/docs/atelier/memory/atelier-forge.md` — lis-la au
-début, crée-la à la première entrée durable et jamais d'avance — et le journal
-des décisions `{racine}/docs/atelier/decisions.md`. Avant de proposer une
-écriture en mémoire, lis `references/memory-protocol.md`.
+Sources de mémoire : le journal des décisions
+`{racine}/docs/atelier/decisions.md`. Avant de proposer une écriture en
+mémoire, lis `references/memory-protocol.md`.
 
 ## L'entretien
 
@@ -62,7 +61,7 @@ ligne de plus si — et seulement si — la compétence sert un rôle.
 
 ## Tester et corriger
 
-C'est l'étape qu'on saute une fois que le ZIP a l'air beau. Ne la saute pas.
+C'est l'étape qu'on saute une fois que le ZIP a l'air correct. Ne la saute pas.
 
 **Critère d'achèvement :** la personne a le ZIP, les instructions de
 téléversement et 2 à 3 phrases de test — et elle sait qu'elle doit revenir te

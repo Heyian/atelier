@@ -29,7 +29,7 @@ documents (company profile, meeting notes, and so on).
 
 ![Settings → Capabilities, with code execution and file creation turned on](screenshots/capabilities-toggle.png)
 
-If either switch is already on, great — move to the next step.
+If both switches are already on, great — move to the next step.
 
 ## 3. Download the skills
 

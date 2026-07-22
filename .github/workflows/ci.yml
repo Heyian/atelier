@@ -47,14 +47,12 @@ jobs:
           # references flattened and broken. -Check cannot detect this, so
           # this is the single most valuable assertion this job can make.
           #
-          # No skills exist yet (Tasks 7-13 add them), so dist/ is empty
-          # today and there is nothing to inspect. Don't let that read as a
-          # silent pass: announce the skip explicitly. Once Task 7 lands the
-          # first skill, this step starts inspecting a real ZIP automatically.
+          # Fourteen ZIPs are always expected once the build has run. Finding
+          # none is a defect, not a state to skip past silently.
           $zips = Get-ChildItem dist -Filter *.zip -ErrorAction SilentlyContinue
           if (-not $zips) {
-            Write-Host "SKIPPED: no ZIPs in dist/ yet (no skills exist before Task 7) — nothing to inspect."
-            exit 0
+            Write-Host "FAIL: no ZIPs found in dist/ — expected 14."
+            exit 1
           }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           foreach ($zip in $zips) {

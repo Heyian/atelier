@@ -16,6 +16,7 @@ require_heading() {
 }
 
 require_heading "## Descriptions"
+require_heading "## Frontmatter contract"
 require_heading "## SKILL.md stays lean"
 require_heading "## Match the form to the failure"
 require_heading "## Checkable completion criteria"

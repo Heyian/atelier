@@ -53,7 +53,8 @@ vert — et n'appuie jamais sur « envoyer » à sa place.
 
 ## Après le lancement
 
-Mesure contre l'objectif chiffré fixé au départ, pas au ressenti. Une
+Mesure les résultats au regard de l'objectif chiffré fixé au départ, pas au
+ressenti. Une
 campagne qui a généré de l'activité mais pas atteint son chiffre n'est pas un
 échec caché — c'est une donnée pour la suivante : quel canal a porté, lequel
 n'a rien apporté, à ajuster avant le prochain enchaînement.

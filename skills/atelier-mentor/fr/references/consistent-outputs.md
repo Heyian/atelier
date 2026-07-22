@@ -14,9 +14,9 @@ préférences vivent chacun à un seul endroit. Si le ton de voix est décrit à
 deux endroits différents, corriger le comportement devient une chasse au
 trésor au lieu d'une modification à un seul endroit.
 
-**Le ton de voix comme objet, pas comme feeling.** Fais extraire par Claude un
+**Le ton de voix comme objet, pas comme impression.** Fais extraire par Claude un
 guide de ton à partir de ce que l'entreprise a déjà produit — site, publications,
-présentations — puis fais noter les brouillons contre ce guide au lieu de
+présentations — puis fais évaluer les brouillons d'après ce guide au lieu de
 juger à l'oreille. Un guide écrit s'applique de la même façon d'une
 conversation à l'autre ; une impression, non.
 

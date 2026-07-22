@@ -4,7 +4,7 @@ Quand la question ressemble à : « je devrais ouvrir une nouvelle conversation
 ou continuer ici ? », « comment je repars sans tout réexpliquer ? ».
 
 **Les longues conversations se dégradent ; les neuves, centrées sur un seul
-travail, performent.** Découpe les phases d'un projet entre plusieurs
+travail, donnent de meilleurs résultats.** Découpe les phases d'un projet entre plusieurs
 conversations volontairement, plutôt que de tout empiler dans une seule qui
 s'allonge.
 
@@ -17,6 +17,6 @@ C'est exactement le rôle du relais d'`atelier`.
 documents charger en premier pour qu'une session neuve démarre orientée, au
 lieu de redécouvrir le contexte à chaque fois.
 
-**Prochaine pratique typique :** si la conversation en cours dépasse déjà un
-long moment ou change de sujet, propose le relais maintenant plutôt que
+**Prochaine pratique typique :** si la conversation en cours dure déjà depuis
+longtemps ou change de sujet, propose le relais maintenant plutôt que
 d'attendre que la personne le demande.

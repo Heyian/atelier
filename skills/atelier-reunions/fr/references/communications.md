@@ -36,11 +36,11 @@ ne vient de nulle part de confirmé reste un blanc marqué, avec une question
 
 ## Avant de livrer
 
-Une communication au conseil ou à l'équipe sort de chez vous : elle se
-rédige dans le Ton de voix du Profil d'entreprise et avec le Vocabulaire
-de la personne dirigeante. Avant de la livrer, relis-la terme par terme
-contre le Vocabulaire du profil : un mot générique là où la personne a un
-mot maison, c'est le mot maison qui gagne.
+Une communication au conseil ou à l'équipe sort de chez vous, avec le nom de
+la personne dirigeante dessus : elle se rédige dans le Ton de voix du Profil
+d'entreprise et avec le Vocabulaire de la personne dirigeante. Avant de la
+livrer, relis-la terme par terme au regard du Vocabulaire du profil : un mot
+générique là où la personne a un mot maison, c'est le mot maison qui gagne.
 
 ## La ligne qui ne bouge jamais : le brouillon est de l'IA, la diffusion appartient à la personne dirigeante
 

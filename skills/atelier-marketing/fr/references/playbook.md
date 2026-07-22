@@ -28,7 +28,7 @@ attendant ». Écris toujours la réponse, jamais seulement la caractéristique.
 
 Résiste à l'envie de parler à tout le monde dans le même texte. Un courriel
 qui essaie de convaincre à la fois le client fidèle et le prospect froid ne
-convainc ni l'un ni l'autre — il dilue. Choisis l'audience avant d'écrire la
+convainc ni l'un ni l'autre — il dilue. Choisis le public avant d'écrire la
 première ligne ; les autres publics reçoivent leur propre texte, pas un
 paragraphe ajouté au même.
 

@@ -22,9 +22,13 @@ proposition ; elle n'invente pas devant une page blanche.
 Si une réponse est vague, reformule ce que tu as compris et demande si c'est
 juste. Une seule relance, puis passe.
 
-**La langue du corps.** Demande aussi dans quelle langue écrire la
+**La langue de la compétence.** Demande aussi dans quelle langue écrire la
 compétence — elle peut différer de la langue de cet entretien, et de celle de
-`atelier-forge` lui-même.
+`atelier-forge` lui-même. Si elle diffère de celle de `atelier-forge`, dis-le
+clairement : les fichiers partagés `glossary.md` et `memory-protocol.md`
+seront livrés dans la langue de `atelier-forge`, pas dans celle de la
+nouvelle compétence. Propose l'autre option — installer d'abord la version de
+`atelier-forge` dans la bonne langue, et fabriquer la compétence là.
 
 ## Les six questions
 

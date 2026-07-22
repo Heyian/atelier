@@ -33,8 +33,9 @@ Load `references/playbook.md`. Before writing a word, read the Company
 Profile, its Tone of voice and Vocabulary sections — even when the executive
 says to hurry. "Just give me the copy, skip the questions" shrinks the
 detour, it doesn't skip it: one line to confirm the tone, then you write. If
-a voice guide already exists at `{root}/docs/marketing/guide-de-voix.md`,
-load that too — it's sharper than the profile's three adjectives.
+a voice guide already exists at `{root}/docs/marketing/guide-de-voix.md` —
+the canonical French name, unchanged in this locale — load that too — it's
+sharper than the profile's three adjectives.
 
 Draft in the executive's own words — their house vocabulary, not generic
 marketing-speak that could belong to any company. Then **score the draft
@@ -65,8 +66,9 @@ voice and Vocabulary, pull out a checkable list — words to use, words that
 are banned, sentence length, what the brand never does.
 
 **Done when:** the checklist exists at
-`{root}/docs/marketing/guide-de-voix.md`, every item is checkable at a
-glance, and the executive has confirmed it sounds like them.
+`{root}/docs/marketing/guide-de-voix.md` — the canonical French name,
+unchanged in this locale — every item is checkable at a glance, and the
+executive has confirmed it sounds like them.
 
 ## Atelier's words
 

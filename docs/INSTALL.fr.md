@@ -33,7 +33,7 @@ comptes rendus, etc.).
 
 ![Réglages → Capacités, avec l'exécution de code et la création de fichiers activées](screenshots/capabilities-toggle.png)
 
-Si l'un des deux interrupteurs est déjà activé, tant mieux — passe à
+Si les deux interrupteurs sont déjà activés, tant mieux — passe à
 l'étape suivante.
 
 ## 3. Télécharger les compétences

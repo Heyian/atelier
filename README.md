@@ -32,7 +32,8 @@ Télécharge la [dernière version](https://github.com/Heyian/atelier/releases/l
 
 ## Statut
 
-Conception initiale — voir `docs/` pour le devis de conception.
+Version 0.1.0 — les sept compétences sont livrées, en français et en
+anglais. Voir `docs/` pour le devis de conception.
 
 ## Remerciements
 
@@ -84,7 +85,8 @@ Download the [latest release](https://github.com/Heyian/atelier/releases/latest)
 
 ## Status
 
-Early design — see `docs/` for the design spec.
+Version 0.1.0 — all seven skills are shipping, in both French and English.
+See `docs/` for the design spec.
 
 ## Acknowledgements
 

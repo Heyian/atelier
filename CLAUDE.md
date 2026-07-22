@@ -17,7 +17,10 @@ Single-context: `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
 - `bash scripts/build.sh --lang all` — build every ZIP into `dist/`
 - `bash scripts/build.sh --check` — mechanical checks (also what CI runs)
+- `./scripts/build.ps1 -Lang all` / `-Check` — PowerShell twin, run on Windows CI
 - `bash scripts/tests/build_test.sh` — build-script tests
+- `bash scripts/tests/shared_test.sh` — shared-text tests
+- `bash scripts/tests/authoring_test.sh` — authoring-standards tests
 
 ## Layout
 

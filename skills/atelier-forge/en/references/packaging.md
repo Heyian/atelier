@@ -94,8 +94,7 @@ guesses where a skill gets uploaded.
 >
 > **To install it:**
 > 1. Open Claude in your browser.
-> 2. Go to your settings, the **Capabilities** section (or **Skills**,
->    depending on the version you see).
+> 2. Go to **Customize → Skills**.
 > 3. Click **Upload skill** and pick the ZIP.
 > 4. Check that it shows up in the list, switched on.
 >

@@ -19,7 +19,7 @@ Trois marches, dans l'ordre :
 3. **Les routines infonuagiques (Cloud Routines)** — un travail récurrent que
    Claude exécute à intervalle fixe, sans que la personne ouvre une
    conversation. Les détails de mise en place changent avec le produit :
-   vérifie contre `sources.md` au moment d'y arriver, ne les décris pas de
+   vérifie-les dans `sources.md` au moment d'y arriver, ne les décris pas de
    mémoire.
 
 ## La règle de la zone proximale

@@ -1,7 +1,7 @@
 # Authoring standards
 
 These rules govern every Atelier skill. They are the single source of truth
-Tasks 7–13 write each `SKILL.md` against, and `atelier-forge` carries an
+each `SKILL.md` is written against, and `atelier-forge` carries an
 exec-facing distillation of them in its own `references/` so generated
 skills inherit the same standards. This document is repo/maintainer-facing;
 it is not shipped to execs.
@@ -31,7 +31,7 @@ language instead of triggering a skill directly.
 Every skill's `SKILL.md` opens with three required fields in YAML frontmatter,
 in this exact order: `name`, `description`, and `version`. The build enforces
 this structure via `scripts/build.sh --check` (and its PowerShell twin), which
-CI runs on every push.
+CI runs on every push and pull request.
 
 - **name**: Must match `^[a-z0-9-]+$` (lowercase, digits, hyphens only). Must
   equal the localized skill name for that locale in `skills/names.tsv`. The
@@ -54,9 +54,12 @@ version: 0.1.0
 
 Knowledge lives in `references/`, loaded on demand — not inlined in
 `SKILL.md`. The author's playbooks (marketing, sales, meetings) are
-reference files, not prose in the body. Target: `SKILL.md` under ~500
-words. If a section is explaining domain knowledge rather than telling
-Claude what to do next, it belongs in `references/`.
+reference files, not prose in the body. Target: `SKILL.md` under ~550
+words. The shared Memory block and Company Profile pointer paragraph are
+part of that count, so the practical ceiling for authored body text is
+lower than the target suggests. If a section is explaining domain
+knowledge rather than telling Claude what to do next, it belongs in
+`references/`.
 
 ## Match the form to the failure
 
