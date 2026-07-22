@@ -2,6 +2,9 @@
 
 **Date:** 2026-07-22
 **Status:** Approved, not yet implemented
+**Amended:** 2026-07-22 — `dev` becomes the default branch and `main` becomes
+the release branch. See *Branch model* below; AC49 and AC63 were rewritten,
+AC68–AC70 added, and #13 and #14 filed.
 **Supersedes:** the tag-triggered `.github/workflows/release.yml` and the
 `build.sh --release-version` gate added on 2026-07-22 (uncommitted at the time
 of writing)
@@ -33,23 +36,47 @@ rather than a maintained one.
 
 ## Design
 
+### Branch model
+
+`dev` is the default branch: every feature branch cuts from it and every PR
+lands on it. `main` holds releases only. Work reaches `main` through a
+**promotion PR** — a deliberate "cut a release" act, distinct from merging a
+feature.
+
+That promotion PR **must be merged as a merge commit, never squashed.**
+release-please reads `main`'s history to compute the bump and every changelog
+entry, so the individual Conventional Commits have to survive the promotion.
+A squash collapses them into one non-conventional message
+(`Merge pull request #N from Heyian/dev`); release-please then finds nothing
+releasable and silently opens no release PR. The failure announces itself only
+as an absence. Mechanical enforcement is deferred to #13.
+
+This mirrors `traction-app`, which runs the same model.
+
 ### Flow
 
 ```
-commit (conventional) → PR → ci.yml: tests + build.sh --check
-                                      └─ version coherence
-merge to main
-   └─ release-please.yml
-      job 1: release-please (manifest mode, target-branch main)
-             maintains a release PR that bumps
-             version.txt · manifest · 14 SKILL.md · README ×2
-             and regenerates CHANGELOG.md
-             └─ CI on that PR is RED until a human writes the
-                bilingual ## vX.Y.Z entry in docs/WHATS-NEW.md
-      merge the release PR
-             └─ tag vX.Y.Z + GitHub release (generated notes)
-      job 2: needs job 1, if release_created == 'true'
-             build.sh --lang all → upload 14 ZIPs + WHATS-NEW.md
+feature branch → PR → ci.yml: tests + build.sh --check
+                              └─ version coherence
+merge to dev                                    ← default branch
+   ⋮
+promotion PR  dev → main   MERGE COMMIT, never squash
+   └─ merge to main                             ← releases only
+      └─ release-please.yml (push: main)
+         job 1: release-please · PAT · manifest mode · target-branch main
+                maintains a release PR against main that bumps
+                version.txt · manifest · 14 SKILL.md · README ×2
+                and regenerates CHANGELOG.md
+                └─ ci.yml RUNS on that PR (PAT) and is RED until a human
+                   commits the bilingual ## vX.Y.Z entry to
+                   docs/WHATS-NEW.md on the release-please branch
+                └─ required status checks on main BLOCK the merge
+         merge the release PR
+                └─ tag vX.Y.Z + GitHub release (generated notes)
+         job 2: needs job 1, if release_created == 'true'
+                build.sh --lang all → upload 14 ZIPs + WHATS-NEW.md
+         job 3: needs job 1, if release_created == 'true'
+                open the back-merge PR  main → dev
 ```
 
 ### Why the version is annotated rather than injected
@@ -115,18 +142,75 @@ trivially. On a release PR, `version.txt` has moved and `WHATS-NEW.md` has not,
 so CI lands red until a human writes the bilingual entry. The file executives
 depend on cannot silently skip a release.
 
+### Why release-please authenticates with a PAT
+
+Anything an action does while authenticating as `GITHUB_TOKEN` produces events
+that do not start new workflow runs — a platform rule that exists to stop
+workflows from recursively triggering themselves.
+
+release-please uses that token for two things. It pushes the tag, addressed
+below. It also **opens and force-pushes the release PR**, and the identical
+rule suppresses that PR's `pull_request` event. Under `GITHUB_TOKEN` the
+release PR carries zero checks, so AC53's forcing function — CI red until a
+human writes the bilingual `docs/WHATS-NEW.md` entry — never fires at all. The
+same-workflow `needs:` trick cannot help: the thing that must run is scoped to
+a PR living between two separate workflow runs.
+
+A PAT is a user credential rather than the bot token, so the events it creates
+are ordinary user events and `ci.yml` runs on the release PR normally. The
+action therefore authenticates with a `RELEASE_PLEASE_TOKEN` repository secret
+— a fine-grained PAT with `contents: write` and `pull-requests: write`.
+`traction-app` carries the same secret for the same reason.
+
+The costs are real and accepted: a fine-grained PAT expires, and its expiry
+looks exactly like "no releasable commits"; and the token belongs to a person
+rather than to the repository. Migrating to a GitHub App token, which has
+neither property, is deferred to #14.
+
 ### Why the publish job lives in the same workflow
 
 A tag pushed by an action authenticating with `GITHUB_TOKEN` does not trigger
 other workflows. Keeping `release.yml` on its `v*` trigger would mean it
 silently never fires again.
 
-Two jobs in one workflow — the second with `needs:` and
-`if: release_created == 'true'` — avoids the cross-workflow trigger entirely,
-needs no PAT to provision or rotate, and surfaces a failed upload in the same
-run as the release that needs it. `traction-app` solves the same problem with a
-PAT (`MY_RELEASE_PLEASE_TOKEN`); this repo has no such secret and does not need
-one.
+The PAT would in principle reopen that door. The publish job stays in the same
+workflow anyway: jobs 2 and 3, each with `needs:` and
+`if: release_created == 'true'`, avoid the cross-workflow hop entirely, keep
+the release and its assets in one run, and surface a failed upload next to the
+release that needs it. One workflow is simply easier to reason about than two
+coupled through a tag.
+
+### Why main flows back into dev
+
+Merging the release PR rewrites eighteen files on `main` — `version.txt`, the
+manifest, the fourteen `SKILL.md`, `README.md` and a regenerated
+`CHANGELOG.md` — while `dev` still declares the old version in every one of
+them. `--check` stays green on `dev`: the tree is internally coherent, just
+stale. But the next promotion PR then conflicts on all eighteen, and does so at
+every release, forever.
+
+So job 3 opens a back-merge PR (`base: dev`, `head: main`) whenever a release
+was created. Merging it carries the bumps and the generated changelog back, and
+promotion PRs stay conflict-free.
+
+It is a PR rather than a direct push because `dev` requires signed commits
+(AC69). A merge pushed from a runner with plain `git` would be unsigned and
+rejected; a merge made through the GitHub API is signed with GitHub's key and
+accepted.
+
+`traction-app` does not do this — 33 commits sit on its `main` and not on its
+`dev`. There the drift is a cosmetic `package.json` version. Here it is
+eighteen files, most of which the coherence check reads.
+
+### A caveat on writing WHATS-NEW
+
+The bilingual entry is committed by a human onto the
+`release-please--branches--main` branch, which release-please **force-pushes**
+on every run. A run landing between that commit and the merge would clobber it.
+
+Under this branch model that cannot happen incidentally: `release-please.yml`
+fires only on `push` to `main`, and pushes to `main` are deliberate promotions.
+The window is real but never opens on its own.
 
 ### Configuration
 
@@ -146,9 +230,13 @@ The workflow **must not** pass `release-type` to the action. Doing so forces
 non-manifest mode, which rediscovers the last release by correlating tags
 against a bounded window of recent commits; a large merge pushes the last
 release outside that window and release-please resets the version to `1.0.0`.
-`traction-app`'s workflow carries this comment from experience. `target-branch:
-main` is pinned for the same reason — the action otherwise defaults to whatever
-the repo's default branch happens to be.
+`traction-app`'s workflow carries this comment from experience.
+
+`target-branch: main` is pinned because the action otherwise defaults to the
+repository's default branch — which, under this branch model, is `dev`.
+Unpinned, release-please would compute releases from `dev` and tag there,
+putting tags on the branch that is explicitly not the release branch. The pin
+is load-bearing, not defensive.
 
 ### Commit convention
 
@@ -170,15 +258,35 @@ the fourteen ZIPs, taking the slot `CHANGELOG.md` occupies today.
 
 ### Bootstrap
 
-One-time, on `main`, after this branch merges:
+The branch flip comes first, so that this spec is itself implemented through
+the workflow it describes.
 
-1. Seed `.release-please-manifest.json` to `{".": "0.1.0"}` and `version.txt`
-   to `0.1.0`.
-2. Tag `v0.1.0` and publish the GitHub release with the fourteen ZIPs and
-   `docs/WHATS-NEW.md` attached.
+1. Push `atelier-v1` to `origin` as `dev`; set `dev` as the repository's
+   default branch; retarget the ruleset per AC69. `main` stays where it is,
+   thirty-seven commits behind, until the first promotion.
+2. Provision the `RELEASE_PLEASE_TOKEN` secret.
+3. Implement this spec on a branch cut from `dev`, and land it by PR into
+   `dev` — the first real use of the new workflow.
+4. When v1 is ready, on `dev`'s tip: run `bash scripts/build.sh --lang all`,
+   tag `v0.1.0`, and publish the GitHub release with the fourteen ZIPs and
+   `docs/WHATS-NEW.md` attached. `version.txt` and
+   `.release-please-manifest.json` already read `0.1.0` — step 3 creates them —
+   so this step only tags and publishes.
+5. Open the promotion PR `dev` → `main` and merge it as a merge commit.
 
-This gives release-please a floor to compute from, and fixes every 404 in the
-install guides today rather than at the next release.
+**The tag must precede the first promotion.** release-please computes from the
+last release tag. With no tag anywhere, the moment `release-please.yml` first
+lands on `main` it would read the thirty-seven v1 commits as unreleased and
+open a premature `v0.2.0` release PR. Tagging `v0.1.0` on `dev`'s tip first
+makes that commit an ancestor of `main` once the promotion merges, so
+release-please sees `v0.1.0` reachable, the manifest at `0.1.0`, and nothing
+releasable since — and correctly opens nothing. The next feature merged into
+`dev` and promoted produces `v0.2.0` through the normal flow.
+
+The tag also fixes every 404 in the install guides today rather than at the
+next release. The thirty-seven commits predating it are pre-history: they
+generate no changelog entries, which is correct, because the v0.1.0 entry is
+hand-written.
 
 ### Failure modes
 
@@ -187,8 +295,11 @@ install guides today rather than at the next release.
 | New skill missing its annotation | `--check` red at PR time |
 | New skill missing from `extra-files` | `--check` red at PR time |
 | Skill versions drift apart | `--check` red at PR time |
-| Bilingual entry forgotten | `--check` red on the release PR |
+| Bilingual entry forgotten | `--check` red on the release PR; required checks on `main` block the merge |
 | Upload job fails | Visible in the same run; re-runnable, `gh release upload --clobber` |
+| Back-merge PR left unmerged | Next promotion PR conflicts on the eighteen version-bearing files |
+| PAT expired | Release PR never appears — indistinguishable from "nothing releasable" until the workflow log is read. Deferred to #14 |
+| Promotion PR squash-merged | Release PR never appears. **Undetected** — deferred to #13 |
 | Non-conventional commit | **Undetected** — deferred to #12 |
 
 ### Testing
@@ -222,10 +333,15 @@ combined output. "The 14 localized names" means the fr and en columns of
 `skills/names.tsv` joined with their locale.
 
 **AC49** — `.github/workflows/release-please.yml` triggers on `push` to `main`,
-invokes `googleapis/release-please-action` with **no** `release-type` input and
-with `target-branch: main`, and declares `contents: write` and
-`pull-requests: write` permissions. `.github/workflows/ci.yml` still triggers on
-`pull_request` and still runs `bash scripts/build.sh --check`.
+invokes `googleapis/release-please-action` with **no** `release-type` input,
+with `target-branch: main`, and with `token` set to the
+`RELEASE_PLEASE_TOKEN` secret rather than `GITHUB_TOKEN`, and declares
+`contents: write` and `pull-requests: write` permissions.
+`.github/workflows/ci.yml` triggers on `pull_request` with no `branches`
+filter — so it runs on PRs targeting `dev` and `main` alike, including the
+release PR — and on `push` to `dev` and `main` only; it declares a
+`concurrency` group keyed on the ref with `cancel-in-progress: true`; and it
+still runs `bash scripts/build.sh --check`.
 
 **AC50** — Given a `skills/*/*/SKILL.md` whose initial frontmatter does not
 contain exactly one `version:` line, or whose `version:` line does not match
@@ -300,13 +416,16 @@ by `needs.<release-job>.outputs.tag_name`.
 version segment; the only non-ZIP asset uploaded is `WHATS-NEW.md`.
 
 **AC63** — After bootstrap, against `Heyian/atelier` with an authenticated
-`gh`: `refs/tags/v0.1.0` exists on `origin`; release `v0.1.0` is published —
-neither draft nor prerelease; its asset set equals exactly the 14 localized ZIP
-names plus `WHATS-NEW.md`; `version.txt` reads `0.1.0`;
-`.release-please-manifest.json` parses to `{".": "0.1.0"}` compared as JSON,
-not as text; and
+`gh`: `refs/tags/v0.1.0` exists on `origin` and points at a commit reachable
+from `refs/heads/main`; release `v0.1.0` is published — neither draft nor
+prerelease; its asset set equals exactly the 14 localized ZIP names plus
+`WHATS-NEW.md`; `version.txt` on `main` reads `0.1.0`;
+`.release-please-manifest.json` on `main` parses to `{".": "0.1.0"}` compared
+as JSON, not as text;
 `https://github.com/Heyian/atelier/releases/latest/download/atelier-en.zip`
-resolves with HTTP 200.
+resolves with HTTP 200; and the `release-please.yml` run triggered by the first
+promotion merge opened no release pull request — the tag preceding the
+promotion is what makes this hold.
 
 **AC64** — `docs/WHATS-NEW.md` satisfies AC53 for version `0.1.0`.
 
@@ -331,9 +450,32 @@ AC2 by AC50 is present in
 contains no `**Français**` label, its bilingual content having moved to
 `docs/WHATS-NEW.md`.
 
+**AC68** — In `.github/workflows/release-please.yml`, a back-merge job declares
+`needs` on the release-please job, is gated on
+`needs.<release-job>.outputs.release_created == 'true'`, and opens a pull
+request with base `dev` and head `main` authenticating with
+`RELEASE_PLEASE_TOKEN`. Given such a pull request is already open, When the job
+runs again, Then it exits zero without creating a second one.
+
+**AC69** — Against `Heyian/atelier` with an authenticated `gh`: the
+repository's default branch is `dev`; no active ruleset targets
+`~DEFAULT_BRANCH`; the branches `refs/heads/dev` and `refs/heads/main` are each
+covered by an active ruleset carrying the `deletion`, `non_fast_forward` and
+`required_signatures` rules; and `refs/heads/main` is additionally covered by a
+`required_status_checks` rule naming both `checks-linux` and `checks-windows`.
+
+**AC70** — `docs/adr/0010-dev-default-main-release-branch.md` exists and
+carries Context, Decision, and Consequences sections, and `docs/adr/0009-…`
+cross-references it for the `target-branch` pin. `CLAUDE.md` states that `dev`
+is the default branch, that `main` carries releases only, that the promotion PR
+`dev` → `main` is merged as a merge commit and never squashed, and that the
+back-merge PR `main` → `dev` is merged after each release.
+
 ## Deferred Items
 
 - #12 — Enforce conventional commit messages in CI
+- #13 — Guard against squash-merging the dev → main promotion PR
+- #14 — Replace the release-please PAT with a GitHub App token
 
 ## Glossary Updates & ADRs
 
@@ -341,7 +483,7 @@ contains no `**Français**` label, its bilingual content having moved to
 is the product's executive-facing glossary, not a developer domain glossary,
 and nothing in this design changes an executive-facing term.
 
-**ADR** — one, passing all three gate criteria:
+**ADR** — two, each passing all three gate criteria:
 
 `docs/adr/0009-release-automation-and-changelog-split.md`
 
@@ -352,10 +494,28 @@ and nothing in this design changes an executive-facing term.
   and different authors; an `x-release-please-version` comment inside skill
   frontmatter that is then stripped at packaging.
 - *Real trade-off* — annotate-and-strip versus single-source injection;
-  split changelog versus one hand-edited file; same-workflow job versus a PAT.
+  split changelog versus one hand-edited file; same-workflow publish job
+  versus a tag-triggered second workflow.
+
+`docs/adr/0010-dev-default-main-release-branch.md`
+
+- *Hard to reverse* — the default branch is the base of every clone's HEAD,
+  every PR's default base, the ruleset's `~DEFAULT_BRANCH` target and
+  release-please's unpinned `target-branch`.
+- *Surprising without context* — `main` sits permanently behind `dev`, which
+  reads as neglect rather than as design; and the promotion PR's merge method
+  is load-bearing for reasons nothing in the diff explains.
+- *Real trade-off* — a release branch versus trunk-based releases straight off
+  the default branch; and, given the release branch, an automated back-merge
+  versus resolving seventeen conflicts at each promotion.
+
+The branch model gets its own ADR rather than a section inside ADR-0009: it
+outlives release-please, and a reader asking why `main` is behind `dev` should
+not have to read a changelog-split ADR to find the answer.
 
 **Conflicts with existing ADRs** — none. ADR-0001–0008 cover skill taxonomy,
-memory regimes, and document paths; none touches releases or versioning.
+memory regimes, and document paths; none touches releases, versioning, or
+branches.
 
 ## Config & Infrastructure Impact
 
@@ -364,18 +524,20 @@ memory regimes, and document paths; none touches releases or versioning.
 | `release-please-config.json` | **Create.** Per the Configuration table above |
 | `.release-please-manifest.json` | **Create.** `{".": "0.1.0"}` |
 | `version.txt` | **Create.** `0.1.0` |
-| `.github/workflows/release-please.yml` | **Create.** Two jobs per AC49, AC61 |
+| `.github/workflows/release-please.yml` | **Create.** Three jobs per AC49, AC61, AC68 |
 | `.github/workflows/release.yml` | **Delete.** Replaced |
-| `.github/workflows/ci.yml` | No change — coherence rides inside the existing `build.sh --check` step |
+| `.github/workflows/ci.yml` | Retrigger per AC49: `pull_request` unfiltered, `push` narrowed to `dev` and `main`, plus a `concurrency` group. Coherence itself rides inside the existing `build.sh --check` step |
 | `scripts/build.sh` | Remove `--release-version` and `run_release_version_check`; add annotation-strip to `stage_skill`; add `check_version_coherence` to `run_checks` |
 | `scripts/build.ps1` | Windows parity for both changes |
 | `scripts/tests/build_test.sh` | Replace 4 gate cases with the coherence mutation matrix; fixture gains `version.txt`, `release-please-config.json`, `.release-please-manifest.json`, `docs/WHATS-NEW.md` |
 | `skills/*/*/SKILL.md` (14) | Annotate the version line |
 | `README.md` | Annotate both version lines (35, 88) |
 | `.gitignore` | No change — already contains `dist/`, which the publish job builds into |
+| GitHub repository settings | **Change.** Default branch `main` → `dev` (AC69) |
+| GitHub ruleset `main` (id 19417109) | **Change.** Its condition is `~DEFAULT_BRANCH` today, so the flip would carry `deletion` / `non_fast_forward` / `required_signatures` onto `dev` and leave `main` bare. Retarget to name `refs/heads/main` and `refs/heads/dev` explicitly, and add `required_status_checks` (`checks-linux`, `checks-windows`) on `main` (AC69) |
+| Repository secret `RELEASE_PLEASE_TOKEN` | **Create.** Fine-grained PAT, `contents: write` + `pull-requests: write`. Without it the release PR receives no CI and AC53 cannot fire |
 
 No new environment variables, containers, IaC, schemas, or API collections.
-No new repository secret — the same-workflow design exists partly to avoid one.
 
 ## Documentation Updates
 
@@ -385,8 +547,9 @@ No new repository secret — the same-workflow design exists partly to avoid one
 | `CHANGELOG.md` | Hand-written bilingual content moves out; becomes release-please-generated |
 | `docs/INSTALL.en.md` | Line ~100: point to `docs/WHATS-NEW.md` (AC65) |
 | `docs/INSTALL.fr.md` | Line ~107: point to `docs/WHATS-NEW.md` (AC65) |
-| `CLAUDE.md` | Add the Conventional Commits convention with its scope vocabulary, and a one-line pointer to this spec. Index-sized entries only |
-| `docs/adr/0009-…` | **Create.** Per the ADR section |
+| `CLAUDE.md` | Add the Conventional Commits convention with its scope vocabulary, the branch model per AC70, and a one-line pointer to this spec. Index-sized entries only |
+| `docs/adr/0009-…` | **Create.** Per the ADR section; cross-reference ADR-0010 for the `target-branch` pin |
+| `docs/adr/0010-dev-default-main-release-branch.md` | **Create.** Per the ADR section |
 | `docs/superpowers/specs/2026-07-21-atelier-design.md` | Add a note that AC2's version requirement is refined by AC50 (annotation mandatory) |
 
 ## Implementation Plan Guidance
@@ -427,12 +590,22 @@ no developer glossary file, and this design adds no terms.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC67) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC70) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus the three test suites, and `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
-**Implementation ordering note.** The commit that introduces
+**Implementation ordering note.** Bootstrap steps 1 and 2 — pushing `dev`,
+flipping the default branch, retargeting the ruleset, provisioning
+`RELEASE_PLEASE_TOKEN` — come *before* the implementation branch is cut, so
+that this spec lands through the workflow it defines. They are repository
+configuration, not code, and produce no commit; verify them against AC69 rather
+than against a diff.
+
+Within the implementation branch, the commit that introduces
 `check_version_coherence` must land together with `version.txt`,
 `docs/WHATS-NEW.md`, `release-please-config.json`, and the sixteen annotations
-— the check fails against a tree missing any of them. The bootstrap (tag and
-release) happens on `main` after the branch merges, not during implementation.
+— the check fails against a tree missing any of them.
+
+Bootstrap steps 4 and 5 — the promotion PR, the tag, and the release — happen
+after the implementation branch merges into `dev` and v1 is ready, not during
+implementation.
