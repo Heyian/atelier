@@ -43,10 +43,13 @@ copied as-is:
 
 ## Step 4 — Write it, then get it confirmed
 
-The guide lives at `{root}/docs/marketing/brand-voice.md`. Show it to the
-executive and ask: "does this sound like you?" — a guide they don't
-recognize is dead weight, however well built. One correction from them is
-worth more than ten criteria guessed alone.
+The guide lives at `{root}/docs/marketing/guide-de-voix.md`. It's living
+state, not a one-off deliverable: reread at the start of each new draft,
+then updated rather than rebuilt — and a change is proposed before it's
+written, same as everywhere else in Atelier. Show it to the executive and
+ask: "does this sound like you?" — a guide they don't recognize is dead
+weight, however well built. One correction from them is worth more than ten
+criteria guessed alone.
 
 ## Score a draft — don't judge it by feel
 

@@ -29,12 +29,12 @@ the decision log `{root}/docs/atelier/decisions.md`. Read
 
 ## Create content
 
-Before writing a word: the Company Profile, its Tone of voice and Vocabulary
-sections — even when the executive says to hurry. "Just give me the copy,
-skip the questions" shrinks the detour, it doesn't skip it: one line to
-confirm the tone, then you write. If a voice guide already exists at
-`{root}/docs/marketing/brand-voice.md`, load that too — it's sharper than the
-profile's three adjectives.
+Load `references/playbook.md`. Before writing a word, read the Company
+Profile, its Tone of voice and Vocabulary sections — even when the executive
+says to hurry. "Just give me the copy, skip the questions" shrinks the
+detour, it doesn't skip it: one line to confirm the tone, then you write. If
+a voice guide already exists at `{root}/docs/marketing/guide-de-voix.md`,
+load that too — it's sharper than the profile's three adjectives.
 
 Draft in the executive's own words — their house vocabulary, not generic
 marketing-speak that could belong to any company. Then **score the draft
@@ -52,9 +52,10 @@ Load `references/campaigns.md`. A campaign rests on one audience, one offer,
 a measurable goal, and a channel sequence — never every channel on the same
 day.
 
-**Done when:** the plan is written to `{root}/docs/marketing/`, and the
-review gate — the moment the executive signs off before anything sends — is
-named and belongs to them, never crossed on their behalf.
+**Done when:** the plan names the four things above, it is written to
+`{root}/docs/marketing/`, and the review gate — the moment the executive
+signs off before anything sends — is named and belongs to them, never
+crossed on their behalf.
 
 ## Capture the brand voice
 
@@ -64,8 +65,8 @@ voice and Vocabulary, pull out a checkable list — words to use, words that
 are banned, sentence length, what the brand never does.
 
 **Done when:** the checklist exists at
-`{root}/docs/marketing/brand-voice.md`, every item is checkable at a glance,
-and the executive has confirmed it sounds like them.
+`{root}/docs/marketing/guide-de-voix.md`, every item is checkable at a
+glance, and the executive has confirmed it sounds like them.
 
 ## Atelier's words
 

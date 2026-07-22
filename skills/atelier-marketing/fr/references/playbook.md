@@ -43,8 +43,8 @@ superlatif par la preuve qui le justifierait, ou retire-le.
 
 Relis la phrase et demande : est-ce qu'un concurrent pourrait dire exactement
 la même chose ? Si oui, elle ne dit rien de spécifique à cette entreprise —
-réécris-la jusqu'à ce qu'elle ne survive plus à ce test. C'est le réflexe le
-plus rapide pour repérer un texte générique avant de le livrer.
+réécris-la jusqu'à ce qu'un concurrent ne puisse plus la reprendre. C'est le
+réflexe le plus rapide pour repérer un texte générique avant de le livrer.
 
 ## Cadrer par le résultat, pas par le mécanisme
 

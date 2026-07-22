@@ -38,7 +38,7 @@ Exemple de calendrier à adapter, jamais à recopier tel quel :
 |---|---|---|
 | J-14 | Infolettre | Annonce complète, offre et dates |
 | J-7 | Réseaux sociaux | Rappel court, même accroche |
-| J-0 | Infolettre | Lancement, appel à l'action unique |
+| Jour J | Infolettre | Lancement, appel à l'action unique |
 | J+3 | Réseaux sociaux | Preuve sociale ou question d'audience |
 | J+7 | Infolettre | Dernier rappel avant la date limite |
 

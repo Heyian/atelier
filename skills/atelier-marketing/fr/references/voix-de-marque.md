@@ -45,15 +45,18 @@ recopier tel quel :
 
 ## Étape 4 — Écrire et faire confirmer
 
-Le guide vit à `{racine}/docs/marketing/voix-de-marque.md`. Montre-le à la
-personne dirigeante et demande : « est-ce que ça sonne comme toi ? » — un
+Le guide vit à `{racine}/docs/marketing/guide-de-voix.md`. C'est un état
+vivant, pas un livrable ponctuel : relu au début de chaque nouvelle
+rédaction, puis mis à jour plutôt que reconstruit — et une modification se
+propose avant de s'écrire, comme partout ailleurs dans Atelier. Montre-le à
+la personne dirigeante et demande : « est-ce que ça sonne comme toi ? » — un
 guide qu'elle ne reconnaît pas ne sert à rien, même s'il est bien construit.
 Une correction qu'elle apporte vaut plus que dix critères devinés seul.
 
 ## Noter un texte plutôt que le juger à l'oreille
 
 C'est l'idée qui rend ce guide utile : on ne relit jamais un brouillon en se
-demandant si « ça sonne bien ». On le relit ligne par ligne contre la grille.
+demandant si « ça sonne bien ». On l'évalue ligne par ligne selon la grille.
 
 1. Prends chaque critère de la grille, un à la fois.
 2. Marque-le réussi ou échoué sur ce brouillon précis — jamais une impression
@@ -64,5 +67,5 @@ demandant si « ça sonne bien ». On le relit ligne par ligne contre la grille.
    note fait partie de la livraison, pas une étape optionnelle qu'on saute
    sous pression de temps.
 
-Sans guide encore capturé, note contre le Ton de voix et le Vocabulaire du
-profil, et propose de bâtir le guide complet à la prochaine occasion.
+Sans guide encore capturé, évalue-le selon le Ton de voix et le Vocabulaire
+du profil, et propose de bâtir le guide complet à la prochaine occasion.

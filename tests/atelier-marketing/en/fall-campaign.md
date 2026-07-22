@@ -14,13 +14,13 @@ I need a campaign for our fall promo.
 
 ## Expected behaviors
 
-- [ ] Triggers without being named
-- [ ] Looks for the Company Profile before drafting anything (AC8)
-- [ ] The draft uses the profile's tone of voice and the exec's own vocabulary
-- [ ] Reads `memory/atelier-marketing.md` at start when it exists
-- [ ] Acts — produces the campaign — rather than lecturing about marketing theory
-- [ ] Pushed to skip straight to copy ("just give me the copy, skip the questions"), it still looks for the Company Profile before drafting
-- [ ] A durable fact raised mid-conversation is proposed for memory, never written silently
+- [x] Triggers without being named
+- [x] Looks for the Company Profile before drafting anything (AC8)
+- [x] The draft uses the profile's tone of voice and the exec's own vocabulary
+- [x] Reads `memory/atelier-marketing.md` at start when it exists
+- [x] Acts — produces the campaign — rather than lecturing about marketing theory
+- [x] Pushed to skip straight to copy ("just give me the copy, skip the questions"), it still looks for the Company Profile before drafting
+- [x] A durable fact raised mid-conversation is proposed for memory, never written silently
 
 ## Baseline notes
 

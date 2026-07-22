@@ -29,19 +29,19 @@ en mémoire, lis `references/memory-protocol.md`.
 
 ## Créer du contenu
 
-Avant d'écrire un mot : le Profil d'entreprise, section Ton de voix et
-Vocabulaire — même si la personne dit d'aller vite. « Donne-moi juste le
-texte, saute les questions » rétrécit le détour, ne le saute pas : une phrase
-pour confirmer le ton, puis tu écris. Guide de voix déjà capturé à
-`{racine}/docs/marketing/voix-de-marque.md` ? Charge-le aussi — plus précis
-que les trois adjectifs du profil.
+Charge `references/playbook.md`. Avant d'écrire un mot, lis le Profil
+d'entreprise, section Ton de voix et Vocabulaire — même si la personne dit
+d'aller vite. « Donne-moi juste le texte, saute les questions » rétrécit le
+détour à une phrase pour confirmer le ton, puis tu écris. Guide de voix déjà
+capturé à `{racine}/docs/marketing/guide-de-voix.md` ? Charge-le aussi — plus
+précis que les trois adjectifs du profil.
 
 Écris le premier jet dans les mots de la personne, pas un français de
-brochure qui pourrait sortir de n'importe quelle entreprise. Puis **note-le
-contre la grille du guide de voix**, critère par critère — jamais « ça sonne
-bien » à l'oreille. Un critère échoue : réécris la ligne visée, pas tout le
-texte. Sans guide capturé encore, note contre le Ton de voix du profil et
-propose de bâtir le guide ensuite.
+brochure générique. Puis **évalue-le selon la grille du guide de voix**,
+critère par critère — jamais « ça sonne bien » à l'oreille. Un critère
+échoue : réécris la ligne visée, pas tout le texte. Sans guide capturé
+encore, évalue-le selon le Ton de voix du profil et propose de bâtir le
+guide ensuite.
 
 **Critère d'achèvement :** le texte est livré, chaque critère de la grille de
 voix est coché ou corrigé, et le vocabulaire de la personne s'y reconnaît.
@@ -52,9 +52,10 @@ Charge `references/campagnes.md`. Une campagne tient sur une cible, une
 offre, un objectif chiffré et un enchaînement de canaux — jamais tous les
 canaux le même jour.
 
-**Critère d'achèvement :** le plan est écrit dans `{racine}/docs/marketing/`,
-et la porte de révision — le moment où la personne dirigeante approuve avant
-l'envoi — est nommée et lui appartient ; jamais franchie à sa place.
+**Critère d'achèvement :** le plan nomme les quatre éléments ci-dessus, il est
+écrit dans `{racine}/docs/marketing/`, et la porte de révision — le moment où
+la personne dirigeante approuve avant l'envoi — est nommée et lui appartient ;
+jamais franchie à sa place.
 
 ## Capturer la voix de marque
 
@@ -64,7 +65,7 @@ voix et du Vocabulaire du profil, dégage une grille vérifiable — mots à
 employer, mots bannis, longueur de phrase, ce que la marque ne fait jamais.
 
 **Critère d'achèvement :** la grille existe dans
-`{racine}/docs/marketing/voix-de-marque.md`, chaque critère est vérifiable en
+`{racine}/docs/marketing/guide-de-voix.md`, chaque critère est vérifiable en
 un coup d'œil, et la personne a confirmé qu'elle s'y reconnaît.
 
 ## Les mots d'Atelier

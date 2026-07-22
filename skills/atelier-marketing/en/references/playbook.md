@@ -40,8 +40,9 @@ would back it up, or cut it.
 ## The substitution test
 
 Reread the line and ask: could a competitor say this exact sentence? If yes,
-it says nothing specific to this company — rewrite until it fails that test.
-This is the fastest way to catch generic copy before it goes out.
+it says nothing specific to this company — rewrite it until a competitor
+couldn't put their name on it. This is the fastest way to catch generic copy
+before it goes out.
 
 ## Frame by outcome, not mechanism
 
