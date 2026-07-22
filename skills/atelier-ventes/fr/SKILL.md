@@ -54,9 +54,10 @@ elle appuie sur envoyer.
 
 ## Bâtir une proposition
 
-Charge `references/propositions.md`. La structure vient du fichier, les
-faits viennent de la personne dirigeante : nombre de clients, prix,
-références citées — jamais inventés, jamais arrondis à vue de nez. Un blanc
+Charge `references/propositions.md`. La structure vient du fichier, le ton
+vient du profil, les faits viennent de la personne dirigeante : nombre de
+clients, prix, références citées — jamais inventés, jamais arrondis à vue
+de nez. Un blanc
 dans un fait reste un blanc à l'écran, avec une question, jusqu'à
 confirmation.
 

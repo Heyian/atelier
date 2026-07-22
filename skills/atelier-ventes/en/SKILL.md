@@ -54,9 +54,9 @@ hit send.
 
 ## Build a proposal
 
-Load `references/proposals.md`. Structure comes from the file; facts come
-from the executive — customer counts, pricing, cited references — never
-invented, never rounded from a guess. A missing fact stays a visible gap
+Load `references/proposals.md`. Structure comes from the file, voice from
+the profile; facts come from the executive — customer counts, pricing,
+cited references — never invented, never rounded from a guess. A missing fact stays a visible gap
 with a question next to it, until confirmed.
 
 **Done when:** the proposal contains only facts the executive has confirmed;

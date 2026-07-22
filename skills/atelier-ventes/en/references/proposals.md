@@ -4,6 +4,12 @@ A proposal that could go to any customer convinces none of them. It has to
 read like an answer to this specific deal, not a template filled in a
 hurry.
 
+A proposal leaves the building with the executive's name on it: write it in
+the Company Profile's Tone of voice, using the executive's own Vocabulary —
+their words for their offer, their market, their services. Before delivering
+it, reread it term by term against the profile's Vocabulary. Where a generic
+word sits in place of a house term, the house term wins.
+
 ## Anatomy of a proposal
 
 Five blocks, in this order — each answers a question the customer is
