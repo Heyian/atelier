@@ -350,7 +350,7 @@ the workflow it describes.
 
 1. Push `atelier-v1` to `origin` as `dev`; set `dev` as the repository's
    default branch; retarget the ruleset per AC69. `main` stays where it is,
-   thirty-seven commits behind, until the first promotion.
+   the whole of v1's history behind, until the first promotion.
 2. Register the `atelier-release-please` GitHub App under the `Heyian`
    account with `contents: write` and `pull-requests: write`; install it on
    `Heyian/atelier` only; store its id and private key as the
@@ -366,17 +366,16 @@ the workflow it describes.
 
 **The tag must precede the first promotion.** release-please computes from the
 last release tag. With no tag anywhere, the moment `release-please.yml` first
-lands on `main` it would read the thirty-seven v1 commits as unreleased and
-open a premature `v0.2.0` release PR. Tagging `v0.1.0` on `dev`'s tip first
+lands on `main` it would read every v1 commit as unreleased and open a
+premature `v0.2.0` release PR. Tagging `v0.1.0` on `dev`'s tip first
 makes that commit an ancestor of `main` once the promotion merges, so
 release-please sees `v0.1.0` reachable, the manifest at `0.1.0`, and nothing
 releasable since — and correctly opens nothing. The next feature merged into
 `dev` and promoted produces `v0.2.0` through the normal flow.
 
 The tag also fixes every 404 in the install guides today rather than at the
-next release. The thirty-seven commits predating it are pre-history: they
-generate no changelog entries, which is correct, because the v0.1.0 entry is
-hand-written.
+next release. Every commit predating it is pre-history: they generate no
+changelog entries, which is correct, because the v0.1.0 entry is hand-written.
 
 ### Failure modes
 
