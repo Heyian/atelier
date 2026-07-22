@@ -10,7 +10,7 @@ and #13 filed.
 **Amended:** 2026-07-22 — release-please authenticates as a GitHub App rather
 than with a PAT, folding in what was #14 (now closed). Requiring signed commits
 is dropped as a consequence; see *Why the branches do not require signed
-commits*. AC49, AC68, AC69 and AC69a rewritten, AC71 added.
+commits*. AC49, AC68, AC69 and AC69a rewritten; AC69b and AC71 added.
 **Supersedes:** the tag-triggered `.github/workflows/release.yml` and the
 `build.sh --release-version` gate added on 2026-07-22 (uncommitted at the time
 of writing)
@@ -184,6 +184,10 @@ leaked key reaches exactly one repo. The App was scoped to this repository
 rather than made account-wide deliberately: the narrower blast radius is worth
 registering a second App if `traction-app` is ever migrated.
 
+The one-hour lifetime constrains nothing here. Only jobs 1 and 3 hold an App
+token, and both are short — open or update a PR. Job 2, the only long one,
+builds fourteen ZIPs under `GITHUB_TOKEN` and never touches the App.
+
 The remaining cost is the private key, which must be stored and eventually
 rotated. That is a smaller and better-signposted liability than a silently
 expiring PAT.
@@ -211,6 +215,11 @@ machine-authored commit in the history:
 are signed; release-please's are not, and its documentation says nothing about
 signing.
 
+This is a claim about a **version**, not a law of nature — which is why AC49
+pins `googleapis/release-please-action` to a major version. Should a later
+release-please gain commit signing, the argument below stops applying and the
+decision is worth reopening. Until then it holds for the version we pin.
+
 GitHub's rule for a branch requiring signatures is:
 
 > you cannot squash and merge a pull request into the branch on GitHub unless
@@ -235,11 +244,15 @@ checks. Four rulesets to buy "every commit is signed, unless the release bot
 wrote it".
 
 The rule is dropped instead. A bypassed rule is worse than an absent one: it
-still reads as a guarantee. Nothing else is given up — `deletion`,
-`non_fast_forward` and the new `required_status_checks` are all indifferent to
-who authored a commit — and commits written by hand stay signed by local git
-config either way. What goes is the enforcement, on the one rule this repo's
-own automation cannot satisfy.
+still reads as a guarantee.
+
+Be precise about what this costs. The guarantee that *every* commit on these
+branches is signed is genuinely gone — not only for release-please, but for
+anyone who can push. In this repo that set is one person and one App. No other
+protection is touched: `deletion`, `non_fast_forward` and the new
+`required_status_checks` are all indifferent to who authored a commit, and
+commits written by hand stay signed by local git config either way. What goes
+is the enforcement, on the one rule this repo's own automation cannot satisfy.
 
 ### Why the publish job lives in the same workflow
 
@@ -247,8 +260,8 @@ A tag pushed by an action authenticating with `GITHUB_TOKEN` does not trigger
 other workflows. Keeping `release.yml` on its `v*` trigger would mean it
 silently never fires again.
 
-The App token would in principle reopen that door. The publish job stays in the same
-workflow anyway: jobs 2 and 3, each with `needs:` and
+The App token would in principle reopen that door. The publish job stays in
+the same workflow anyway: jobs 2 and 3, each with `needs:` and
 `if: release_created == 'true'`, avoid the cross-workflow hop entirely, keep
 the release and its assets in one run, and surface a failed upload next to the
 release that needs it. One workflow is simply easier to reason about than two
@@ -375,7 +388,8 @@ hand-written.
 | Bilingual entry forgotten | `--check` red on the release PR; required checks on `main` block the merge |
 | Upload job fails | Visible in the same run; re-runnable, `gh release upload --clobber` |
 | Back-merge PR left unmerged | Next promotion PR conflicts on the eighteen version-bearing files |
-| App uninstalled, key rotated or permissions narrowed | The token-minting step fails, so the whole run fails loudly and visibly — unlike an expired PAT, which fails as an absence |
+| App uninstalled or private key rotated | The token-minting step fails, so the run fails loudly at its first step — unlike an expired PAT, which fails as an absence |
+| App permissions narrowed | The token mints successfully and the run fails later, at the first API call needing the missing scope. Visible, but further from the cause |
 | Promotion PR squash-merged | Release PR never appears. Caught for the first promotion by AC63a; **undetected** thereafter — deferred to #13 |
 | Non-conventional commit | **Undetected** — deferred to #12 |
 
@@ -402,7 +416,8 @@ today.
 
 Numbering continues from the existing spec (AC1–AC48) so that `AC<n>` in a code
 comment stays unambiguous. Criteria added after the cross-model critique carry
-a letter suffix (`AC63a`, `AC63b`, `AC69a`) rather than a new number, so they
+a letter suffix (`AC63a`, `AC63b`, `AC69a`, `AC69b`) rather than a new
+number, so they
 stay adjacent to the criterion they sharpen; they are ordinary criteria in
 every other respect.
 
@@ -413,11 +428,15 @@ under test — so a non-zero exit proves the mutation, not unrelated breakage.
 combined output. "The 14 localized names" means the fr and en columns of
 `skills/names.tsv` joined with their locale.
 
-**AC49** — `.github/workflows/release-please.yml` triggers on `push` to `main`,
-invokes `googleapis/release-please-action` with **no** `release-type` input,
-with `target-branch: main`, and with `token` set to the App token minted per
-AC71 rather than to `GITHUB_TOKEN` or to any PAT secret, and declares
-`contents: write` and `pull-requests: write` permissions.
+**AC49** — `.github/workflows/release-please.yml` triggers on `push` to `main`
+and invokes `googleapis/release-please-action` pinned to an explicit major
+version (`@v4` or later — never `@main` or an unpinned reference, since the
+unsigned-commit premise of AC69 is version-dependent), with **no**
+`release-type` input, with `target-branch: main`, and with `token` set to the
+App token minted per AC71 rather than to `GITHUB_TOKEN` or to any other secret.
+`contents: write` and `pull-requests: write` are in effect **for the
+release-please job** — declared either at workflow level or on that job, not
+only on some other job.
 `.github/workflows/ci.yml` triggers on `pull_request` with no `branches`
 filter — so it runs on PRs targeting `dev` and `main` alike, including the
 release PR — and on `push` to `dev` and `main` only; it declares a
@@ -456,8 +475,8 @@ no malformed case here; its structure is AC53's subject.
 **AC55** — Given every AC50–AC54 and AC59 invariant holds, When
 `bash scripts/build.sh --check` runs, Then it exits zero and its output
 contains the line `STATUS: PASS (mechanical checks)`. AC49, AC61, AC62, AC63,
-AC63a, AC63b and AC68–AC71 are workflow and repository criteria, not fixture
-invariants, and are outside AC55's precondition.
+AC63a, AC63b and AC68–AC71 (AC69b included) are workflow and repository
+criteria, not fixture invariants, and are outside AC55's precondition.
 
 **AC56** — Given every existing build dependency (`bash`, `awk`, `grep`,
 `find`, `zip`, `unzip`) remains on `PATH` and only `command -v jq` fails, When
@@ -551,18 +570,23 @@ contains no `**Français**` label, its bilingual content having moved to
 `needs` on the release-please job, is gated on
 `needs.<release-job>.outputs.release_created == 'true'`, and opens a pull
 request with base `dev` and head `main` authenticating with an App token minted
-per AC71. Given a `main` → `dev` pull request is already open,
-When **that same job is re-run** — so that it executes rather than being
+per AC71. Given a `main` → `dev` pull request is already open, When the
+back-merge job of the workflow run that opened it is re-run on its own — via
+`gh run rerun <run-id> --job <job-id>`, so that it executes rather than being
 skipped by its own gate — Then it exits zero and the count of open `main` →
-`dev` pull requests is still one. A run in which the job is skipped does not
-satisfy this criterion.
+`dev` pull requests is still one. A whole-workflow re-run, or any run in which
+the job is skipped, does not satisfy this criterion.
 
 **AC69** — Against `Heyian/atelier` with an authenticated `gh`: the
 repository's default branch is `dev`; no active ruleset targets
 `~DEFAULT_BRANCH`; the branches `refs/heads/dev` and `refs/heads/main` are each
 covered by an active ruleset carrying the `deletion` and `non_fast_forward`
 rules, whose `bypass_actors` is empty; **no** active ruleset carries a
-`required_signatures` rule against either branch; and `refs/heads/main` is
+`required_signatures` rule against either branch **and neither branch carries
+classic branch protection with `required_signatures` enabled** — classic
+protection layers independently of rulesets, so
+`gh api repos/Heyian/atelier/branches/{dev,main}/protection` must either 404 or
+report `required_signatures.enabled` false; and `refs/heads/main` is
 additionally covered by a `required_status_checks` rule naming both
 `checks-linux` and `checks-windows`, with
 `strict_required_status_checks_policy` **false** — strict mode would demand the
@@ -571,12 +595,19 @@ a branch whose only inbound PRs are promotions and releases.
 
 **AC69a** — Given the first release PR release-please opens after bootstrap,
 When it is inspected with `gh pr checks`, Then both `checks-linux` and
-`checks-windows` appear with a completed conclusion, and the pull request's
-author is the `atelier-release-please` App's bot account rather than a human.
-This is the only criterion that proves the App is installed, granted sufficient
-permissions, and minting a credential of the right kind — facts no inspection
-of the workflow file can establish — and therefore the only one that proves
-AC53's forcing function can fire at all.
+`checks-windows` report a conclusion of `success` or `failure` — `skipped`,
+`cancelled`, `neutral` and a still-pending check each fail this criterion,
+since only a check that reached a verdict proves it ran — and the pull
+request's author is the `atelier-release-please` App's bot account rather than
+a human. Together with AC69b this is what proves AC53's forcing function can
+fire at all; no inspection of the workflow file can establish it.
+
+**AC69b** — `gh api /repos/Heyian/atelier/installation` resolves to an
+installation of the `atelier-release-please` App whose `repository_selection`
+is `selected`, and whose permissions are exactly `contents: write` and
+`pull_requests: write` plus the `metadata: read` GitHub grants implicitly. An
+App installed on all of the account's repositories, or holding permissions
+beyond these, fails.
 
 **AC70** — `docs/adr/0010-dev-default-main-release-branch.md` exists and
 carries Context, Decision, and Consequences sections, and
@@ -588,12 +619,18 @@ is merged as a merge commit and never squashed, and that the back-merge PR
 `main` → `dev` is merged after each release.
 
 **AC71** — In `.github/workflows/release-please.yml`, both the release-please
-job and the back-merge job mint a token with `actions/create-github-app-token`,
-passing `app-id` from the `RELEASE_PLEASE_APP_ID` secret and `private-key` from
-the `RELEASE_PLEASE_APP_PRIVATE_KEY` secret, and consume that step's `token`
-output. The publish job of AC61 does **not** mint one and authenticates with
-`GITHUB_TOKEN`. No job references a PAT secret, and the string
-`RELEASE_PLEASE_TOKEN` appears nowhere in `.github/`.
+job and the back-merge job mint a token with
+`actions/create-github-app-token@v2`, passing `app-id` from the
+`RELEASE_PLEASE_APP_ID` secret and `private-key` from the
+`RELEASE_PLEASE_APP_PRIVATE_KEY` secret, passing **neither** an `owner` nor a
+`repositories` input — so the token stays scoped to this repository alone — and
+consuming that step's `token` output. The publish job of AC61 mints no token,
+authenticates with `GITHUB_TOKEN`, and has `contents: write` in effect, without
+which its asset uploads cannot succeed. Across all of `.github/`, the only
+secrets referenced are `RELEASE_PLEASE_APP_ID`, `RELEASE_PLEASE_APP_PRIVATE_KEY`
+and `GITHUB_TOKEN` — enumerated by matching `secrets\.[A-Z_]+`, so that a PAT
+reintroduced under any name fails this criterion rather than only one spelled
+`RELEASE_PLEASE_TOKEN`.
 
 ## Deferred Items
 
@@ -723,7 +760,7 @@ no developer glossary file, and this design adds no terms.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC71, including AC63a, AC63b and AC69a) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC49–AC71, including AC63a, AC63b, AC69a and AC69b) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus the three test suites, and `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
