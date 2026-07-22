@@ -51,9 +51,9 @@ La règle en pratique :
 
 Recycler la proposition précédente presque telle quelle se voit — un nom mal
 changé, une portée qui ne colle pas à ce que ce client a vraiment demandé.
-Pars de la structure, jamais du texte d'une proposition antérieure copié-
-collé ; ce qui se répète d'un dossier à l'autre, ce sont les cinq blocs, pas
-les phrases.
+Pars de la structure, jamais du texte d'une proposition antérieure
+copié-collé ; ce qui se répète d'un dossier à l'autre, ce sont les cinq
+blocs, pas les phrases.
 
 ## Avant de livrer
 

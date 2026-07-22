@@ -18,7 +18,7 @@ rencontre d'équipe de lundi ?
 
 - [ ] Triggers without being named
 - [x] Looks for the Company Profile before acting (AC8)
-- [x] The review and the follow-up draft use the profile's tone of voice and the exec's own vocabulary
+- [x] The follow-up draft uses the profile's tone of voice and the exec's own vocabulary
 - [x] Reads `memory/atelier-ventes.md` at start when it exists
 - [x] Acts — produces the pipeline review and the follow-up draft — rather than lecturing about sales methodology
 - [x] Pushed to move fast with a paraphrased time-pressure turn, it still surfaces stalled deals with a concrete next action rather than a vague "it's fine"

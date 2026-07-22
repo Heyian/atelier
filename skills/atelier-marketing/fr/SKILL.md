@@ -52,10 +52,10 @@ Charge `references/campagnes.md`. Une campagne tient sur une cible, une
 offre, un objectif chiffré et un enchaînement de canaux — jamais tous les
 canaux le même jour.
 
-**Critère d'achèvement :** le plan nomme les quatre éléments ci-dessus, il est
-écrit dans `{racine}/docs/marketing/`, et la porte de révision — le moment où
-la personne dirigeante approuve avant l'envoi — est nommée et lui appartient ;
-jamais franchie à sa place.
+**Critère d'achèvement :** le plan nomme les quatre éléments ci-dessus ; s'il
+est gardé, il est écrit dans `{racine}/docs/marketing/` ; et la porte de
+révision — le moment où la personne dirigeante approuve avant l'envoi — est
+nommée et lui appartient, jamais franchie à sa place.
 
 ## Capturer la voix de marque
 

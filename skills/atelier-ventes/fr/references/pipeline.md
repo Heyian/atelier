@@ -33,7 +33,7 @@ Trois questions pour chaque dossier stagnant, dans l'ordre :
    depuis des semaines sans qu'on ait relancé, ce n'est pas un dossier
    bloqué — c'est un dossier qu'on a laissé tomber.
 3. **Quelle est la prochaine action, avec une date ?** Un dossier sans
-   prochaine action datée n'est pas géré, il est stationné. Chaque dossier
+   prochaine action datée n'est pas géré, il est en veilleuse. Chaque dossier
    qui reste dans le pipeline en sort avec une action et une date, ou il en
    sort tout court.
 
@@ -45,11 +45,11 @@ questions que la personne dirigeante n'a pas eu le temps de poser :
 - **La concentration** — est-ce qu'un seul dossier pèse pour la moitié du
   chiffre visé ? Le perdre change tout ; ça se dit clairement, pas en
   filigrane.
-- **L'embouteillage d'étape** — trop de dossiers coincés à la même étape
+- **L'engorgement à une étape** — trop de dossiers coincés à la même étape
   signale souvent un problème de processus, pas cinq problèmes de dossier.
 - **Les dossiers sans prochaine action** — le signal le plus fiable qu'un
   dossier va mourir silencieusement.
-- **La confiance réelle des chiffres avancés** — un total de pipeline qui
+- **Ce que le total vaut vraiment** — un total de pipeline qui
   compte des dossiers dormants depuis deux mois au même titre que des
   dossiers chauds ne dit rien d'utile ; distingue ce qui est probable de ce
   qui est théorique.

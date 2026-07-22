@@ -52,10 +52,10 @@ Load `references/campaigns.md`. A campaign rests on one audience, one offer,
 a measurable goal, and a channel sequence — never every channel on the same
 day.
 
-**Done when:** the plan names the four things above, it is written to
-`{root}/docs/marketing/`, and the review gate — the moment the executive
-signs off before anything sends — is named and belongs to them, never
-crossed on their behalf.
+**Done when:** the plan names the four things above; if it's kept as a
+file, it is written to `{root}/docs/marketing/`; and the review gate — the
+moment the executive signs off before anything sends — is named and
+belongs to them, never crossed on their behalf.
 
 ## Capture the brand voice
 

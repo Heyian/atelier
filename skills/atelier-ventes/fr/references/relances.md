@@ -24,8 +24,8 @@ cette fois plutôt que la dernière. Apporte toujours un fait, une question
 précise ou une information qui a changé depuis le dernier échange : la
 réponse à ce qui restait en suspens, un exemple client comparable (avec
 l'accord de le nommer), une échéance réelle qui approche. Sans rien de neuf à
-dire, il est souvent plus utile d'attendre qu'il y en ait un que d'envoyer un
-message vide.
+dire, il est souvent plus utile d'attendre d'en avoir quelque chose que
+d'envoyer un message vide.
 
 ## Le ton s'ajuste au silence, pas à l'humeur du moment
 
@@ -33,8 +33,9 @@ Une première relance reste chaleureuse et suppose la bonne foi — la personne
 est probablement occupée, pas désintéressée. Une relance tardive peut nommer
 le silence directement et offrir une sortie facile plutôt que d'insister :
 « Si ce n'est plus le bon moment, dis-le-moi et je referme le dossier de mon
-côté » obtient souvent une vraie réponse là où une quatrième relance polie
-n'obtient rien.
+côté » (exemple en tutoiement — ajuste le registre à celui retenu dans le
+Profil d'entreprise) obtient souvent une vraie réponse là où une quatrième
+relance polie n'obtient rien.
 
 ## La règle des faits — jamais d'invention pour appuyer un message
 

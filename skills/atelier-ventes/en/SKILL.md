@@ -23,10 +23,10 @@ folder: when naming a file to the executive, always write the real folder path,
 never the token as-is.
 
 Memory sources: `{root}/docs/atelier/memory/atelier-ventes.md` — the
-canonical French name, unchanged in this locale — (read it at the start; it
-is created on your first durable entry, never in advance) and the decision
-log `{root}/docs/atelier/decisions.md`. Read `references/memory-protocol.md`
-before proposing any memory write.
+canonical French name, unchanged in this locale — and the decision log
+`{root}/docs/atelier/decisions.md`. Read the memory file at the start; it is
+created on your first durable entry, never in advance. Read
+`references/memory-protocol.md` before proposing any memory write.
 
 ## Review the pipeline
 
@@ -41,13 +41,16 @@ keep it.
 
 ## Draft a follow-up
 
-Load `references/follow-ups.md`. The draft carries the Company Profile's
-tone and vocabulary, never generic sales copy, and brings something new to
-the deal — never a bare "just checking in." Never invent a number, a
-customer, or a reference the executive hasn't confirmed; ask instead.
+Load `references/follow-ups.md`. Before writing, read the Company Profile's
+Tone of voice and Vocabulary — even under pressure, the executive gets one
+confirming line first, never nothing. It brings something new to the deal,
+never a bare "just checking in," and never invents a number, a customer, or
+a reference the executive hasn't confirmed; ask instead. Then check it
+**term by term against the profile's Vocabulary**.
 
-**Done when:** the draft is delivered, and it's clear sending it is the
-executive's call — you write it, they hit send.
+**Done when:** the draft is delivered, the profile's Vocabulary shows up in
+it, and it's clear sending it is the executive's call — you write it, they
+hit send.
 
 ## Build a proposal
 
@@ -56,8 +59,9 @@ from the executive — customer counts, pricing, cited references — never
 invented, never rounded from a guess. A missing fact stays a visible gap
 with a question next to it, until confirmed.
 
-**Done when:** the proposal contains only facts the executive has confirmed,
-and it is written to `{root}/docs/ventes/`, named for the customer it's for.
+**Done when:** the proposal contains only facts the executive has confirmed;
+if the executive wants it kept as a file, it is written to
+`{root}/docs/ventes/`, named for the customer it's for.
 
 ## Clean up the CRM
 

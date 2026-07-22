@@ -62,6 +62,13 @@ This is the gap the skill exists to close.
 
 ## Verification notes
 
+Box 1 ("Triggers without being named") is ticked above, but the dispatch
+handed this agent the staged skill directly, so autonomous triggering was
+never actually controlled for — that tick is inferred from the transcript's
+opening move, not from a real trigger test. A real trigger test needs
+several skills staged side by side so the agent has to pick the right one
+on its own.
+
 Run 2026-07-21, fresh `general-purpose` subagent (sonnet) — never the
 baseline agent — given the staged built skill (`SKILL.md` + all five
 references, including the copied canonical `glossary.md` and

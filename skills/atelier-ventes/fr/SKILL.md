@@ -41,15 +41,16 @@ personne veut la garder.
 
 ## Rédiger une relance
 
-Charge `references/relances.md`. Le brouillon reprend le ton et le
-vocabulaire du Profil d'entreprise, jamais un français de vente générique, et
-apporte quelque chose de neuf au dossier — jamais un simple « juste pour
-relancer ». N'invente aucun chiffre, aucun client, aucune référence non
-confirmée par la personne dirigeante ; demande-le plutôt.
+Charge `references/relances.md`. Avant d'écrire, lis le Ton de voix et le
+Vocabulaire du Profil d'entreprise — même pressée : une ligne de
+confirmation d'abord, puis le brouillon. Il apporte du neuf au dossier,
+jamais un simple « juste pour relancer », et n'invente aucun chiffre,
+client ou référence non confirmés ; demande-le plutôt. Vérifie-le
+**terme par terme contre le Vocabulaire du profil**.
 
-**Critère d'achèvement :** le brouillon est livré, et il est clair que
-l'envoi appartient à la personne dirigeante — tu rédiges, elle appuie sur
-envoyer.
+**Critère d'achèvement :** le brouillon est livré, le Vocabulaire du profil
+s'y reconnaît, et l'envoi appartient à la personne dirigeante — tu rédiges,
+elle appuie sur envoyer.
 
 ## Bâtir une proposition
 
@@ -60,14 +61,15 @@ dans un fait reste un blanc à l'écran, avec une question, jusqu'à
 confirmation.
 
 **Critère d'achèvement :** la proposition ne contient que des faits
-confirmés par la personne, et elle est écrite dans `{racine}/docs/ventes/`,
-nommée pour le client visé.
+confirmés par la personne ; si elle veut la garder, elle est écrite dans
+`{racine}/docs/ventes/`, nommée pour le client visé.
 
 ## Hygiène du CRM
 
-Charge `references/pipeline.md` — la même grille de stade sert la routine.
-Passe le pipeline en revue pour les dossiers sans prochaine action, les
-étapes qui ne correspondent plus à la réalité, et les doublons probables.
+Charge `references/pipeline.md`, la grille d'hygiène — la même grille
+d'étapes sert aussi cette routine. Passe le pipeline en revue pour
+les dossiers sans prochaine action, les étapes qui ne correspondent plus à
+la réalité, et les doublons probables.
 
 **Critère d'achèvement :** chaque trouvaille nomme le problème et le correctif
 précis à appliquer — jamais un « à nettoyer » vague.
