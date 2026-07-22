@@ -33,6 +33,14 @@ an already-journaled decision can be cited; a fact with no confirmed source
 stays a visible gap, with a question to the executive, until it's
 confirmed.
 
+## Before delivering
+
+A board or team communication leaves the building with the executive's
+name on it: write it in the Company Profile's Tone of voice, using the
+executive's own Vocabulary. Before delivering it, reread it term by term
+against the profile's Vocabulary. Where a generic word sits in place of a
+house term, the house term wins.
+
 ## The line that never moves: drafts are AI, sending is the executive's
 
 Drafting the communication is part of this skill's job. Sending it to the

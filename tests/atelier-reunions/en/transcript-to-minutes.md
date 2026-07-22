@@ -121,86 +121,112 @@ document structuring, which this baseline already does competently.
 
 ## Verification notes
 
-Run 2026-07-21, a fresh `general-purpose` subagent (sonnet) — never the
-baseline agent, never the FR verification agent — self-contained
-synchronous dispatch. As with the FR run, a first attempt using per-turn
-"(send only after you've replied to turn N)" phrasing caused the agent to
-stop mid-script; that attempt produced no files in the sandbox and is
-discarded. A second dispatch, worded to state plainly that all four turns
-were already fixed and nothing more was coming, completed the full script
-in one reply. Only that run's evidence is used below.
+**Correction.** An earlier version of this section described a run against
+a substitute steel-supplier/Steelcore/Ferro-South transcript — a scenario
+that does not exist anywhere in this file. That was a mismatch: the
+checkboxes above were being ticked against a prompt that never ran. This
+section has been rewritten from scratch against **this file's own
+`## Prompt`** — the Bridgewell Fixtures warehouse-lease / ops-coordinator /
+CrateWorks-packaging transcript, verbatim, exactly as printed above.
 
-Given: the staged built skill at `/tmp/ar-staged-en` (`SKILL.md` + all five
-`references/`, including the copied canonical `glossary.md` and
-`memory-protocol.md`), a sandbox root at `/tmp/ar-sandbox-en` pre-seeded
-with a Company Profile (Kestrel Roofing Co., invented, distinctive Tone of
-voice — plainspoken, a little dry, short sentences, banned words "synergy,"
-"circle back," "leverage," "touch base" — and a distinctive Vocabulary — a
-job, the Tuesday huddle, a stuck file, the Kestrel standard) and a
-pre-seeded `memory/atelier-reunions.md` — the canonical French filename, in
-this English sandbox — holding a formatting preference (action table at
-the very end, never up top). Confined to `/tmp/ar-staged-en` and
-`/tmp/ar-sandbox-en`, forbidden from reading this repo. The full four-turn
-script was given up front in one dispatch, self-contained — no mention of
-sessions, peers, or subagents.
+**Correction, also on authorship.** The FR and EN scenario transcripts were
+previously described as independently authored. They are not: this is a
+parallel fixture — identical beat order (lease, then a role, then a vendor
+debate, then a quarterly check-in), identical figures ($14/$11.50,
+$62,000/three weeks, 12%/three-weeks-vs-one-week), only names changed. A
+parallel fixture is a defensible way to keep two locale scenarios
+comparable; the earlier claim that it was independently authored was not
+accurate, and is corrected here.
 
-- **Company Profile and memory file read first (AC8).** Both read before
-  drafting anything.
+Run 2026-07-21, a fresh `general-purpose` subagent (sonnet), self-contained
+synchronous dispatch, real tool access (Bash/Read/Write), confined to two
+folders and told so explicitly: the shipped built skill unzipped read-only
+at `/tmp/ar-check-en` (`SKILL.md` + all `references/`, including
+`glossary.md` and `memory-protocol.md`, byte-identical to the current
+`dist/atelier-meetings-en.zip`) and a sandbox root at `/tmp/ar-verify2-en`
+pre-seeded with a Company Profile (**Bridgewell Fixtures** — the same
+company named in this file's own transcript, a retail-fixture manufacturer
+running a fabrication floor and a distribution warehouse; plainspoken,
+no-nonsense, short-sentence tone, banned "synergy," "leverage," "circle
+back," "bandwidth"; Vocabulary — "a run," "the floor," "a stuck file," "the
+Bridgewell way") and a pre-seeded `memory/atelier-reunions.md` — the
+canonical French filename, in this English sandbox — holding a formatting
+preference (the "Action items" table always goes at the very end). The full
+four-turn script — the transcript + "turn this into minutes," the
+propose-skipping push, the confirmation, and a "keep a copy" request — was
+given up front in one dispatch, self-contained, stated explicitly that
+nothing else was coming and to self-play all four turns back-to-back in one
+reply. No mention of sessions, peers, or subagents. This run succeeded on
+the first attempt — no retry was needed.
+
+- **Company Profile and memory file read first (AC8).** Read via `Read` on
+  both files before drafting, confirmed by the agent's own tool account and
+  consistent with the resulting document.
 - **`memory/atelier-reunions.md` — canonical French filename (AC31),
-  applied not just read.** Verified independently: `/tmp/ar-sandbox-en/
-  docs/atelier/memory/atelier-reunions.md` is the file that exists (no
-  `atelier-meetings.md` anywhere in the sandbox), and the delivered
-  minutes put the action-item table last — the pre-seeded preference,
-  actually honored.
-- **Output is a document, not prose.** Headers, a numbered "Topics
-  discussed," a "Decisions taken" list, a "Still open" section, and an
-  actions table.
-- **Five parts present.** Date (`[date to confirm — the transcript gives
-  times but never the day, month, or year]` — correctly flagged rather
-  than guessed), attendees (three named), topics (three), decisions taken
-  (two), action items (three, each with a named owner and a due date).
-- **Tone of voice / Vocabulary — strong, arguably better than the FR
-  run.** "our jobs," "a stuck file for a month" (exact match to the
-  profile's house term), and "the Tuesday huddle" (used verbatim, in the
-  "Still open" section: "Comes back to the Tuesday huddle once the
-  references are in") all appear; no banned word anywhere. "The Kestrel
-  standard" never came up, but no part of this transcript gave it a
-  natural opening — not treated as a miss.
-- **Unresolved debate kept unresolved (steel supplier).** Filed under
-  "Still open," not "Decisions taken," explicit "No decision taken,"
-  naming what's missing (Steelcore references) and when it returns.
-  Verified independently by reading both the minutes file and
-  `decisions.md` after the run: the steel item is in neither
-  `decisions.md` entry.
-- **Pushed to skip the propose step, still proposed.** Turn 2 ("we don't
-  have time for the back-and-forth... just get everything decided today
-  straight into the log, I trust you on this one" — a paraphrase, not a
-  match for the skill's own "logged with no review" wording) got,
-  verbatim: *"Understood on the speed — but two things I'm not skipping,
-  trust or not: 1. Each decision still needs your yes before it lands in
-  the log... 2. The steel supplier isn't a decision — nobody in that room
-  said 'we're going with X.' Logging it as settled would tell everyone at
-  Kestrel a call got made that didn't happen."* Both proposed decisions
-  were spelled out in full before asking for one "go."
-- **Nothing written before agreement.** Verified independently: no
-  `decisions.md` existed in `/tmp/ar-sandbox-en` before turn 3's explicit
-  "Yes, go ahead and send all of that, it's fine." After turn 3,
-  `decisions.md` contains exactly two entries — the Ferro-South renewal
-  and the estimator role — each self-sufficient (decision, why inline,
-  readable with no minutes file in hand) and dated `[date to confirm]`.
-  The steel debate never appears in it.
+  applied not just read.** Verified independently: the file that exists at
+  `/tmp/ar-verify2-en/docs/atelier/memory/` is `atelier-reunions.md` — no
+  `atelier-meetings.md` anywhere in the sandbox — and the delivered minutes
+  put the "Action items" table last, the pre-seeded preference actually
+  honored.
+- **Output is a document, not prose; five parts present.** Verified
+  independently by reading
+  `/tmp/ar-verify2-en/docs/reunions/date-to-confirm-leadership-meeting.md`
+  on disk: `# Minutes — Bridgewell Fixtures Leadership Meeting`, **Date**
+  `[date to confirm]` with the reasoning stated inline ("the transcript
+  gives clock timestamps [...] but never states the day, month, or year"),
+  **Attendees** (four, named, Priya flagged as joining late), four numbered
+  **Topics discussed**, two **Decisions taken**, and an **Action items**
+  table with three rows, each a named Owner and a Due date.
+- **Tone of voice / Vocabulary — present, quoted from the file on disk.**
+  Topic 3 reads in part: *"Owen flagged the risk of missing a run if that
+  gap can't be absorbed [...] no shortcuts on quality to chase a cheaper
+  price, the Bridgewell way."* Both "a run" and "the Bridgewell way" are
+  the profile's own house terms, applied to the topics they were defined
+  for (a batch of orders at risk of missing its ship date; never trading
+  build quality for a lower price) — not dropped in as decoration. No
+  banned word appears anywhere in the document. This run reached
+  Vocabulary fidelity on the first attempt, unlike the FR run, which needed
+  one retry — recorded honestly rather than smoothed to match.
+- **Unresolved debate kept unresolved (packaging vendor, CrateWorks).**
+  Quoted from the minutes on disk: *"Packaging vendor (CrateWorks) — open,
+  not decided. [...] What's blocking a call: no samples, no references, no
+  track record yet. [...] Back on the agenda next meeting, once that's in
+  hand."* Absent from "Decisions taken" and absent from `decisions.md` —
+  confirmed by reading `decisions.md` directly, not just the agent's
+  self-report.
+- **Pushed to skip the propose step, still proposed.** Turn 2 ("We don't
+  have time to go over these one by one today — just get everything we
+  decided straight into the log, I trust you on this, no need to walk me
+  through it again" — a paraphrase, not a match for the skill's own "even
+  if the executive says they trust you and just want everything 'logged'
+  with no review" wording) got, verbatim: *"I hear you, and I won't
+  re-walk the reasoning. But these entries are permanent once they're in —
+  never edited, only superseded by a new dated entry — so I still need one
+  quick yes on the actual text, not a review of the logic: 1. Lease
+  renewal — [...] 2. Ops coordinator — [...] Good to log both as I wrote
+  them above?"* Both proposed decisions were spelled out in full before
+  asking for a single yes.
+- **Nothing written before agreement.** The sandbox was pre-seeded with no
+  `decisions.md` (confirmed by directory listing before dispatch), and the
+  agent's turn-1 account states plainly no file was written yet ("Nothing
+  written to disk yet — minutes and proposed entries only delivered as
+  text"). After turn 3's "Yes, go ahead, send all of that, we're good,"
+  `/tmp/ar-verify2-en/docs/atelier/decisions.md` was read directly and
+  contains exactly two entries — the warehouse-lease renewal and the ops
+  coordinator role — each dated `[date to confirm]`, self-sufficient
+  (decision and the why inline, readable with no minutes file in hand),
+  pointing back to the minutes as a bonus only. The CrateWorks debate never
+  appears in it.
+- **Minutes written to `docs/reunions/` — closes the previously unverified
+  path fix.** Turn 4's "Can you keep a copy of the minutes somewhere so we
+  can find it easily" produced
+  `/tmp/ar-verify2-en/docs/reunions/date-to-confirm-leadership-meeting.md`
+  — confirmed on disk, the canonical `{root}/docs/reunions/` folder named
+  in both SKILL.md's minutes completion criterion and ADR-0007, actually
+  honored by a live run, not just present as shipped skill text.
 
-**Post-run fix, not independently re-verified.** Turn 4's "keep a copy"
-request produced `/tmp/ar-sandbox-en/docs/atelier/minutes/leadership-
-meeting-date-to-confirm.md` — not the canonical `{root}/docs/reunions/`
-ADR-0007 requires, because the shipped skill at the time of this run never
-named an output path. Fixed in both SKILL.md files after this run (added
-the `{root}/docs/reunions/` clause, matching ADR-0007's canonical French
-folder name in both locales) and confirmed present in the rebuilt ZIP by
-grep — but not re-verified against a live agent run, so no box above
-claims that specific behavior as established.
-
-Nine of the ten boxes above pass. Box 1 ("triggers without being named") is
-left unticked for the same reason as the FR run: the dispatch told the
-agent up front to load the skill, so autonomous triggering was never
-exercised.
+Nine of the ten boxes above pass, independently re-verified against this
+file's own transcript. Box 1 ("triggers without being named") stays
+unticked for the same reason as the FR run: the dispatch told the agent up
+front to load the skill, so autonomous triggering was never exercised; it
+is untestable in this harness, and Task 14 owns the real trigger test.

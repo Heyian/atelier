@@ -27,9 +27,9 @@ en cours.
 Pour chaque sujet, fixe un temps alloué réaliste et nomme ce qu'on doit en
 sortir : une décision, une mise à jour d'information, ou un remue-méninges
 sans obligation de conclure. Un point marqué « décision » qui n'a pas assez
-de temps, ou pas l'information nécessaire pour trancher vraiment, est
-souvent mieux servi en deux temps : un point d'information cette fois-ci,
-une décision à la rencontre suivante une fois l'information réunie.
+de temps, ou pas l'information nécessaire pour trancher vraiment, gagne à
+être scindé en deux : un point d'information cette fois-ci, une décision
+à la rencontre suivante une fois l'information réunie.
 
 ## Qui vient, et pourquoi
 

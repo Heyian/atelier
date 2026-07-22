@@ -47,6 +47,14 @@ need to go dig up the minutes; a pointer to the minutes is a bonus, never
 the only place the reasoning lives. See `references/memory-protocol.md` for
 the full mechanics.
 
+## Before delivering
+
+Minutes leave the building with the executive's name on them: write them
+in the Company Profile's Tone of voice, using the executive's own
+Vocabulary — their words for roles, services, and open files. Before
+delivering, reread them term by term against the profile's Vocabulary.
+Where a generic word sits in place of a house term, the house term wins.
+
 ## Out of scope for v1
 
 Deep minutes specialization — legal formats, board templates with precise

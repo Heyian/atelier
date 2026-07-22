@@ -24,8 +24,8 @@ never the token as-is.
 
 Memory sources: `{root}/docs/atelier/memory/atelier-reunions.md` — the
 canonical French name, unchanged in this locale — and the decision log
-`{root}/docs/atelier/decisions.md`. Read it at the start; it's created on
-your first durable entry, never in advance. Read
+`{root}/docs/atelier/decisions.md`. Read the memory file at the start; it's
+created on your first durable entry, never in advance. Read
 `references/memory-protocol.md` before proposing any memory write.
 
 ## Prep a meeting
@@ -42,9 +42,10 @@ ready to send.
 
 Load `references/minutes.md`. Read the whole transcript before writing
 anything. Before drafting, read the Company Profile's Tone of voice and
-Vocabulary — even under pressure: every decision gets proposed to the
-journal before it's written there, never the reverse, even if the executive
-says they trust you and just want everything "logged" with no review.
+Vocabulary — even under pressure: check it term by term before delivering.
+Every decision gets proposed to the journal before it's written there,
+never the reverse, even if the executive says they trust you and just want
+everything "logged" with no review.
 
 Pull out the date, attendees, topics, what got settled, and what's still
 open — never reworded into a decision because the conversation seemed to be
@@ -62,9 +63,10 @@ French folder name, unchanged in this locale.
 ## Draft the board or team communication
 
 Load `references/communications.md`. Before writing, read the Company
-Profile's Tone of voice and Vocabulary — even under pressure: work out the
-audience first. A board wants the ask and the risk up front; a team wants
-context and who owns what. No unconfirmed number appears.
+Profile's Tone of voice and Vocabulary — even under pressure: check it
+term by term before delivering. Work out the audience first: a board wants
+the ask and the risk up front; a team wants context and who owns what. No
+unconfirmed number appears.
 
 **Done when:** the draft is delivered, shaped for the right audience, carries
 the profile's Vocabulary, and sending or presenting it stays the

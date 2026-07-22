@@ -34,6 +34,14 @@ transcript ou d'une décision déjà journalisée peut être cité ; un fait qui
 ne vient de nulle part de confirmé reste un blanc marqué, avec une question
 à la personne dirigeante, jusqu'à confirmation.
 
+## Avant de livrer
+
+Une communication au conseil ou à l'équipe sort de chez vous : elle se
+rédige dans le Ton de voix du Profil d'entreprise et avec le Vocabulaire
+de la personne dirigeante. Avant de la livrer, relis-la terme par terme
+contre le Vocabulaire du profil : un mot générique là où la personne a un
+mot maison, c'est le mot maison qui gagne.
+
 ## La ligne qui ne bouge jamais : le brouillon est de l'IA, la diffusion appartient à la personne dirigeante
 
 Rédiger la communication fait partie du travail de cette compétence. La

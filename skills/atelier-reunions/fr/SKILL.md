@@ -1,6 +1,6 @@
 ---
 name: atelier-reunions
-description: À utiliser quand la personne dirigeante dit « je dois préparer ma réunion », demande un procès-verbal, un PV, un compte rendu, ou veut un suivi de rencontre après une rencontre ou un comité de direction.
+description: À utiliser quand la personne dirigeante dit « je dois préparer ma réunion », demande un procès-verbal, un PV, un compte rendu, ou veut un suivi de rencontre après une réunion ou un comité de direction.
 version: 0.1.0
 ---
 
@@ -41,17 +41,17 @@ attendu (décision, information, remue-méninges), et l'ordre du jour est prêt
 ## Traiter un transcript → PV
 
 Charge `references/pv.md`. Lis le transcript en entier avant d'écrire. Avant
-de rédiger, lis le Ton de voix et le Vocabulaire du profil — même pressé·e :
-chaque décision se propose au journal avant de s'y écrire, jamais l'inverse,
-même si la personne dit te faire confiance et veut tout « consigné » sans
-revue.
+de rédiger, lis le Ton de voix et le Vocabulaire du profil — même pressée :
+vérifie-le terme par terme avant de livrer. Chaque décision se propose au
+journal avant de s'y écrire, jamais l'inverse, même si la personne dit te
+faire confiance et veut tout « consigné » sans revue.
 
 Repère la date, les personnes présentes, les sujets, ce qui est tranché, et
 ce qui reste en débat — jamais reformulé en décision parce que le ton
 semblait converger. Une date absente du transcript reste un blanc à
-confirmer, jamais devinée. Pour chaque décision, propose une entrée datée
-et autoportante — la décision, le pourquoi en clair — et attends l'accord
-avant d'écrire dans `decisions.md`.
+confirmer, jamais devinée. Pour chaque décision de direction, propose une
+entrée datée et autoportante — la décision, le pourquoi en clair — et
+attends l'accord avant d'écrire dans `decisions.md`.
 
 **Critère d'achèvement :** le document livré porte date, personnes
 présentes, sujets, décisions, et actions avec une personne responsable
@@ -62,9 +62,10 @@ est écrit dans `{racine}/docs/reunions/`.
 ## Rédiger la communication au conseil ou à l'équipe
 
 Charge `references/communications.md`. Avant d'écrire, lis le Ton de voix et
-le Vocabulaire du profil — même pressé·e : identifie d'abord le public. Le
-conseil veut la décision et le risque en premier ; l'équipe veut le contexte
-et qui fait quoi. Aucun chiffre non confirmé n'y figure.
+le Vocabulaire du profil — même pressée : vérifie-le terme par terme avant
+de livrer. Identifie d'abord le public : le conseil veut la décision et le
+risque en premier ; l'équipe veut le contexte et qui fait quoi. Aucun
+chiffre non confirmé n'y figure.
 
 **Critère d'achèvement :** le brouillon livré, adapté au bon public, porte le
 Vocabulaire du profil, et la diffusion reste la décision de la personne
