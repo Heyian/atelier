@@ -392,7 +392,8 @@ check_version_coherence() {
   done < <(extra_files_entries "$REPO_ROOT/release-please-config.json")
 
   required_paths="$( { find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md -type f \
-                | sed "s|^$REPO_ROOT/||" | sort; echo "README.md"; } )"
+                | while IFS= read -r f; do printf '%s\n' "${f#"$REPO_ROOT"/}"; done \
+                | sort; echo "README.md"; } )"
 
   while IFS= read -r rel; do
     n_any="$(printf '%s' "$tsv" | awk -F'\t' -v p="$rel" '$2 == p { n++ } END { print n + 0 }')"
