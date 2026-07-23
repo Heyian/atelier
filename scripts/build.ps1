@@ -161,6 +161,19 @@ function New-SkillStage {
                    -Destination (Join-Path $Stage 'references/glossary.md')
   Copy-Item -Force -Path (Join-Path (Join-Path $SharedDir $Locale) 'memory-protocol.md') `
                    -Destination (Join-Path $Stage 'references/memory-protocol.md')
+
+  # AC57 — the annotation is a release-please marker, not skill metadata.
+  # Strip it so the packaged SKILL.md carries a clean `version: X.Y.Z`, and a
+  # naive frontmatter parser in the skill loader cannot read the version as
+  # "0.1.0 # x-release-please-version". Mirrors build.sh's sed in stage_skill.
+  #
+  # ReadAllText/WriteAllText, not Get-Content/Set-Content: the latter pair
+  # would rewrite every line ending as CRLF and change the archive's bytes.
+  $stagedMd = Join-Path $Stage 'SKILL.md'
+  $text = [System.IO.File]::ReadAllText($stagedMd)
+  $text = [regex]::Replace($text, '(?m)^(version: \d+\.\d+\.\d+) # x-release-please-version[ \t]*$', '$1')
+  [System.IO.File]::WriteAllText($stagedMd, $text)
+
   return $name
 }
 
@@ -332,8 +345,203 @@ function Test-Triggers {
   }
 }
 
+# AC53 — docs/WHATS-NEW.md must carry a `## v<version>` heading whose section
+# holds both bilingual labels, each followed by at least one non-empty prose
+# line. Mirrors build.sh's check_whats_new, including its "punctuation is not
+# prose" rule and its one-failure-then-stop behavior.
+function Test-WhatsNew {
+  param([string]$Version)
+  $rel = 'docs/WHATS-NEW.md'
+  $lines = @(Get-Content -LiteralPath (Join-Path $RepoRoot $rel))
+  $section = @()
+  $inside = $false
+  $found = $false
+  foreach ($line in $lines) {
+    # -ceq: bash's awk `$0 == "## v" ver` is case-sensitive; PowerShell's bare
+    # -eq is not.
+    if ($line -ceq "## v$Version") { $inside = $true; $found = $true; continue }
+    # Ordinal, not the culture-sensitive default of String.StartsWith(String):
+    # awk's substr($0, 1, 3) == "## " is a plain byte comparison.
+    if ($inside -and $line.StartsWith('## ', [System.StringComparison]::Ordinal)) { $inside = $false }
+    if ($inside) { $section += $line }
+  }
+  if (-not $found) {
+    Add-CheckFailure "${rel}: no '## v$Version' heading for the version in version.txt"
+    return
+  }
+  foreach ($label in @('**Français**', '**English**')) {
+    $at = -1
+    for ($i = 0; $i -lt $section.Count; $i++) {
+      # String.Contains(String) is ordinal — case-sensitive, like awk's index().
+      if ($section[$i].Contains($label)) { $at = $i; break }
+    }
+    if ($at -lt 0) {
+      Add-CheckFailure "${rel}: the v$Version section has no $label label"
+      return
+    }
+    $rest = $section[$at].Substring($section[$at].IndexOf($label, [System.StringComparison]::Ordinal) + $label.Length)
+    # Prose, not punctuation: an em dash or a colon alone is not an entry.
+    if ($rest -cmatch '\w') { continue }
+    $ok = $false
+    for ($i = $at + 1; $i -lt $section.Count; $i++) {
+      if ($section[$i].Contains('**Français**') -or $section[$i].Contains('**English**')) { break }
+      if ($section[$i] -cmatch '\w') { $ok = $true; break }
+    }
+    if (-not $ok) {
+      Add-CheckFailure "${rel}: the $label label in the v$Version section is followed by no prose"
+      return
+    }
+  }
+}
+
+# AC50–AC54, AC59 — the version is computed by release-please, so nothing here
+# checks that it is *correct*; it checks that every place declaring it agrees,
+# and that a new skill cannot silently opt out of being maintained.
+#
+# PowerShell parses JSON natively, so this is the short twin of build.sh's
+# hand-rolled scanner (AC56 exists for exactly that reason and is bash-only).
+function Test-VersionCoherence {
+  # AC54 / AC59 — the files this check reads must exist and be non-empty.
+  # An early return: with the reference file missing there is nothing left to
+  # compare against, and one clear failure beats a cascade.
+  foreach ($f in @('version.txt', 'release-please-config.json',
+                   '.release-please-manifest.json', 'docs/WHATS-NEW.md', 'README.md')) {
+    # NOTE: ${f}: not $f: — see the ${Locale}: comment in New-SkillStage.
+    $p = Join-Path $RepoRoot $f
+    if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { Add-CheckFailure "${f}: missing"; return }
+    # -Force: without it Get-Item refuses to return a "hidden" item, and on
+    # Unix a leading dot *is* hidden — so .release-please-manifest.json would
+    # throw here instead of being sized. Harmless on Windows, where hidden is
+    # an NTFS attribute no file in this set carries.
+    if ((Get-Item -LiteralPath $p -Force).Length -eq 0) { Add-CheckFailure "${f}: empty"; return }
+  }
+
+  # AC54 — version.txt holds exactly one SemVer line. ReadAllText plus a manual
+  # split, dropping one trailing empty element, so a one-line file with or
+  # without a trailing newline both read as 1 — matching awk's NR.
+  $raw = [System.IO.File]::ReadAllText((Join-Path $RepoRoot 'version.txt'))
+  $vlines = @($raw -split "`r?`n")
+  if ($vlines.Count -gt 0 -and $vlines[-1] -eq '') { $vlines = @($vlines[0..($vlines.Count - 2)]) }
+  if ($vlines.Count -ne 1 -or $vlines[0] -cnotmatch '^\d+\.\d+\.\d+$') {
+    Add-CheckFailure "version.txt: expected exactly one SemVer line, found $($vlines.Count) line(s) starting '$($vlines[0])'"
+    return
+  }
+  $version = $vlines[0]
+
+  # AC54 — both JSON files must parse.
+  $config = $null
+  foreach ($f in @('release-please-config.json', '.release-please-manifest.json')) {
+    $parsed = $null
+    try {
+      $parsed = Get-Content -LiteralPath (Join-Path $RepoRoot $f) -Raw | ConvertFrom-Json
+    } catch {
+      Add-CheckFailure "${f}: is not well-formed JSON"
+      return
+    }
+    if ($f -ceq 'release-please-config.json') { $config = $parsed }
+  }
+
+  # AC50 / AC51 — every SKILL.md declares the version once, annotated, and
+  # equal to version.txt.
+  #
+  # The segment-count filter is what makes this equal to build.sh's
+  # `find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md`: -Depth 2 caps
+  # the recursion at three levels but has no -mindepth, and -Filter is
+  # case-insensitive where find -name is not.
+  $skillMds = @(Get-ChildItem -LiteralPath $SkillsDir -Recurse -Depth 2 -Filter 'SKILL.md' -File |
+    Where-Object { $_.Name -ceq 'SKILL.md' } |
+    Where-Object { (($_.FullName.Substring($SkillsDir.Length + 1)) -split '[\\/]').Count -eq 3 } |
+    Sort-Object FullName)
+  foreach ($file in $skillMds) {
+    $rel = ($file.FullName.Substring($RepoRoot.Length + 1)) -replace '\\', '/'
+    $lines = @(Get-Content -LiteralPath $file.FullName)
+    $fm = @()
+    if ($lines.Count -gt 0 -and $lines[0] -ceq '---') {
+      for ($i = 1; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -ceq '---') { break }
+        $fm += $lines[$i]
+      }
+    }
+    # Ordinal StartsWith, mirroring awk's index($0, "version:") == 1.
+    $versionLines = @($fm | Where-Object { $_.StartsWith('version:', [System.StringComparison]::Ordinal) })
+    if ($versionLines.Count -ne 1) {
+      Add-CheckFailure "${rel}: frontmatter has $($versionLines.Count) 'version:' lines, expected exactly 1"
+      continue
+    }
+    # [regex]::Match, not -cnotmatch + $Matches: the automatic $Matches variable
+    # is only reliably populated by a *successful* -match, and this needs the
+    # capture from a match tested for failure.
+    $vm = [regex]::Match($versionLines[0], '^version: (\d+\.\d+\.\d+) # x-release-please-version$')
+    if (-not $vm.Success) {
+      Add-CheckFailure "${rel}: version line '$($versionLines[0])' must read 'version: <semver> # x-release-please-version'"
+      continue
+    }
+    $declared = $vm.Groups[1].Value
+    if ($declared -cne $version) {
+      Add-CheckFailure "${rel}: declares version $declared but version.txt says $version"
+    }
+  }
+
+  # AC52 / AC59 — every SKILL.md and README.md is listed in extra-files exactly
+  # once, as type generic.
+  $pkg = $null
+  if ($config -and $config.packages) { $pkg = $config.packages.'.' }
+  $entries = @()
+  if ($pkg -and $pkg.'extra-files') { $entries = @($pkg.'extra-files') }
+
+  $wanted = @($skillMds | ForEach-Object {
+    ($_.FullName.Substring($RepoRoot.Length + 1)) -replace '\\', '/'
+  }) + @('README.md')
+
+  foreach ($rel in $wanted) {
+    $matching = @($entries | Where-Object { $_.path -ceq $rel })
+    if ($matching.Count -ne 1) {
+      Add-CheckFailure "release-please-config.json: extra-files must list $rel exactly once, found $($matching.Count)"
+    } elseif ($matching[0].type -cne 'generic') {
+      Add-CheckFailure "release-please-config.json: the extra-files entry for $rel is not type 'generic'"
+    }
+  }
+
+  # Cardinality — extra-files must hold exactly the required set, no more. The
+  # loop above only checks that each required path is present; without this, a
+  # stale entry for a deleted skill, or an entry for an unrelated file, would
+  # sit in the array forever and pass silently — the same hole this whole check
+  # exists to close. The required set is computed from the tree above, not
+  # hardcoded, so it tracks the skill count automatically.
+  foreach ($entry in $entries) {
+    $p = $entry.path
+    if (-not $p) { continue }
+    if ($wanted -cnotcontains $p) {
+      Add-CheckFailure "release-please-config.json: extra-files lists $p, which is not a SKILL.md or README.md path"
+    }
+  }
+
+  # AC59 — README.md carries exactly two annotated lines, each on version.
+  $annotated = @(Get-Content -LiteralPath (Join-Path $RepoRoot 'README.md') |
+    Where-Object { $_.Contains('x-release-please-version') })
+  if ($annotated.Count -ne 2) {
+    Add-CheckFailure "README.md: expected exactly 2 x-release-please-version annotations, found $($annotated.Count)"
+  }
+  foreach ($line in $annotated) {
+    # A line with no X.Y.Z at all must still be reported, naming README.md —
+    # not skipped and not fatal. $declared is left empty so the comparison
+    # below fails normally. (build.sh needs a `|| true` for the same reason.)
+    $m = [regex]::Match($line, '\d+\.\d+\.\d+')
+    $declared = if ($m.Success) { $m.Value } else { '' }
+    if ($declared -cne $version) {
+      Add-CheckFailure "README.md: annotated line declares '$declared' but version.txt says $version"
+    }
+  }
+
+  # AC53 — the bilingual entry exists for this version.
+  Test-WhatsNew -Version $version
+}
+
 function Invoke-Checks {
   param([string[]]$Locales)
+  # Repo-wide, not per-locale: run it once.
+  Test-VersionCoherence
+
   foreach ($locale in $Locales) {
     foreach ($canonical in Get-SkillList) {
       $src = Join-Path (Join-Path $SkillsDir $canonical) $locale

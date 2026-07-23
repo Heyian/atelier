@@ -19,6 +19,7 @@ Single-context: `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 - `bash scripts/build.sh --check` — mechanical checks (also what CI runs)
 - `./scripts/build.ps1 -Lang all` / `-Check` — PowerShell twin, run on Windows CI
 - `bash scripts/tests/build_test.sh` — build-script tests
+- `pwsh -File scripts/tests/build_test.ps1` — build-script tests, PowerShell twin
 - `bash scripts/tests/shared_test.sh` — shared-text tests
 - `bash scripts/tests/authoring_test.sh` — authoring-standards tests
 
