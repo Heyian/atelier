@@ -1,0 +1,125 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+# Declared at workflow level so the release-please job holds both (AC49); the
+# publish job narrows itself below.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # Not GITHUB_TOKEN: events triggered by GITHUB_TOKEN start no new
+      # workflow run, which would suppress the release PR's pull_request event
+      # and leave it with no completed checks — so AC53's forcing function
+      # (CI red until a human writes the bilingual docs/WHATS-NEW.md entry)
+      # could never fire. Neither `owner` nor `repositories` is passed, so the
+      # minted token stays scoped to this repository alone.
+      - name: Mint a GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          # Pinned, not defaulted: the action otherwise targets the repository
+          # default branch, which is `dev`. Unpinned, release-please would
+          # compute releases from `dev` and tag there — on the branch that is
+          # explicitly not the release branch.
+          target-branch: main
+          # DO NOT add `release-type:` here. Passing it forces non-manifest
+          # mode, which rediscovers the last release by correlating tags
+          # against a bounded window of recent commits; a large merge pushes
+          # the last release outside that window and release-please resets the
+          # version to 1.0.0. The release type lives in
+          # release-please-config.json instead.
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    # Narrower than the workflow default: this job only uploads assets to an
+    # existing release, and it triggers nothing, so it keeps GITHUB_TOKEN.
+    permissions:
+      contents: write
+    # AC2's 1024-char cap is measured with bash's ${#var}, which counts
+    # characters only under a UTF-8-aware LC_CTYPE. Under the runner's default
+    # LC_ALL=C it would count bytes instead, over-counting every accented
+    # French description.
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build every locale
+        run: bash scripts/build.sh --lang all
+
+      - name: Attach the fourteen ZIPs and WHATS-NEW.md to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          # Filenames stay unversioned so that
+          # releases/latest/download/<name>-<locale>.zip — already published in
+          # both install guides — keeps resolving across releases.
+          count="$(ls -1 dist/*.zip | wc -l)"
+          if [[ "$count" -ne 14 ]]; then
+            echo "expected 14 ZIPs in dist/, found $count" >&2
+            exit 1
+          fi
+          gh release upload "$TAG" dist/*.zip docs/WHATS-NEW.md --clobber
+
+  back-merge:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Mint a GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+
+      # Merging the release PR rewrites eighteen version-bearing files on main
+      # while dev still declares the old version in every one of them. Without
+      # this, every promotion PR conflicts on all eighteen, forever.
+      #
+      # A PR rather than a direct push: the merge is visible, ci.yml runs
+      # against dev's would-be state before it lands, and idempotency is one
+      # query ("is a main → dev PR already open?") rather than a guess.
+      - name: Open the back-merge pull request (main → dev)
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          open_count="$(gh pr list --base dev --head main --state open --json number --jq 'length')"
+          if [[ "$open_count" -gt 0 ]]; then
+            echo "A main → dev pull request is already open; nothing to do."
+            exit 0
+          fi
+          gh pr create --base dev --head main \
+            --title "chore: back-merge $TAG into dev" \
+            --body "Carries the release bumps and the regenerated CHANGELOG.md from \`main\` back into \`dev\`, so the next promotion PR stays conflict-free. Merge this after each release — see ADR-0010."
