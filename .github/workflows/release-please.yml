@@ -25,14 +25,14 @@ jobs:
       # minted token stays scoped to this repository alone.
       - name: Mint a GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
 
       - name: Run release-please
         id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
@@ -65,7 +65,7 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build every locale
         run: bash scripts/build.sh --lang all
@@ -95,12 +95,12 @@ jobs:
     steps:
       - name: Mint a GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Merging the release PR rewrites eighteen version-bearing files on main
       # while dev still declares the old version in every one of them. Without
