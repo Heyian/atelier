@@ -1,7 +1,7 @@
 ---
 name: atelier-reunions
 description: À utiliser quand la personne dirigeante dit « je dois préparer ma réunion », demande un procès-verbal, un PV, un compte rendu, ou veut un suivi de rencontre après une réunion ou un comité de direction.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-réunions — la compétence de rôle réunions

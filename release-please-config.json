@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "include-v-in-tag": true,
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false,
+      "extra-files": [
+        { "type": "generic", "path": "README.md" },
+        { "type": "generic", "path": "skills/atelier/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-mentor/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-mentor/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-marketing/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-marketing/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-forge/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-forge/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-ventes/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-ventes/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-reunions/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-reunions/en/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-boussole/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-boussole/en/SKILL.md" }
+      ],
+      "changelog-sections": [
+        { "type": "feat", "section": "Features" },
+        { "type": "fix", "section": "Bug Fixes" },
+        { "type": "perf", "section": "Performance Improvements" },
+        { "type": "revert", "section": "Reverts" },
+        { "type": "docs", "section": "Documentation", "hidden": true },
+        { "type": "style", "section": "Styles", "hidden": true },
+        { "type": "chore", "section": "Miscellaneous Chores", "hidden": true },
+        { "type": "refactor", "section": "Code Refactoring", "hidden": true },
+        { "type": "test", "section": "Tests", "hidden": true },
+        { "type": "build", "section": "Build System", "hidden": true },
+        { "type": "ci", "section": "Continuous Integration", "hidden": true }
+      ]
+    }
+  }
+}

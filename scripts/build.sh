@@ -124,6 +124,15 @@ stage_skill() {
   cp "$SHARED_DIR/$locale/glossary.md" "$stage/references/glossary.md"
   cp "$SHARED_DIR/$locale/memory-protocol.md" "$stage/references/memory-protocol.md"
 
+  # AC57 — the annotation is a release-please marker, not skill metadata.
+  # Strip it so the packaged SKILL.md carries a clean `version: X.Y.Z`, and
+  # a naive frontmatter parser in the skill loader cannot read the version as
+  # "0.1.0 # x-release-please-version". The temp file lives inside $stage, so
+  # the EXIT trap sweeps it on any failure path.
+  sed 's/^\(version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\) # x-release-please-version[[:space:]]*$/\1/' \
+    "$stage/SKILL.md" > "$stage/SKILL.md.tmp"
+  mv "$stage/SKILL.md.tmp" "$stage/SKILL.md"
+
   echo "$name"
 }
 
@@ -192,6 +201,243 @@ main() {
 
 CHECK_FAILURES=0
 check_fail() { echo "CHECK FAIL: $*" >&2; CHECK_FAILURES=$((CHECK_FAILURES + 1)); }
+
+# --- Minimal JSON support, hand-rolled on purpose.
+# AC56 requires --check to run with jq off PATH, and the repo has no other
+# JSON dependency, so these two helpers cover exactly what the coherence
+# check needs and nothing more.
+
+# Well-formedness, not validity: balanced braces/brackets, correctly paired
+# quotes, no string spanning a line break. Enough to catch a truncated or
+# hand-mangled file, which is what AC54's "malformed" case means here.
+json_wellformed() {
+  awk '
+    { s = s $0 "\n" }
+    END {
+      depth = 0; instr = 0; esc = 0
+      n = length(s)
+      for (i = 1; i <= n; i++) {
+        c = substr(s, i, 1)
+        if (instr) {
+          if (esc) { esc = 0 }
+          else if (c == "\\") { esc = 1 }
+          else if (c == "\"") { instr = 0 }
+          else if (c == "\n") { exit 1 }
+          continue
+        }
+        if (c == "\"") { instr = 1; continue }
+        if (c == "{") { stack[++depth] = "{"; continue }
+        if (c == "[") { stack[++depth] = "["; continue }
+        if (c == "}") { if (depth == 0 || stack[depth] != "{") exit 1; depth--; continue }
+        if (c == "]") { if (depth == 0 || stack[depth] != "[") exit 1; depth--; continue }
+      }
+      if (instr || depth != 0) exit 1
+      exit 0
+    }
+  ' "$1"
+}
+
+# Emit one line per `extra-files` array element: the object body, with
+# newlines flattened to spaces so each entry stays on one line.
+extra_files_entries() {
+  awk '
+    { s = s $0 "\n" }
+    END {
+      i = index(s, "\"extra-files\"")
+      if (i == 0) exit 0
+      s = substr(s, i)
+      j = index(s, "[")
+      if (j == 0) exit 0
+      s = substr(s, j + 1)
+      depth = 0; instr = 0; esc = 0; buf = ""
+      n = length(s)
+      for (k = 1; k <= n; k++) {
+        c = substr(s, k, 1)
+        if (instr) {
+          buf = buf c
+          if (esc) { esc = 0 }
+          else if (c == "\\") { esc = 1 }
+          else if (c == "\"") { instr = 0 }
+          continue
+        }
+        if (c == "\"") { instr = 1; buf = buf c; continue }
+        if (c == "{") { depth++; if (depth == 1) { buf = ""; continue } }
+        else if (c == "}") { depth--; if (depth == 0) { print buf; buf = ""; continue } }
+        else if (c == "]" && depth == 0) { break }
+        if (depth >= 1) {
+          if (c == "\n" || c == "\r" || c == "\t") c = " "
+          buf = buf c
+        }
+      }
+    }
+  ' "$1"
+}
+
+# Pull one string-valued field out of a single extra-files object body.
+json_string_field() {
+  sed -n 's/.*"'"$2"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' <<<"$1" | head -1
+}
+
+# AC53 — docs/WHATS-NEW.md must carry a `## v<version>` heading whose section
+# holds both bilingual labels, each followed by at least one non-empty prose
+# line. This is the forcing function: on a release PR version.txt has moved
+# and this file has not, so CI lands red until a human writes the entry.
+check_whats_new() {
+  local version="$1" rel="docs/WHATS-NEW.md" verdict
+  verdict="$(awk -v ver="$version" '
+    $0 == "## v" ver { inside = 1; found = 1; next }
+    { if (inside && substr($0, 1, 3) == "## ") inside = 0 }
+    inside { sec[++n] = $0 }
+    END {
+      if (!found) { print "no-heading"; exit }
+      for (l = 1; l <= 2; l++) {
+        label = (l == 1) ? "**Français**" : "**English**"
+        at = 0
+        for (i = 1; i <= n; i++) { if (index(sec[i], label) > 0) { at = i; break } }
+        if (at == 0) { print "no-label:" label; exit }
+        rest = substr(sec[at], index(sec[at], label) + length(label))
+        # Prose, not punctuation: an em dash or a colon alone is not an entry.
+        if (rest ~ /[[:alnum:]]/) continue
+        ok = 0
+        for (i = at + 1; i <= n; i++) {
+          if (index(sec[i], "**Français**") > 0 || index(sec[i], "**English**") > 0) break
+          if (sec[i] ~ /[[:alnum:]]/) { ok = 1; break }
+        }
+        if (!ok) { print "no-prose:" label; exit }
+      }
+      print "ok"
+    }
+  ' "$REPO_ROOT/$rel")"
+
+  case "$verdict" in
+    ok) ;;
+    no-heading)  check_fail "$rel: no '## v$version' heading for the version in version.txt" ;;
+    no-label:*)  check_fail "$rel: the v$version section has no ${verdict#no-label:} label" ;;
+    no-prose:*)  check_fail "$rel: the ${verdict#no-prose:} label in the v$version section is followed by no prose" ;;
+    *)           check_fail "$rel: could not validate the v$version section" ;;
+  esac
+}
+
+# AC50–AC54, AC59 — the version is computed by release-please, so nothing here
+# checks that it is *correct*; it checks that every place declaring it agrees,
+# and that a new skill cannot silently opt out of being maintained.
+check_version_coherence() {
+  local f version vcount tsv body t p rel line declared found n_any n_generic required_paths
+
+  # AC54 / AC59 — the files this check reads must exist and be non-empty.
+  # An early return: with the reference file missing there is nothing left to
+  # compare against, and one clear failure beats a cascade.
+  for f in version.txt release-please-config.json .release-please-manifest.json \
+           docs/WHATS-NEW.md README.md; do
+    if [[ ! -f "$REPO_ROOT/$f" ]]; then check_fail "$f: missing"; return; fi
+    if [[ ! -s "$REPO_ROOT/$f" ]]; then check_fail "$f: empty"; return; fi
+  done
+
+  # AC54 — version.txt holds exactly one SemVer line. awk's NR counts a final
+  # line with no trailing newline, so a one-line file with or without one
+  # both read as 1.
+  vcount="$(awk 'END { print NR }' "$REPO_ROOT/version.txt")"
+  version="$(head -1 "$REPO_ROOT/version.txt")"
+  if [[ "$vcount" -ne 1 ]] || [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    check_fail "version.txt: expected exactly one SemVer line, found $vcount line(s) starting '$version'"
+    return
+  fi
+
+  # AC54 — both JSON files must parse.
+  for f in release-please-config.json .release-please-manifest.json; do
+    if ! json_wellformed "$REPO_ROOT/$f"; then
+      check_fail "$f: is not well-formed JSON"
+      return
+    fi
+  done
+
+  # AC50 / AC51 — every SKILL.md declares the version once, annotated, and
+  # equal to version.txt.
+  while IFS= read -r f; do
+    rel="${f#"$REPO_ROOT"/}"
+    found="$(awk '
+      NR == 1 && $0 == "---" { inside = 1; next }
+      inside && $0 == "---" { exit }
+      inside && index($0, "version:") == 1 { n++ }
+      END { print n + 0 }
+    ' "$f")"
+    if [[ "$found" -ne 1 ]]; then
+      check_fail "$rel: frontmatter has $found 'version:' lines, expected exactly 1"
+      continue
+    fi
+    line="$(awk '
+      NR == 1 && $0 == "---" { inside = 1; next }
+      inside && $0 == "---" { exit }
+      inside && index($0, "version:") == 1 { print; exit }
+    ' "$f")"
+    if [[ ! "$line" =~ ^version:\ ([0-9]+\.[0-9]+\.[0-9]+)\ \#\ x-release-please-version$ ]]; then
+      check_fail "$rel: version line '$line' must read 'version: <semver> # x-release-please-version'"
+      continue
+    fi
+    declared="${BASH_REMATCH[1]}"
+    if [[ "$declared" != "$version" ]]; then
+      check_fail "$rel: declares version $declared but version.txt says $version"
+    fi
+  done < <(find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md -type f | sort)
+
+  # AC52 / AC59 — every SKILL.md and README.md is listed in extra-files
+  # exactly once, as type generic.
+  tsv=""
+  while IFS= read -r body; do
+    [[ -z "$body" ]] && continue
+    p="$(json_string_field "$body" path)"
+    t="$(json_string_field "$body" type)"
+    [[ -z "$p" ]] && continue
+    tsv+="$t"$'\t'"$p"$'\n'
+  done < <(extra_files_entries "$REPO_ROOT/release-please-config.json")
+
+  required_paths="$( { find "$SKILLS_DIR" -mindepth 3 -maxdepth 3 -name SKILL.md -type f \
+                | while IFS= read -r f; do printf '%s\n' "${f#"$REPO_ROOT"/}"; done \
+                | sort; echo "README.md"; } )"
+
+  while IFS= read -r rel; do
+    n_any="$(printf '%s' "$tsv" | awk -F'\t' -v p="$rel" '$2 == p { n++ } END { print n + 0 }')"
+    n_generic="$(printf '%s' "$tsv" | awk -F'\t' -v p="$rel" '$1 == "generic" && $2 == p { n++ } END { print n + 0 }')"
+    if [[ "$n_any" -ne 1 ]]; then
+      check_fail "release-please-config.json: extra-files must list $rel exactly once, found $n_any"
+    elif [[ "$n_generic" -ne 1 ]]; then
+      check_fail "release-please-config.json: the extra-files entry for $rel is not type 'generic'"
+    fi
+  done <<<"$required_paths"
+
+  # Cardinality — extra-files must hold exactly the required set, no more.
+  # The loop above only checks that each required path is present; without
+  # this, a stale entry for a deleted skill, or an entry for an unrelated
+  # file, would sit in the array forever and pass silently — the same hole
+  # this whole check exists to close. The required set is computed from the
+  # tree above, not hardcoded, so it tracks the skill count automatically.
+  while IFS= read -r p; do
+    [[ -z "$p" ]] && continue
+    if ! grep -qxF "$p" <<<"$required_paths"; then
+      check_fail "release-please-config.json: extra-files lists $p, which is not a SKILL.md or README.md path"
+    fi
+  done < <(printf '%s' "$tsv" | awk -F'\t' '{ print $2 }')
+
+  # AC59 — README.md carries exactly two annotated lines, each on version.
+  n_any="$(grep -cF 'x-release-please-version' "$REPO_ROOT/README.md" || true)"
+  if [[ "$n_any" -ne 2 ]]; then
+    check_fail "README.md: expected exactly 2 x-release-please-version annotations, found $n_any"
+  fi
+  while IFS= read -r line; do
+    # `|| true`: under set -euo pipefail, a line with no X.Y.Z at all makes
+    # `grep -o` exit 1 and pipefail would abort this assignment (and the
+    # whole script) before check_fail ever ran. Tolerate zero matches so
+    # `declared` is empty, the comparison below fails normally, and the
+    # offending path is still named in the output.
+    declared="$(grep -oE '[0-9]+\.[0-9]+\.[0-9]+' <<<"$line" | head -1 || true)"
+    if [[ "$declared" != "$version" ]]; then
+      check_fail "README.md: annotated line declares '$declared' but version.txt says $version"
+    fi
+  done < <(grep -F 'x-release-please-version' "$REPO_ROOT/README.md" || true)
+
+  # AC53 — the bilingual entry exists for this version.
+  check_whats_new "$version"
+}
 
 # AC2 — frontmatter contract.
 check_frontmatter() {
@@ -303,6 +549,9 @@ run_checks() {
   local out_dir="$1"; shift
   local selected=("$@")
   local locale canonical stage
+
+  # Repo-wide, not per-locale: run it once.
+  check_version_coherence
 
   for locale in "${selected[@]}"; do
     for canonical in $(list_skills); do

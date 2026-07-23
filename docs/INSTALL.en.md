@@ -97,8 +97,8 @@ When a new version of Atelier ships:
 2. Re-upload it under **Customize → Skills**, just like in step 4.
 
 That's it — the new version replaces the old one. To see what changed
-between versions, check the repo's `CHANGELOG.md`: it lists what's new in
-plain language, no technical jargon.
+between versions, read [`WHATS-NEW.md`](WHATS-NEW.md): it lists what's new
+in plain language, no technical jargon.
 
 ## 7. If it doesn't work
 

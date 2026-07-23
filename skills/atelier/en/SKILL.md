@@ -1,7 +1,7 @@
 ---
 name: atelier
 description: Use when the executive has just installed Atelier, asks where to start or how to get started, wants onboarding or a Company Profile, wants to continue their work in a new conversation, asks for a relay or handoff, or wants to organize their work by department.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier — the hub

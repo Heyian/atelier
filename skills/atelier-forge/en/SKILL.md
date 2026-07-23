@@ -1,7 +1,7 @@
 ---
 name: atelier-forge
 description: Use when the executive wants to create a skill, asks for a new skill, says "I wish Claude could do X", wants to automate a recurring task, or wants to adapt Atelier to their line of work.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier-forge — the skill builder

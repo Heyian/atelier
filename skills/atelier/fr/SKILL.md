@@ -1,7 +1,7 @@
 ---
 name: atelier
 description: À utiliser quand la personne dirigeante vient d'installer Atelier, demande par où commencer, veut faire son accueil ou son profil d'entreprise, veut continuer son travail dans une nouvelle conversation, demande un relais, ou veut organiser son travail par département.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Atelier — le pivot

@@ -7,6 +7,19 @@ FAILURES=0
 fail() { echo "FAIL: $*"; FAILURES=$((FAILURES + 1)); }
 pass() { echo "ok: $*"; }
 
+# Run --check in a fixture and require both a non-zero exit and a named path
+# in the combined output. Every coherence mutation is asserted this way, so
+# a fixture that breaks for an unrelated reason cannot pass by accident.
+expect_check_fail() {
+  local dir="$1" needle="$2" label="$3" out rc
+  out="$( cd "$dir" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+  if [[ "$rc" -ne 0 ]] && grep -qF -- "$needle" <<<"$out"; then
+    pass "$label"
+  else
+    fail "$label (rc=$rc, out=$out)"
+  fi
+}
+
 # Build a minimal but valid repo in a temp dir: real build.sh, real shared texts,
 # one two-locale skill with differing localized names, and its scenarios.
 make_fixture_repo() {
@@ -26,7 +39,7 @@ make_fixture_repo() {
 ---
 name: atelier-ventes
 description: À utiliser quand il est question de pipeline, de relance ou de proposition commerciale.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Ventes
@@ -37,7 +50,7 @@ EOF
 ---
 name: atelier-sales
 description: Use when the conversation turns to pipeline, follow-ups, or proposals.
-version: 0.1.0
+version: 0.1.0 # x-release-please-version
 ---
 
 # Sales
@@ -65,6 +78,52 @@ triggers:
 ---
 ## Prompt
 Review my pipeline.
+EOF
+
+  printf '0.1.0\n' > "$dir/version.txt"
+
+  cat > "$dir/.release-please-manifest.json" <<'EOF'
+{
+  ".": "0.1.0"
+}
+EOF
+
+  cat > "$dir/release-please-config.json" <<'EOF'
+{
+  "include-v-in-tag": true,
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "changelog-path": "CHANGELOG.md",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": false,
+      "extra-files": [
+        { "type": "generic", "path": "README.md" },
+        { "type": "generic", "path": "skills/atelier-ventes/fr/SKILL.md" },
+        { "type": "generic", "path": "skills/atelier-ventes/en/SKILL.md" }
+      ]
+    }
+  }
+}
+EOF
+
+  cat > "$dir/README.md" <<'EOF'
+# Fixture
+
+Version 0.1.0 <!-- x-release-please-version -->
+
+Version 0.1.0 <!-- x-release-please-version -->
+EOF
+
+  mkdir -p "$dir/docs"
+  cat > "$dir/docs/WHATS-NEW.md" <<'EOF'
+# Quoi de neuf / What's new
+
+## v0.1.0
+
+**Français** — Première version.
+
+**English** — First release.
 EOF
 
   echo "$dir"
@@ -277,6 +336,257 @@ else
   fail "Fix1 did not reject drifted reference pointer (rc=$rc, out=$out)"
 fi
 rm -rf "$d"
+
+# --- AC50: a version line without the annotation fails, naming the path
+d="$(make_fixture_repo)"
+sed -i 's/^version: 0\.1\.0 # x-release-please-version$/version: 0.1.0/' \
+  "$d/skills/atelier-ventes/fr/SKILL.md"
+expect_check_fail "$d" "skills/atelier-ventes/fr/SKILL.md" \
+  "AC50 rejects a version line without the annotation"
+rm -rf "$d"
+
+# --- AC50: two version: lines in the frontmatter fail, naming the path
+d="$(make_fixture_repo)"
+sed -i '4a version: 0.1.0 # x-release-please-version' \
+  "$d/skills/atelier-ventes/en/SKILL.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/SKILL.md" \
+  "AC50 rejects two version: lines in the frontmatter"
+rm -rf "$d"
+
+# --- AC50: no version: line at all fails, naming the path
+d="$(make_fixture_repo)"
+sed -i '/^version: /d' "$d/skills/atelier-ventes/fr/SKILL.md"
+expect_check_fail "$d" "skills/atelier-ventes/fr/SKILL.md" \
+  "AC50 rejects a frontmatter with no version: line"
+rm -rf "$d"
+
+# --- AC50: a malformed SemVer on the annotated line fails, naming the path
+d="$(make_fixture_repo)"
+sed -i 's/^version: 0\.1\.0 # x-release-please-version$/version: 0.1 # x-release-please-version/' \
+  "$d/skills/atelier-ventes/en/SKILL.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/SKILL.md" \
+  "AC50 rejects a malformed SemVer on the annotated line"
+rm -rf "$d"
+
+# --- AC51: two skills declaring different versions fails, reporting both values
+d="$(make_fixture_repo)"
+sed -i 's/^version: 0\.1\.0 # x-release-please-version$/version: 0.2.0 # x-release-please-version/' \
+  "$d/skills/atelier-ventes/en/SKILL.md"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] && grep -qF '0.2.0' <<<"$out" && grep -qF '0.1.0' <<<"$out"; then
+  pass "AC51 rejects mismatched skill versions and reports both values"
+else
+  fail "AC51 did not report both disagreeing versions (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- AC51: version.txt disagreeing with the skills fails, reporting both values
+d="$(make_fixture_repo)"
+printf '0.3.0\n' > "$d/version.txt"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] && grep -qF '0.3.0' <<<"$out" && grep -qF '0.1.0' <<<"$out"; then
+  pass "AC51 rejects a version.txt disagreeing with the skills"
+else
+  fail "AC51 did not report the version.txt disagreement (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- AC52: a SKILL.md absent from extra-files fails, naming the path
+d="$(make_fixture_repo)"
+grep -v 'skills/atelier-ventes/en/SKILL.md' "$d/release-please-config.json" \
+  > "$d/rp.tmp"
+# The removed line carried the trailing comma's partner; re-close the array.
+sed -i 's/{ "type": "generic", "path": "skills\/atelier-ventes\/fr\/SKILL.md" },/{ "type": "generic", "path": "skills\/atelier-ventes\/fr\/SKILL.md" }/' \
+  "$d/rp.tmp"
+mv "$d/rp.tmp" "$d/release-please-config.json"
+expect_check_fail "$d" "skills/atelier-ventes/en/SKILL.md" \
+  "AC52 rejects a SKILL.md absent from extra-files"
+rm -rf "$d"
+
+# --- AC52: an extra-files entry lacking type: generic fails, naming the path
+d="$(make_fixture_repo)"
+sed -i 's/{ "type": "generic", "path": "skills\/atelier-ventes\/fr\/SKILL.md" }/{ "type": "json", "path": "skills\/atelier-ventes\/fr\/SKILL.md" }/' \
+  "$d/release-please-config.json"
+expect_check_fail "$d" "skills/atelier-ventes/fr/SKILL.md" \
+  "AC52 rejects an extra-files entry that is not type generic"
+rm -rf "$d"
+
+# --- AC52: an extra-files entry outside the required set fails, naming it
+d="$(make_fixture_repo)"
+sed -i '/"path": "README.md"/a\        { "type": "generic", "path": "docs/WHATS-NEW.md" },' \
+  "$d/release-please-config.json"
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC52 rejects an extra-files entry outside the required set"
+rm -rf "$d"
+
+# --- AC59: README.md missing an annotation fails, naming README.md
+d="$(make_fixture_repo)"
+sed -i '0,/^Version 0\.1\.0 <!-- x-release-please-version -->$/s//Version 0.1.0/' \
+  "$d/README.md"
+expect_check_fail "$d" "README.md" "AC59 rejects a README with one annotation"
+rm -rf "$d"
+
+# --- AC59: an annotated README line disagreeing with version.txt fails
+d="$(make_fixture_repo)"
+sed -i '0,/^Version 0\.1\.0 <!-- x-release-please-version -->$/s//Version 0.9.9 <!-- x-release-please-version -->/' \
+  "$d/README.md"
+expect_check_fail "$d" "README.md" \
+  "AC59 rejects an annotated README line disagreeing with version.txt"
+rm -rf "$d"
+
+# --- AC59: extra-files without a README.md entry fails, naming README.md
+d="$(make_fixture_repo)"
+sed -i '/"path": "README.md"/d' "$d/release-please-config.json"
+expect_check_fail "$d" "README.md" \
+  "AC59 rejects extra-files with no README.md entry"
+rm -rf "$d"
+
+# --- AC59: an annotated README line carrying no SemVer at all fails, naming
+# the path, and must not abort the script under set -euo pipefail.
+d="$(make_fixture_repo)"
+sed -i '0,/^Version 0\.1\.0 <!-- x-release-please-version -->$/s//<!-- x-release-please-version -->/' \
+  "$d/README.md"
+expect_check_fail "$d" "README.md" \
+  "AC59 rejects an annotated README line with no SemVer"
+rm -rf "$d"
+
+# --- AC53: a WHATS-NEW heading with an empty section fails, naming the path
+d="$(make_fixture_repo)"
+cat > "$d/docs/WHATS-NEW.md" <<'EOF'
+# Quoi de neuf / What's new
+
+## v0.1.0
+
+## v0.0.9
+
+**Français** — Ancienne version.
+
+**English** — Old release.
+EOF
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC53 rejects a v0.1.0 heading with an empty section"
+rm -rf "$d"
+
+# --- AC53: a section missing the English half fails, naming the path
+d="$(make_fixture_repo)"
+cat > "$d/docs/WHATS-NEW.md" <<'EOF'
+# Quoi de neuf / What's new
+
+## v0.1.0
+
+**Français** — Première version.
+EOF
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC53 rejects a section with no English half"
+rm -rf "$d"
+
+# --- AC53: a label with no prose after it fails, naming the path
+d="$(make_fixture_repo)"
+cat > "$d/docs/WHATS-NEW.md" <<'EOF'
+# Quoi de neuf / What's new
+
+## v0.1.0
+
+**Français** — Première version.
+
+**English**
+EOF
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC53 rejects a label with no prose after it"
+rm -rf "$d"
+
+# --- AC53: no heading for the current version fails, naming the path
+d="$(make_fixture_repo)"
+sed -i 's/^## v0\.1\.0$/## v0.0.9/' "$d/docs/WHATS-NEW.md"
+expect_check_fail "$d" "docs/WHATS-NEW.md" \
+  "AC53 rejects a WHATS-NEW with no heading for version.txt's version"
+rm -rf "$d"
+
+# --- AC54: each required file, missing then empty, fails naming that path
+for target in version.txt release-please-config.json \
+              .release-please-manifest.json docs/WHATS-NEW.md README.md; do
+  d="$(make_fixture_repo)"
+  rm -f "$d/$target"
+  expect_check_fail "$d" "$target" "AC54 rejects a missing $target"
+  rm -rf "$d"
+
+  d="$(make_fixture_repo)"
+  : > "$d/$target"
+  expect_check_fail "$d" "$target" "AC54 rejects an empty $target"
+  rm -rf "$d"
+done
+
+# --- AC54: a version.txt with two lines fails, naming version.txt
+d="$(make_fixture_repo)"
+printf '0.1.0\n0.1.0\n' > "$d/version.txt"
+expect_check_fail "$d" "version.txt" "AC54 rejects a two-line version.txt"
+rm -rf "$d"
+
+# --- AC54: a version.txt that is not SemVer fails, naming version.txt
+d="$(make_fixture_repo)"
+printf 'v0.1.0\n' > "$d/version.txt"
+expect_check_fail "$d" "version.txt" "AC54 rejects a non-SemVer version.txt"
+rm -rf "$d"
+
+# --- AC54: an unparseable release-please-config.json fails, naming the path
+d="$(make_fixture_repo)"
+printf '{ "packages": { ".": { "extra-files": [ }\n' \
+  > "$d/release-please-config.json"
+expect_check_fail "$d" "release-please-config.json" \
+  "AC54 rejects an unparseable release-please-config.json"
+rm -rf "$d"
+
+# --- AC54: an unparseable .release-please-manifest.json fails, naming the path
+d="$(make_fixture_repo)"
+printf '{ ".": "0.1.0"\n' > "$d/.release-please-manifest.json"
+expect_check_fail "$d" ".release-please-manifest.json" \
+  "AC54 rejects an unparseable .release-please-manifest.json"
+rm -rf "$d"
+
+# --- AC55: the clean fixture passes, with the exact PASS line
+d="$(make_fixture_repo)"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && grep -qxF 'STATUS: PASS (mechanical checks)' <<<"$out"; then
+  pass "AC55 clean fixture passes with the exact PASS line"
+else
+  fail "AC55 clean fixture did not print the exact PASS line (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- AC56: --check passes with jq off PATH
+# A shim PATH holding only the documented build dependencies. `jq` is absent
+# from it by construction, so this proves the checks never reach for it.
+d="$(make_fixture_repo)"
+shim="$(mktemp -d)"
+for tool in bash awk grep find zip unzip sed cat head sort wc cmp mktemp rm mkdir cp mv tr basename dirname printf; do
+  src="$(command -v "$tool" 2>/dev/null)" || continue
+  ln -sf "$src" "$shim/$tool"
+done
+out="$( cd "$d" && PATH="$shim" bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && ! PATH="$shim" command -v jq >/dev/null 2>&1; then
+  pass "AC56 --check passes with jq off PATH"
+else
+  fail "AC56 --check failed without jq (rc=$rc, out=$out)"
+fi
+rm -rf "$shim" "$d"
+
+# --- AC57: the packaged SKILL.md carries the version without the annotation
+d="$(make_fixture_repo)"
+( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
+x="$(mktemp -d)"
+unzip -q "$d/dist/atelier-ventes-fr.zip" -d "$x"
+packaged="$(grep '^version:' "$x/SKILL.md")"
+if [[ "$packaged" == "version: 0.1.0" ]]; then
+  pass "AC57 packaged SKILL.md version line has the annotation stripped"
+else
+  fail "AC57 packaged version line is '$packaged', expected 'version: 0.1.0'"
+fi
+if grep -rqF 'x-release-please-version' "$x"; then
+  fail "AC57 an archive member still contains x-release-please-version"
+else
+  pass "AC57 no archive member contains x-release-please-version"
+fi
+rm -rf "$x" "$d"
 
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi

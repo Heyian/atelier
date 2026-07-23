@@ -104,8 +104,8 @@ Quand une nouvelle version d'Atelier sort :
 2. Retéléverse-le dans **Personnaliser → Compétences**, comme à l'étape 4.
 
 C'est tout — la nouvelle version remplace l'ancienne. Pour savoir ce qui a
-changé d'une version à l'autre, consulte le fichier `CHANGELOG.md` du
-dépôt : il liste les nouveautés en langage clair, sans jargon technique.
+changé d'une version à l'autre, consulte [`WHATS-NEW.md`](WHATS-NEW.md) :
+il liste les nouveautés en langage clair, sans jargon technique.
 
 ## 7. Si ça ne marche pas
 

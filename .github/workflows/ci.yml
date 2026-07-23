@@ -1,9 +1,19 @@
 name: CI
 
 on:
-  push:
-    branches: ['**']
+  # No `branches` filter on pull_request: this must run on PRs targeting dev
+  # and main alike, including release-please's own release PR — that is where
+  # the WHATS-NEW.md forcing function (AC53) fires.
   pull_request:
+  push:
+    branches: [dev, main]
+
+# A ref-keyed group so a rapid second push supersedes the first run instead of
+# queueing behind it. pull_request events carry refs/pull/N/merge, so a PR's
+# runs never cancel its branch's push runs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   checks-linux:
@@ -31,6 +41,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Build-script tests on Windows
+        shell: pwsh
+        # AC58: the Windows job runs the same coherence mutation matrix through
+        # build.ps1, not only the coherent real repository.
+        run: ./scripts/tests/build_test.ps1
       - name: Mechanical checks on Windows
         shell: pwsh
         run: ./scripts/build.ps1 -Check
