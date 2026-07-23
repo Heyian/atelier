@@ -27,7 +27,7 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Shared-text tests
         run: bash scripts/tests/shared_test.sh
       - name: Authoring-standards tests
@@ -40,7 +40,7 @@ jobs:
   checks-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build-script tests on Windows
         shell: pwsh
         # AC58: the Windows job runs the same coherence mutation matrix through

@@ -65,7 +65,7 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build every locale
         run: bash scripts/build.sh --lang all
@@ -100,7 +100,7 @@ jobs:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Merging the release PR rewrites eighteen version-bearing files on main
       # while dev still declares the old version in every one of them. Without
