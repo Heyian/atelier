@@ -68,8 +68,13 @@ wrote it". A bypassed rule is worse than an absent one: it still reads as a
 guarantee. The rule is dropped instead.
 
 This is a claim about a *version*: `googleapis/release-please-action` is pinned
-to `@v4` partly for that reason. Should a later release-please gain commit
-signing, the argument stops applying and the decision is worth reopening.
+to `@v5` partly for that reason. The pin moved from `@v4` to `@v5` on
+2026-07-23 to reach the Node 24 runtime; the `v4`→`v5` changelog's sole
+breaking change is that runtime, with no commit-signing behaviour added, so the
+unsigned-commit premise above still holds for `@v5`. Should a later
+release-please gain commit signing, the argument stops applying and the
+decision is worth reopening — the first real `@v5` release landing on `main` is
+where an unexpectedly signed commit would surface it.
 
 The ruleset that carried `~DEFAULT_BRANCH` is retargeted to name
 `refs/heads/main` and `refs/heads/dev` explicitly — the flip would otherwise
