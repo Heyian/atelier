@@ -520,7 +520,11 @@ Build & packaging:
   at the ZIP root.
 - **AC2** — Every built ZIP's SKILL.md has valid frontmatter: `name`
   (letters/numbers/hyphens only) and `description` present, ≤1024
-  characters combined, and a version.
+  characters combined, and a version. *Refined by AC50 in
+  `docs/superpowers/specs/2026-07-22-release-please-design.md`: in the source
+  tree the version line must additionally carry the
+  ` # x-release-please-version` annotation, which `stage_skill` strips at
+  packaging time — so the version inside the ZIP is unchanged.*
 - **AC3** — Given no language option, `scripts/build.sh` and
   `scripts/build.ps1` each prompt for français / English / both; given
   the script's own non-interactive language option — `build.sh --lang
