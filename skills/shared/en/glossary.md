@@ -26,3 +26,5 @@
 - **Workspace** — a Claude Project dedicated to one department, with its own
   instructions and reference documents.
 - **Routine** — recurring work Claude runs without you, on a fixed schedule.
+- **Tutorial** — the walkthrough of how Claude works, in seven **modules** you
+  can take in full or revisit one at a time.

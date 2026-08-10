@@ -29,3 +29,5 @@
   avec ses instructions et ses documents de référence.
 - **Routine** — un travail récurrent que Claude exécute sans toi, à intervalle
   fixe.
+- **Tutoriel** — le parcours qui explique comment Claude fonctionne, en sept
+  **modules** qu'on peut faire au complet ou revoir un par un.
