@@ -7,8 +7,8 @@ what's actually possible in the conversation — not just how it looks.
 
 **Chat** is a conversation: you write, Claude answers, and the back-and-forth
 is the whole of it. The **Cowork tab** is built for a different kind of job —
-something with several steps, that touches files, or that keeps running after
-you've looked away.
+the kind that takes more than a quick back-and-forth, with several steps
+between where you start and where you finish.
 
 ## claude.ai web vs. Desktop, and what each can reach
 
@@ -51,6 +51,7 @@ server reachable over the public internet.
 ## Try it on your own
 
 Open claude.ai on the web and, separately, the Claude Desktop app if you have
-it installed. Compare what each shows under Connectors, and, if you use
-Cowork, check whether Desktop is open before you ask it to touch a local
-folder — that's the condition the folder-access answer above depends on.
+it installed. Compare what each shows for your connected services, and, if
+you use Cowork, check whether Desktop is open before you ask it to touch a
+local folder — that's the condition the folder-access answer above depends
+on.

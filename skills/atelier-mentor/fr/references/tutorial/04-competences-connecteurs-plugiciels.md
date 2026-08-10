@@ -43,16 +43,16 @@ installer d'un coup plutôt qu'une à une.
 | Onglet Chat de Claude Desktop | Oui, sur les plans payants | Non — grisées |
 | Cowork | Oui, sur les plans payants | Oui |
 
+En pratique : les compétences d'un plugiciel se retrouvent partout, alors
+choisis la surface selon le reste de ta tâche — Chat pour une question
+rapide, Cowork si ça demande une automatisation ou plusieurs étapes. Les
+hooks et les sous-agents ne tournent que dans Cowork ; ailleurs, ils
+apparaissent grisés, pas absents.
+
 > **Vérifié le 2026-08-10** — source : centre d'aide Anthropic, article 13837440
 > (« Use plugins in Claude »). Les capacités changent de mois en mois : montre
 > cette date à la personne, et propose de revérifier dans
 > `references/sources.md` avant qu'elle bâtisse quoi que ce soit dessus.
-
-En pratique : les compétences d'un plugiciel se retrouvent partout, alors
-choisis la surface selon le reste de ta tâche — Chat pour une question
-rapide, Cowork si ça touche des fichiers. Mais si le travail dépend d'une
-automatisation (hooks, sous-agents), seul Cowork la fait tourner ; ailleurs,
-elle apparaît grisée, pas absente.
 
 ## À essayer de ton bord
 

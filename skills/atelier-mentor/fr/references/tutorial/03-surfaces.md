@@ -7,8 +7,8 @@ est réellement possible dans la conversation — pas juste son allure.
 
 Le **Chat** est une conversation : tu écris, Claude répond, et l'échange est
 tout le travail. L'**onglet Cowork** est pensé pour un autre genre de tâche —
-quelque chose avec plusieurs étapes, qui touche à des fichiers, ou qui
-continue de tourner même quand tu ne regardes plus.
+celle qui prend plus qu'un aller-retour rapide, avec plusieurs étapes entre le
+début et la fin.
 
 ## claude.ai sur le web contre Desktop, et ce que chacun peut atteindre
 

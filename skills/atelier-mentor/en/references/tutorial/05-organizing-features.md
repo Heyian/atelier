@@ -7,16 +7,15 @@ single conversation at a time: Projects, Artifacts, Scheduled, and Dispatch.
 
 A **Project** is a persistent, self-contained workspace with its own files,
 context, instructions, and memory — you group related tasks into it instead
-of starting each one from a blank conversation.
+of starting each one from a blank conversation. One limit worth knowing:
+Cowork projects are desktop-only and stored locally — there's no cloud sync
+for project data. If you build a project on one computer, it stays on that
+computer.
 
 > **Last verified 2026-08-10** — source: Anthropic help center, article 14116274
 > ("Organize your tasks with projects in Claude Cowork"). Capabilities shift
 > month to month: show the executive this date, and offer to re-verify
 > against `references/sources.md` before they build anything on it.
-
-One limit worth knowing: Cowork projects are desktop-only and stored
-locally — there's no cloud sync for project data. If you build a project on
-one computer, it stays on that computer.
 
 ## Artifacts
 
