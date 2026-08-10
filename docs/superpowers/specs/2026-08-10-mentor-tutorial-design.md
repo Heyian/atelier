@@ -68,10 +68,27 @@ In ZPD order. Each doubles as a numbered choice in the refresh part-picker.
    `references/fact-checking.md` for the *practices*; the two must not restate
    each other.
 
-Every module ends with a named practice section. Where the concept can be
-exercised in this conversation, the section invites the executive to try it now;
-where it cannot, the section says where to exercise it instead rather than
-inventing an exercise.
+### Module files and practice type
+
+Filenames are fixed by this spec and are maintainer-facing — they do not change
+with Claude's on-screen labels, which govern the module *bodies* only.
+
+Every module ends with a named practice section. Whether that practice is
+**in-conversation** or **external** is decided here, per module, so the module
+author is never left judging it:
+
+| # | FR filename | EN filename | Practice |
+| --- | --- | --- | --- |
+| 01 | `01-comment-claude-pense.md` | `01-how-claude-thinks.md` | **In-conversation** — ask mentor for a relay right now and watch memory-in-files answer the degradation problem just described. |
+| 02 | `02-modeles-et-effort.md` | `02-models-and-effort.md` | External — the model and effort pickers are interface controls mentor cannot operate. |
+| 03 | `03-surfaces.md` | `03-surfaces.md` | External — comparing surfaces means opening another one. |
+| 04 | `04-competences-connecteurs-plugiciels.md` | `04-skills-connectors-plugins.md` | External — enabling a skill or connector happens in account settings. |
+| 05 | `05-fonctions-organisation.md` | `05-organizing-features.md` | External — creating a Project is an interface action. |
+| 06 | `06-hygiene-des-competences.md` | `06-skill-hygiene.md` | **In-conversation** — mentor can see which skills are enabled in the conversation (`onboarding.md` Step 4 already relies on this) and reviews the executive's actual roster against the module's symptoms on the spot. |
+| 07 | `07-confiance-et-verification.md` | `07-trust-and-verification.md` | **In-conversation** — the executive hands mentor a claim and mentor fact-checks it now. |
+
+An external practice names where to go and what to do there; it never invents an
+in-conversation exercise to fill the slot.
 
 ### Dated claims (modules 3, 4, 5)
 
@@ -106,7 +123,8 @@ ONBOARDING (any run, including the update path)
 
   Step 1  establish the root
     ↓
-  OFFER   full tutorial / refresh / skip     ← recommended answer given,
+  OFFER   full tutorial / refresh / skip     ← the full tutorial is the
+    │                                          recommended answer;
     │                                          exit rule explained here
     ├─ refresh → part-picker inline → modules run → Step 2
     ├─ full    → hub writes the short relais and stops
@@ -127,11 +145,16 @@ EVERY ENTRY
   recommends the ones not yet covered
 ```
 
+**The recommended answer is the full tutorial**, on every run. The hub cannot
+read `progression.md` (see below), so the recommendation is static — and for the
+population actually sitting in a first onboarding, "you have never done this" is
+the right assumption.
+
 The hub always offers; **mentor de-duplicates**. The hub does not read
 `progression.md` — that file is mentor's record, and the hub's Memory block
 (decision log, role registry) is unchanged. A "full tutorial" request from
-someone who has already covered five modules gets a suggestion to refresh the
-two missing ones instead.
+someone who has already covered five modules gets a suggestion to take the two
+missing ones instead.
 
 ### The part-picker
 
@@ -217,6 +240,8 @@ quotation glyphs in the scenario and in the description, or the build fails.
 ## Acceptance Criteria
 
 Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*.
+AC41–AC46 were added by the Stage 2 cross-model critique, which also sharpened
+AC4, AC6, AC9, AC12–AC18, AC22, AC26 and AC35 in place.
 
 ### Corpus source doc
 
@@ -234,9 +259,10 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
 - **AC3** — `skills/atelier-mentor/{fr,en}/SKILL.md` each carry a Tutorial
   section that routes to `references/tutorial.md`, states that the executive may
   leave at any point, and ends on a checkable completion criterion.
-- **AC4** — Both mentor `SKILL.md` files are at or under 550 words after the
-  change (they are 549 and 565 before it), and `docs/AUTHORING.md`'s word target
-  is unchanged.
+- **AC4** — `wc -w < skills/atelier-mentor/<locale>/SKILL.md` returns 550 or
+  less for both locales after the change. The count is taken over the whole
+  file, frontmatter included — the same measure that reads 549 (EN) and 565
+  (FR) before it. `docs/AUTHORING.md`'s word target is unchanged.
 - **AC5** — Each locale's mentor `description` contains, verbatim, every term
   listed under `triggers:` in that locale's new tutorial scenarios, and
   `atelier`'s description is unchanged.
@@ -244,8 +270,9 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
 ### Reference layout
 
 - **AC6** — For each locale, `references/tutorial.md` exists and
-  `references/tutorial/` contains exactly seven module files numbered `01`–`07`
-  in the ZPD order of this spec, with locale-appropriate slugs.
+  `references/tutorial/` contains exactly the seven filenames listed for that
+  locale in the *Module files and practice type* table — no more, no fewer, no
+  renames.
 - **AC7** — Every `atelier-mentor` ZIP built by `scripts/build.sh --lang all`
   **and** by `scripts/build.ps1 -Lang all` contains `references/tutorial.md` and
   all seven `references/tutorial/` files.
@@ -254,39 +281,48 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
 
 - **AC8** — Given any entry into the tutorial, mentor states the exit rule
   before delivering the first module's content.
-- **AC9** — Given a refresh, mentor presents all seven modules as a numbered
-  list, marks each already-covered module with the date read from
-  `progression.md`, and names its own recommendation.
+- **AC9** — Given a refresh with fewer than seven modules covered, mentor lists
+  all seven modules numbered `1`–`7`, shows the recorded date beside each
+  covered module, and recommends every uncovered module and only those.
 - **AC10** — Given `progression.md` is absent, the picker lists all seven
   modules unmarked and mentor recommends the full tutorial.
 - **AC11** — Given `progression.md` records all seven modules covered, mentor
   says so and offers a specific module to re-run instead of the full sequence.
-- **AC12** — Mentor never delivers two modules in the same message, and checks
-  the executive's understanding before advancing from one module to the next.
-- **AC13** — Every module file ends with a named practice section: an invitation
-  to try the concept in this conversation where it can be exercised here, and
-  otherwise a statement of where to exercise it.
-- **AC14** — Module 7 covers hallucination and misplaced confidence as concepts
-  and points to `references/fact-checking.md` for the practices; neither file
-  restates the other's content.
+- **AC12** — Mentor never delivers two modules in the same message. Before
+  sending the next module it asks a question that requires the executive to
+  restate or apply the preceding module's concept — not a bare "does that make
+  sense?" — and waits for their answer.
+- **AC13** — Every module file ends with a named practice section matching its
+  row in the *Module files and practice type* table: modules 01, 06 and 07 carry
+  an invitation to try the concept in this conversation; modules 02, 03, 04 and
+  05 name where to go and what to do there, and contain no in-conversation
+  exercise.
+- **AC14** — Module 07 defines hallucination and misplaced confidence and links
+  to `references/fact-checking.md`, without reproducing any fact-checking
+  procedure from it; `fact-checking.md` does not reproduce those conceptual
+  definitions.
 
 ### Dated capability claims
 
-- **AC15** — Every capability-sensitive claim in modules 3, 4 and 5 carries a
-  last-verified date and a named source in the same file. No such claim ships
-  undated.
-- **AC16** — Module 4's per-surface matrix states that skills bundled in a
+- **AC15** — Every assertion in modules 03, 04 and 05 about current surface
+  availability, folder or connector access, feature support, plan eligibility,
+  interface labels, or product limits carries a last-verified date and a named
+  source in the same file. That list delimits "capability-sensitive"; nothing
+  in it ships undated.
+- **AC16** — Module 04's per-surface matrix states that skills bundled in a
   plugin work on claude.ai web chat, the Desktop Chat tab, and Cowork for paid
-  plans, and that hooks and sub-agents run only in Cowork. The date it carries
-  is the date implementation verified it against a source in
-  `references/sources.md` — not 2026-07-21.
-- **AC17** — Given the executive is about to build a way of working on a dated
-  claim, mentor either offers to re-verify it against `references/sources.md` or
-  states it cannot verify from here and cites where to check. It never restates
-  the dated claim as a current promise.
+  plans, and that hooks and sub-agents run only in Cowork. It is annotated with
+  a last-verified date later than 2026-07-21 and a source of a kind
+  `references/sources.md` permits.
+- **AC17** — Given the executive states they will rely on a dated claim for a
+  workflow, mentor offers to re-verify it against `references/sources.md`; if it
+  cannot verify from this conversation, it says so and names where to check. In
+  neither response does it present the dated claim as currently verified.
 - **AC18** — The French module bodies name skills, connectors, plugins,
-  Projects and Artifacts using Claude's French interface labels, annotated with
-  the same last-verified date and source.
+  Projects and Artifacts using Claude's French interface labels. Each label is
+  covered by a last-verified date and named source recording how that label was
+  verified; labels verified in one pass against one source may share a single
+  annotation.
 
 ### Progression record
 
@@ -298,8 +334,9 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
   per module and never a silent write.
 - **AC21** — Given the executive exits mid-module, only completed modules appear
   in the proposal.
-- **AC22** — Given the proposal receives no answer, nothing is written and
-  mentor states the record waits for the next session.
+- **AC22** — The proposal message itself states that nothing will be written
+  without an explicit answer and that the record then waits for the next
+  session; and given no answer follows, no write occurs.
 - **AC23** — Given `progression.md` does not exist and a tutorial record is
   confirmed, the file is created with the documented format's headings,
   including the tutorial section.
@@ -313,8 +350,9 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
 ### Hub onboarding offer
 
 - **AC26** — `skills/atelier/{fr,en}/references/onboarding.md` places the offer
-  between Step 1 and Step 2, offering full tutorial / refresh / skip with a
-  recommended answer, and explains the exit rule at the offer.
+  between Step 1 and Step 2, offering full tutorial / refresh / skip, naming the
+  **full tutorial** as its recommendation on every run, and explaining the exit
+  rule at the offer.
 - **AC27** — Given the executive picks refresh, the picked modules run inline
   and onboarding then resumes at Step 2.
 - **AC28** — Given the executive picks the full tutorial, the hub produces the
@@ -343,8 +381,11 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
   « Tutoriel » / "Tutorial" — which defines **module** within it and follows the
   file's existing entry format.
 - **AC35** — `docs/adr/0011-dated-capability-claims-in-shipped-references.md`
-  and `docs/adr/0012-teaching-capabilities-live-in-mentor.md` exist with Status,
-  Context, Decision and Consequences sections; 0012 references ADR-0002.
+  and `docs/adr/0012-teaching-capabilities-live-in-mentor.md` exist, each with
+  Status, Context, Decision and Consequences sections. ADR-0011's Decision
+  records the dated-claim gate and the re-verification index; ADR-0012's records
+  that teaching capability lands in mentor rather than a new skill, and
+  references ADR-0002.
 
 ### Tests and build
 
@@ -360,6 +401,36 @@ Numbered independently of the v1 spec's AC1–AC59; cite these as *tutorial AC#*
   reported in issue #11.
 - **AC40** — `bash scripts/build.sh --check` and `pwsh -File scripts/build.ps1
   -Check` both pass.
+
+### Added by the Stage 2 cross-model critique
+
+AC1–AC40 were sharpened in place; these six close requirements the design prose
+claimed but no criterion captured.
+
+- **AC41** — Each of the seven module files covers the concepts listed for its
+  number in *The seven modules*: correct numbering and a practice section are
+  not sufficient. Module 01 covers the context window, tokens, and why long or
+  compacted conversations degrade, and ties that to fresh conversations plus
+  memory in files. Module 02 covers model families, what an effort level
+  changes, and the speed/depth trade-off. Module 03 covers Chat vs the Cowork
+  tab and claude.ai web vs Desktop, including folder access and connector
+  reach. Module 05 covers Projects, Artifacts, Scheduled and Dispatch. Module 06
+  covers the hygiene symptoms and states the ~10–15 enabled-skill figure as a
+  smell, not a rule.
+- **AC42** — When mentor teaches a claim carrying a last-verified date, the
+  response shows the executive that date. A date present in the reference file
+  but absent from what the executive reads fails this criterion.
+- **AC43** — Given the executive asks for the **full** tutorial and
+  `progression.md` records some but not all modules covered, mentor names the
+  covered modules and proposes taking only the uncovered ones instead of
+  replaying the sequence. (AC24 covers the same de-duplication in refresh mode.)
+- **AC44** — Given a conversation after onboarding in which no skill is named,
+  a prompt using the trigger vocabulary of AC5 reaches mentor's tutorial, and
+  mentor offers the same full/refresh choice the onboarding path offers.
+- **AC45** — `docs/mentor-corpus.md` carries the module 07 cross-reference: the
+  tutorial holds the concepts, `fact-checking.md` holds the practices.
+- **AC46** — `CLAUDE.md` gains exactly one line pointing at this spec, under the
+  existing design-spec pointers, and the file stays under 300 lines.
 
 ## Deferred Items
 
@@ -448,7 +519,7 @@ mentor's `SKILL.md` (Tutorial section, trimmed prose, description),
 `references/tutorial.md` and the seven module files per locale, the
 `progression.md` format change, the shared glossary entry, the four mentor
 scenarios per locale, and the `tests/_cross-skill/declenchement.md` re-run.
-Satisfies AC1–AC25 and AC34–AC38.
+Satisfies AC1–AC25, AC34–AC38, and AC41–AC46.
 
 **PR 2 — `feat(atelier)`: the onboarding offer.** `onboarding.md` and
 `relais.md` per locale, and `tests/atelier/{fr,en}/accueil-offre-tutoriel.md`.
@@ -495,7 +566,7 @@ if PR 2 slips.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC40) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC46) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
