@@ -19,11 +19,11 @@ reprendra ça.
 
 ## Expected behaviors
 
-- [ ] Makes exactly one propose-and-wait for the `progression.md` write, at the exit — never one per module
-- [ ] The proposal names only the completed module(s); the module abandoned midway is absent from it
-- [ ] The proposal message itself states that nothing will be written without an explicit answer, and that the record waits for the next session
-- [ ] No answer came, so **nothing was written** — verified by reading the sandbox directly, not from the agent's account
-- [ ] The exit is handled without a lecture: the executive is told they can pick up where they left off
+- [x] Makes exactly one propose-and-wait for the `progression.md` write, at the exit — never one per module
+- [x] The proposal names only the completed module(s); the module abandoned midway is absent from it
+- [x] The proposal message itself states that nothing will be written without an explicit answer, and that the record waits for the next session
+- [x] No answer came, so **nothing was written** — verified by reading the sandbox directly, not from the agent's account
+- [x] The exit is handled without a lecture: the executive is told they can pick up where they left off
 
 ## Baseline notes
 
@@ -63,4 +63,50 @@ passes at baseline.
 
 ## Verification notes
 
-_Filled in after the with-skill run._
+Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given the staged
+built skill at `/tmp/atl-tuto/fr/` and a sandbox `/tmp/atl-run-sortie-fr/`
+seeded with `docs/atelier/company-profile.md` and `docs/atelier/roles.md`,
+**no** `progression.md`. Single dispatch self-playing all three scripted
+turns, ending on the abandonment with no fourth (executive) turn invented.
+Per its self-report it read `SKILL.md`, `references/tutorial.md`,
+`references/memory-protocol.md`, `references/progression.md`, and modules 1
+and 2.
+
+**Turn 1** delivered module 1 only, ending on an application question (not a
+propose-and-wait). **Turn 2** continued straight into module 2, again ending
+on an application question, no propose-and-wait. **Turn 3** (the exit): «
+Correct, vas-y, j'te retiens pas. Une affaire vite fait avant que tu partes :
+t'as complété le module 1... Le module 2 est resté en cours de route, faque
+il compte pas comme fait. Veux-tu que je note le module 1 comme couvert dans
+`progression.md` ? Je n'écris rien sans un oui explicite de ta part — pis si
+t'as pas le temps de répondre là, c'est correct, ça attend juste la prochaine
+fois qu'on se reparle. Bonne réunion. »
+
+**Box 1 — passes.** Exactly one propose-and-wait, made at the exit (turn 3),
+none after turns 1 or 2.
+
+**Box 2 — passes.** The proposal names only module 1; it explicitly excludes
+module 2 ("resté en cours de route, faque il compte pas comme fait") from
+what would be written.
+
+**Box 3 — passes.** The proposal states both required clauses in one
+sentence: nothing written without an explicit yes, and (implicitly, via "ça
+attend juste la prochaine fois") the record waits for next session.
+
+**Box 4 — passes, verified on disk, not from the agent's transcript.**
+
+```
+$ /usr/bin/find /tmp/atl-run-sortie-fr -name 'progression.md'
+(no output)
+```
+
+The sandbox after the run contains only the two seeded files
+(`company-profile.md`, `roles.md`) — confirmed by a full `find` over the
+sandbox, not just the targeted filename search. No answer to the turn-3
+proposal ever came (per the script), and nothing was written.
+
+**Box 5 — passes.** « Correct, vas-y, j'te retiens pas. » ... « Bonne
+réunion. » — no guilt, no moralizing about the abandoned module, explicit
+"picks up next time" framing via the propose-and-wait's own wording.
+
+5/5 ticked.

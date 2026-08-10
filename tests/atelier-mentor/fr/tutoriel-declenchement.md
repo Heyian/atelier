@@ -15,10 +15,10 @@ même conversation.
 ## Expected behaviors
 
 - [ ] Reaches the tutorial from a prompt that names no skill and never says « tutoriel »
-- [ ] Offers the same two modes the onboarding path offers — le tutoriel complet ou une révision d'un ou deux modules
-- [ ] States the exit rule — la personne peut quitter à tout moment — before delivering any module content
-- [ ] Delivers at most one module in the message, and ends by asking the executive to restate or apply the concept before moving on
-- [ ] Does not silently write anything to `progression.md`
+- [x] Offers the same two modes the onboarding path offers — le tutoriel complet ou une révision d'un ou deux modules
+- [x] States the exit rule — la personne peut quitter à tout moment — before delivering any module content
+- [x] Delivers at most one module in the message, and ends by asking the executive to restate or apply the concept before moving on
+- [x] Does not silently write anything to `progression.md`
 
 ## Baseline notes
 
@@ -72,4 +72,48 @@ Failing boxes at baseline: all five.
 
 ## Verification notes
 
-_Filled in after the with-skill run._
+Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given the staged
+built skill at `/tmp/atl-tuto/fr/` (unzipped from `dist/atelier-mentor-fr.zip`)
+and a sandbox `/tmp/atl-run-declenchement-fr/` seeded with
+`docs/atelier/company-profile.md` (Manufacture Verdon inc., fictional) and
+`docs/atelier/roles.md` (`atelier-ventes`), and **no** `progression.md`.
+Single-turn dispatch, the scenario's `## Prompt` verbatim. Confined to the two
+directories; per its own self-report it read `SKILL.md`,
+`references/tutorial.md`, `references/tutorial/01-comment-claude-pense.md`,
+`references/memory-protocol.md`, both sandbox files, and confirmed
+`progression.md`'s absence before answering.
+
+**Box 1 (triggers without the skill being named) — left unticked, per
+`tests/README.md` § "The triggers without the skill being named box."** This
+dispatch handed the agent the one skill under test directly, so it structurally
+cannot demonstrate discovery from bare trigger vocabulary — that is what
+`tests/_cross-skill/declenchement.md` tests instead. As an inferred, not
+controlled, signal: the agent's reply opened straight into tutorial framing
+(the exit rule, the two-mode offer, the seven-module list) off a prompt that
+never said « tutoriel » — consistent with the trigger having worked, but not
+proof, since the skill was never in competition with any other. Recorded
+honestly as unticked rather than credited.
+
+**Box 2 (two modes) — passes.** Reply: « Y a deux façons de faire ça : le
+complet (les sept modules, dans l'ordre) ou la révision (tu piges juste ceux
+qui t'intéressent). »
+
+**Box 3 (exit rule before content) — passes.** Opening line, before the
+selector and before any module content: « Avant de partir : tu peux arrêter
+n'importe quand, dans le tutoriel. On note où tu es rendu, pis on reprend plus
+tard sans repartir de zéro. »
+
+**Box 4 (at most one module, ends on restate/apply) — passes.** Delivered
+module 1 only, then closed on the module's own built-in practice section
+(verbatim from `references/tutorial/01-comment-claude-pense.md`'s « À essayer
+tout de suite » — confirmed by reading that file directly): « À essayer tout
+de suite : demande-moi un relais, là, maintenant, sur ce qu'on vient de
+faire. » This is an application prompt (not the forbidden "does this make
+sense?"), so it satisfies the box even though it's the module's own written
+practice rather than a freshly composed question.
+
+**Box 5 (no silent write) — passes, confirmed on disk, not just self-report.**
+`/usr/bin/find /tmp/atl-run-declenchement-fr -name 'progression.md'` returns
+nothing; the sandbox after the run contains only the two seeded files.
+
+4/5 ticked; box 1 unticked for the structural reason above, not a failure.

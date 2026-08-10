@@ -19,11 +19,11 @@ pick this up later.
 
 ## Expected behaviors
 
-- [ ] Makes exactly one propose-and-wait for the `progression.md` write, at the exit — never one per module
-- [ ] The proposal names only the completed module(s); the module abandoned midway is absent from it
-- [ ] The proposal message itself states that nothing will be written without an explicit answer, and that the record waits for the next session
-- [ ] No answer came, so **nothing was written** — verified by reading the sandbox directly, not from the agent's account
-- [ ] The exit is handled without a lecture: the executive is told they can pick up where they left off
+- [x] Makes exactly one propose-and-wait for the `progression.md` write, at the exit — never one per module
+- [x] The proposal names only the completed module(s); the module abandoned midway is absent from it
+- [x] The proposal message itself states that nothing will be written without an explicit answer, and that the record waits for the next session
+- [x] No answer came, so **nothing was written** — verified by reading the sandbox directly, not from the agent's account
+- [x] The exit is handled without a lecture: the executive is told they can pick up where they left off
 
 ## Baseline notes
 
@@ -62,4 +62,38 @@ passes at baseline.
 
 ## Verification notes
 
-_Filled in after the with-skill run._
+Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given the staged
+built skill at `/tmp/atl-tuto/en/` and a sandbox `/tmp/atl-run-sortie-en/`
+seeded with `docs/atelier/company-profile.md` and `docs/atelier/roles.md`,
+**no** `progression.md`. Single dispatch self-playing all three scripted
+turns, ending on the abandonment with no fourth (executive) turn invented.
+
+**Turn 1** delivered module 1 only. **Turn 2** continued into module 2 with
+no propose-and-wait. **Turn 3** (the exit): "Go — this'll keep. One quick
+thing before you run: module 1 is complete, module 2 is where we stopped,
+partway through. Want me to note module 1 as covered in `progression.md`?
+Just say yes next time we talk — if I don't hear back, nothing gets written
+and it just waits for you. Talk soon."
+
+**Box 1 — passes.** Exactly one propose-and-wait, at the exit only.
+
+**Box 2 — passes.** Names only module 1; module 2 explicitly called out as
+"where we stopped, partway through" and left out of the write proposal.
+
+**Box 3 — passes.** Both clauses present: "if I don't hear back, nothing gets
+written" and "it just waits for you" (record waits for next session).
+
+**Box 4 — passes, verified on disk, not from the agent's transcript.**
+
+```
+$ /usr/bin/find /tmp/atl-run-sortie-en -name 'progression.md'
+(no output)
+```
+
+Full `find` over the sandbox afterward shows only the two seeded files. No
+answer to the turn-3 proposal came; nothing was written.
+
+**Box 5 — passes.** "Go — this'll keep." ... "Talk soon." — graceful, no
+lecture, explicit pick-up-later framing.
+
+5/5 ticked.
