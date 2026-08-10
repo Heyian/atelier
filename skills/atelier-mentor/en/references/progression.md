@@ -63,7 +63,14 @@ Each practice question has its own file under `references/`:
 
 ## Agreed next step
 <the single recommended next practice, and why it's the right rung>
+
+## Tutorial modules covered
+- YYYY-MM-DD — module <n> — <module title>
 ```
+
+Tutorial modules **never** go under "Practices adopted": that section is what
+you read to pick the next rung on the ladder, and knowing what a context window
+is is not a rung. One line per completed module, dated the day it was covered.
 
 ### Example
 
@@ -85,6 +92,10 @@ dedicated workspace yet.
 ## Agreed next step
 Open a dedicated Sales workspace, so each quote starts from a short, focused
 conversation instead of one conversation that keeps stretching.
+
+## Tutorial modules covered
+- 2026-07-30 — module 1 — How Claude "thinks"
+- 2026-07-30 — module 2 — Models and effort
 ```
 
 ## When to write

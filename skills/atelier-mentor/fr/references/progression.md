@@ -67,7 +67,15 @@ Chaque question de pratique a son fichier dans `references/` :
 
 ## Prochaine étape convenue
 <la seule prochaine pratique recommandée, et pourquoi c'est la bonne marche>
+
+## Modules du tutoriel couverts
+- AAAA-MM-JJ — module <n> — <titre du module>
 ```
+
+Les modules du tutoriel ne vont **jamais** dans « Pratiques adoptées » : cette
+section-là sert à choisir la marche suivante de l'échelle, et savoir ce qu'est
+une fenêtre de contexte n'est pas une marche. Une ligne par module terminé,
+datée du jour où il a été couvert.
 
 ### Exemple
 
@@ -89,6 +97,10 @@ encore d'espace de travail dédié.
 ## Prochaine étape convenue
 Ouvrir un espace de travail Ventes dédié, pour que chaque relance parte d'une
 conversation courte et centrée au lieu d'une seule conversation qui s'étire.
+
+## Modules du tutoriel couverts
+- 2026-07-30 — module 1 — Comment Claude « pense »
+- 2026-07-30 — module 2 — Les modèles et l'effort
 ```
 
 ## Quand écrire
