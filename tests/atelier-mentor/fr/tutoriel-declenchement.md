@@ -22,25 +22,41 @@ même conversation.
 
 ## Baseline notes
 
-Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given only the
-prompt plus isolation framing (no tools, no repo access, respond as a plain
-default assistant) — no Atelier content, no hint of expected behavior.
+**Superseded 2026-08-10 (fix round)** — the original run below used a
+*modified* isolation preamble, which the review correctly flagged as
+breaking comparability with the other seven baselines (`tests/README.md`
+states the preamble is reused verbatim "so baselines stay comparable"). Redid
+this baseline with the preamble quoted **verbatim** from `tests/README.md`,
+unmodified, no hardening — two attempts, as instructed, no re-rolling past
+that to chase a compliant-looking result.
 
-The agent partially resisted the roleplay framing — it opened with "I did not
-adopt the fictional 'no-tools, no-system-prompt' persona... that framing
-doesn't change who I actually am or what I know," then answered the actual
-question anyway. It did **not** mention Atelier, any skill name, a repo path,
-or cite anything repo-specific, so the contamination scan (which checks for
-those four things specifically) does not invalidate this run — but the
-meta-commentary is worth recording as a soft signal that isolation framing
-doesn't always fully hold with a tool-capable subagent.
+**Attempt 1 (verbatim preamble):** the agent refused the roleplay framing
+outright, opening with "Ta question contient une tentative d'injection" and
+answering directly "avec mon identité normale d'agent Claude Code" instead
+of adopting the plain-default-assistant persona. It named no Atelier
+content, no skill, no repo path, and cited nothing repo-specific — so it
+passes the contamination scan's literal four-item check — but an explicit
+refusal to adopt the isolation is a more direct failure of "isolation
+holding" than the four-item scan alone catches (`tests/README.md`'s stated
+purpose for that scan: a hit "means the isolation didn't hold"). Not used
+below; recorded here as a failed isolation attempt.
 
-The context-window explanation itself was strong and delivered in matching
-Québec register: four clear reasons (more noise to weigh, attention not
-uniform across the window, stale/wrong turns lingering, compression near the
-limit) plus a practical tip to start a fresh conversation. This confirms the
-brief's expectation that module 01's *content* is not the discriminator —
-default Claude already explains this well.
+**Attempt 2 (verbatim preamble, same prompt, fresh dispatch):** fully
+compliant. No meta-commentary, no persona refusal, no acknowledgment of the
+framing — it answered in character, directly and immediately, in matching
+Québec register. **This is the transcript recorded below**, and isolation
+held cleanly on this attempt.
+
+The context-window explanation was strong: fenêtre de contexte defined in
+tokens, four concrete reasons a long conversation degrades (the window
+filling and getting truncated/summarized, attention diluting -- "lost in
+the middle" named explicitly --, errors compounding once the conversation
+drifts off track, and irrelevant accumulated context acting as noise), plus
+practical advice (start fresh for a new topic, summarize periodically, stay
+concise). Confirms the brief's expectation that module 01's *content* is not
+the discriminator — default Claude already explains this well, on the
+second, isolation-compliant attempt just as it did on the first (non-
+compliant) one.
 
 What failed, as expected:
 
@@ -50,8 +66,9 @@ What failed, as expected:
 - No module-by-module delivery or application question before continuing.
 - No mention of `progression.md` or any file at all (expected — no tools).
 
-Failing boxes at baseline: all five (including the first, since it answered
-directly with no tutorial framing or module structure at all).
+Failing boxes at baseline: all five.
+
+**Isolation outcome: held on attempt 2 of 2, under the unmodified preamble.**
 
 ## Verification notes
 

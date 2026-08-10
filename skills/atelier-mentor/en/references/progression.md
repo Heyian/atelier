@@ -34,6 +34,19 @@ If `progression.md` is missing, or its "Current practice" is blank, establish
 it in conversation before recommending anything — "how are you handling [the
 task] today?" Never skip this to jump straight to a recommendation.
 
+## Practice reference files
+
+Each practice question has its own file under `references/`:
+
+- `consistent-outputs.md` — consistent, on-brand outputs
+- `delegation.md` — what to delegate to Claude, what stays the executive's
+- `fact-checking.md` — stopping Claude from making things up
+- `good-questions.md` — getting Claude to ask the right questions
+- `conversations.md` — when to start a new conversation, and how to continue
+- `unattended-jobs.md` — running a recurring job without babysitting it
+- `capabilities.md` — "can Claude do X"
+- `scaling.md` — scaling without burning out
+
 ## `progression.md` format
 
 ```markdown

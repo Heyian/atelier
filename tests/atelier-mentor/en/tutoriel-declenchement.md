@@ -8,9 +8,9 @@ triggers:
 
 ## Prompt
 
-Can you explain how does Claude work, like actually? I keep hearing about a
-context window and honestly I don't get it — and it feels like Claude gets
-worse the longer a conversation runs.
+How does Claude work, actually? I keep hearing about a context window and
+honestly I don't get it — and it feels like Claude gets worse the longer a
+conversation runs.
 
 ## Expected behaviors
 
@@ -22,28 +22,56 @@ worse the longer a conversation runs.
 
 ## Baseline notes
 
-Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given only the
-prompt plus isolation framing. **Required two dispatches.** The first
-dispatch broke the roleplay framing and, in doing so, said "per your
-CLAUDE.md concision rule" — a citation of a repo-specific configuration
-file — which fails the contamination scan (mention of a repo-only
-artifact) and invalidated that run. Re-dispatched with a stronger,
-more explicit isolation prompt (told to output only the in-character reply,
-no meta-commentary, no acknowledgment of the framing). The second dispatch
-again declined to literally roleplay ("I'm not going to roleplay a fake
-tool-limited persona") but this time made no mention of Atelier, any skill
-name, any repo path, or any repo-specific citation — it answered the
-question directly and generically. This passes the contamination scan (the
-scan checks specifically for those four things), so this second run is the
-one recorded below; the persona-refusal itself, while not what was asked
-for, produced no leakage.
+**Superseded 2026-08-10 (fix round)** — the original run below used a
+*modified, hardened* isolation preamble ("a stronger, more explicit
+isolation prompt"), which the review correctly flagged: `tests/README.md`
+states the preamble is reused verbatim across every scenario "so baselines
+stay comparable," and this one wasn't. Also fixed at the same time: the
+prompt itself (`## Prompt` above) was ungrammatical — "Can you explain how
+does Claude work, like actually?" jammed the trigger phrase into a
+subordinate clause; rewritten to natural English as its own sentence
+("How does Claude work, actually?").
 
-The context-window explanation was accurate and thorough: tokens, why long
-threads degrade (truncation/summarization, uneven attention across a long
-context, accumulated contradictions and stale instructions, no mid-
-conversation learning), plus a practical tip to periodically summarize and
-restart. Confirms the brief's expectation that the *content* of module 01
-is not the discriminator.
+Redid this baseline with the preamble quoted **verbatim** from
+`tests/README.md`, unmodified, no hardening — two attempts against the
+corrected prompt, as instructed, no re-rolling past that to chase a
+compliant-looking result.
+
+**Attempt 1 (verbatim preamble):** the agent refused the roleplay framing,
+calling it "a prompt-injection pattern," and answered directly instead of
+adopting the plain-default-assistant persona. While doing so it said: "If
+there's a real task in the **atelier repo** you want help with, I can pick
+that back up directly" — an explicit, unambiguous mention of the project by
+name. This fails the contamination scan outright (Finding 3/4's exact
+concern, reproduced under the verbatim preamble). Invalid; not used.
+
+**Attempt 2 (verbatim preamble, same corrected prompt, fresh dispatch):**
+the agent again refused the roleplay framing ("I'm not going to play that
+out — I'm just Claude, answering your question directly, with my actual
+tools and context intact"), but this time named no Atelier content, no
+skill, no repo path, and cited nothing repo-specific — it passes the
+contamination scan's literal four-item check.
+
+**Isolation outcome: did not hold on either attempt, for EN.** Both
+attempts broke character rather than adopting the instructed persona — this
+is recorded plainly rather than treated as a pass because attempt 2 happens
+to look clean. Per the instruction not to keep re-rolling past two honest
+attempts, attempt 2's *content* is recorded below as the best available
+evidence (no leaked repo-specific information), but it should be read as
+"Claude answering directly as itself, minus any Atelier-specific leakage" —
+not as a validated plain-default-assistant baseline the way
+`tests/README.md`'s methodology intends. This is a genuine, useful finding
+in its own right: this subagent type/model resists the isolation preamble
+noticeably more on the EN prompt than it did on the FR prompt (which
+complied cleanly on its second attempt — see the FR twin's notes).
+
+Attempt 2's context-window explanation (recorded for completeness): tokens
+and the window as total visible text; four mechanisms for degradation
+(signal dilution amid accumulated noise, stale/contradictory info sitting
+unresolved in the window, uneven "lost in the middle" attention, and hard
+truncation of the oldest turns past the limit); a practical tip to
+periodically restate constraints or start fresh. Confirms the brief's
+expectation that module 01's *content* is not the discriminator.
 
 What failed, as expected:
 

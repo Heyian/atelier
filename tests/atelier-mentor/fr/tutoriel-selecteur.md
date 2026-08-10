@@ -8,6 +8,9 @@ triggers:
 
 ## Prompt
 
+**Mise en situation.** `progression.md` est déjà rempli : les modules 1 et 3
+sont marqués couverts, chacun avec sa date.
+
 Je veux revoir un module du tutoriel, pas tout refaire au complet. Lequel tu me
 conseilles ?
 

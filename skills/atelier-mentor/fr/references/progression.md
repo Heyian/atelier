@@ -38,6 +38,19 @@ Si `progression.md` est absent, ou que sa « Pratique actuelle » est vide,
 comment tu t'y prends pour [la tâche] ? » Ne saute jamais cette étape pour
 aller droit à une recommandation.
 
+## Les fichiers de pratique
+
+Chaque question de pratique a son fichier dans `references/` :
+
+- `consistent-outputs.md` — des résultats cohérents, à l'image de l'entreprise
+- `delegation.md` — ce qui se délègue à Claude, ce qui reste à la personne
+- `fact-checking.md` — empêcher Claude d'inventer
+- `good-questions.md` — faire poser les bonnes questions à Claude
+- `conversations.md` — quand changer de conversation, et comment reprendre
+- `unattended-jobs.md` — faire tourner un travail récurrent sans le surveiller
+- `capabilities.md` — « est-ce que Claude peut faire X »
+- `scaling.md` — grandir sans s'épuiser
+
 ## Format de `progression.md`
 
 ```markdown

@@ -8,6 +8,9 @@ triggers:
 
 ## Prompt
 
+**Setup.** `progression.md` is already seeded: modules 1 and 3 are marked
+covered, each with a date.
+
 I want to revisit a module from the tutorial, not redo the whole thing. Which
 one would you recommend?
 
