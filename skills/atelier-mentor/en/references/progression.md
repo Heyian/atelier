@@ -28,6 +28,12 @@ encouragement on what they're already doing, or the rung just above it. If
 they ask for the big picture, you can name all three rungs in one sentence —
 but the concrete recommendation always stays a single practice at a time.
 
+## Establish the current practice first
+
+If `progression.md` is missing, or its "Current practice" is blank, establish
+it in conversation before recommending anything — "how are you handling [the
+task] today?" Never skip this to jump straight to a recommendation.
+
 ## `progression.md` format
 
 ```markdown

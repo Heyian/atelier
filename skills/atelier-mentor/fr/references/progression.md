@@ -31,6 +31,13 @@ qu'elle fait déjà, ou de la marche juste au-dessus. Si elle demande la vue
 d'ensemble, tu peux nommer les trois marches en une phrase — mais la
 recommandation concrète reste toujours une seule pratique à la fois.
 
+## Établir la pratique actuelle d'abord
+
+Si `progression.md` est absent, ou que sa « Pratique actuelle » est vide,
+établis-la en conversation avant de recommander quoi que ce soit — « aujourd'hui,
+comment tu t'y prends pour [la tâche] ? » Ne saute jamais cette étape pour
+aller droit à une recommandation.
+
 ## Format de `progression.md`
 
 ```markdown
