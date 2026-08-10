@@ -33,7 +33,9 @@ raccourcie. À côté de chaque module déjà couvert, sa date. Puis **nomme ta
 recommandation** : les modules pas encore couverts, et seulement ceux-là.
 
 - **Pas de `progression.md`** : les sept apparaissent sans marque, et ta
-  recommandation est le tutoriel complet.
+  recommandation est le tutoriel complet. Ce n'est pas une recommandation de
+  l'échelle de progression — passe direct au sélecteur, sans entretien de
+  pratique actuelle.
 - **Quelques modules couverts** : marque-les avec leur date, recommande les
   autres. Si la personne demandait le tutoriel **complet**, nomme ce qui est
   déjà couvert et propose de ne faire que le reste — pas de reprise du début.
@@ -74,6 +76,10 @@ jamais une par module, jamais en silence. Suis
   prochaine session.
 - **Pas de réponse = rien d'écrit.** C'est la règle de pression de temps du
   relais, telle quelle.
+- Si `progression.md` existe déjà, ajoute une ligne par module terminé sous
+  « Modules du tutoriel couverts », datée du jour, format
+  `- AAAA-MM-JJ — module <n> — <titre du module>` — le reste du fichier ne
+  bouge pas.
 - Si `progression.md` n'existe pas encore et que la personne accepte, crée-le
   avec les titres de section du format documenté dans
   `references/progression.md`, section « Modules du tutoriel couverts »

@@ -1,7 +1,8 @@
 # The tutorial
 
-Seven modules that explain how Claude works. Two modes: **full** (all seven,
-in order) and **review** (the executive picks which ones).
+Seven modules that explain how Claude works. Two modes: run the **full**
+tutorial (all seven, in order), or **revisit** one or two modules (the
+executive picks which ones).
 
 ## The seven modules
 
@@ -21,8 +22,9 @@ in order) and **review** (the executive picks which ones).
    modules covered" section.
 2. **State the exit rule before the first module's content**: "you can stop
    at any point, we'll note where you left off, and pick it back up later."
-3. **Offer both modes** — full or review — even when the executive arrives
-   through a question like "explain Claude to me."
+3. **Offer both modes** — the full tutorial or revisiting one or two
+   modules — even when the executive arrives through a question like
+   "explain Claude to me."
 4. **Show the selector** (see below), even in full mode, to say what's
    already covered.
 
@@ -33,7 +35,8 @@ list. Beside each already-covered module, its date. Then **name your
 recommendation**: the modules not yet covered, and only those.
 
 - **No `progression.md`**: all seven show up unmarked, and your
-  recommendation is the full tutorial.
+  recommendation is the full tutorial. This isn't a ladder recommendation —
+  go straight to the selector, no current-practice interview first.
 - **Some modules covered**: mark them with their date, recommend the rest.
   If the executive asked for the **full** tutorial, name what's already
   covered and offer to run only the rest — never restart from the top.
@@ -76,6 +79,10 @@ never one per module, never silent. Follow `references/memory-protocol.md`.
   next session.
 - **No answer means nothing written.** That's the relay's time-pressure
   rule, as-is.
+- If `progression.md` already exists, add one dated line per completed
+  module under "Tutorial modules covered", formatted
+  `- YYYY-MM-DD — module <n> — <module title>` — leave the rest of the file
+  untouched.
 - If `progression.md` doesn't exist yet and the executive agrees, create it
   with the section headings documented in `references/progression.md`,
   including the "Tutorial modules covered" section.
