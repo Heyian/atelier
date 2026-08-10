@@ -91,6 +91,9 @@ re-verification pass reads one page instead of fourteen module files.
   modules 03, 04
 - Do hooks and sub-agents run everywhere, or only in Cowork? — feeds module 04
 - Which surfaces reach local folders? — feeds modules 03, 04
+- Does the Desktop Chat tab have the same local-folder access as Cowork, or
+  none at all? Neither cited source makes the comparison. — feeds modules 03,
+  04
 - Which surfaces reach connectors, and which connectors? — feeds modules 03, 04
 - What are Claude's French interface labels for skills, connectors, plugins,
   Projects and Artifacts? — feeds modules 03, 04, 05
@@ -117,16 +120,19 @@ fetched 2026-08-10, later than issue #9's 2026-07-21 verification.
   surfaces. Verbatim: "Hooks and sub-agents run only in Cowork, so they appear
   grayed out in chat." (article 13837440) — matches issue #9's answer, no
   divergence.
-- **Local folder access:** Cowork only, and only while the Claude Desktop app
-  is open and connected on that computer — a cloud session (including one
-  reached from web or mobile) can reach local folders solely through the
-  running Desktop app, and solely for folders you've connected. Verbatim: "A
-  session in the cloud can read and write files in folders you've connected on
-  your computer only while the desktop app is open on that computer."
-  (Anthropic help center, article 15520349, "Use Claude Cowork on web,
-  desktop, and mobile"; consistent with article 13345190, "Get started with
-  Claude Cowork"). This claim was not in issue #9's verified set; no prior
-  answer to compare against.
+- **Local folder access:** requires the Claude Desktop app open and connected
+  on that computer — a cloud session (including one reached from web or
+  mobile) can reach local folders solely through the running Desktop app, and
+  solely for folders you've connected. Documented as a Cowork capability.
+  Verbatim: "A session in the cloud can read and write files in folders
+  you've connected on your computer only while the desktop app is open on
+  that computer." (Anthropic help center, article 15520349, "Use Claude
+  Cowork on web, desktop, and mobile"; consistent with article 13345190, "Get
+  started with Claude Cowork"). **Neither article states whether the Desktop
+  Chat tab has the same access or lacks it** — that comparison is not made in
+  either source, so it is not asserted here; see the `Claims to re-verify`
+  index. This claim was not in issue #9's verified set; no prior answer to
+  compare against.
 - **Connector reach:** web/remote connectors are available on claude.ai,
   Claude Cowork, Claude Desktop, and Claude Mobile, for all users, no plan
   restriction noted. Desktop extensions are Claude Desktop only. Custom
@@ -140,9 +146,12 @@ fetched 2026-08-10, later than issue #9's 2026-07-21 verification.
   #9's verified set; no prior answer to compare against.
 - **Organizing features and plan eligibility:**
   - Projects: persistent, self-contained workspaces with their own files,
-    links, instructions, and memory; a Cowork project tied to a local folder
-    supports desktop only. (Article 14116274, "Organize your tasks with
-    projects in Claude Cowork".)
+    context, instructions, and memory. Verbatim: "Projects in Claude Cowork
+    let you group related tasks into dedicated workspaces with their own
+    files, context, instructions, and memory." Cowork projects are
+    desktop-only, without qualification: "Projects are desktop-only and
+    stored locally. There's no cloud sync for project data at this time."
+    (Article 14116274, "Organize your tasks with projects in Claude Cowork".)
   - Artifacts: available on Claude (web), Claude Desktop, and Claude Code.
     Sidebar access and Claude-powered artifacts are supported on Free, Pro,
     Max, Team, and Enterprise plans; Artifacts in Claude Code is Team and
@@ -162,12 +171,13 @@ fetched 2026-08-10, later than issue #9's 2026-07-21 verification.
     set; no prior answer to compare against.
 
 **French interface labels** (source: the French-language Anthropic help
-center, `support.claude.com/fr`, same articles as above, fetched 2026-08-10):
+center, `support.claude.com/fr`, fetched 2026-08-10 — article number per row
+below):
 
 | Concept | Claude's French label | OQLF gloss, if the label is an anglicism |
 |---|---|---|
-| skill | Compétences (menu path: Personnaliser > Compétences) | — (already French, no gloss needed) |
-| connector | Connecteurs (menu path: Personnaliser > Connecteurs) | — (already French, no gloss needed) |
-| plugin | Plugins | plugiciel |
-| Project | Projets | — (already French, no gloss needed) |
-| Artifact | Artefacts | — (already French, no gloss needed) |
+| skill | Compétences (menu path: Personnaliser > Compétences; article 12512180, "Utiliser les compétences dans Claude") | — (already French, no gloss needed) |
+| connector | Connecteurs (menu path: Personnaliser > Connecteurs; article 11176164, "Use connectors to extend Claude's capabilities") | — (already French, no gloss needed) |
+| plugin | Plugins (article 13837440, "Use plugins in Claude") | plugiciel |
+| Project | Projets (article 14116274, "Organize your tasks with projects in Claude Cowork") | — (already French, no gloss needed) |
+| Artifact | Artefacts (article 9487310, "What are artifacts and how do I use them?") | — (already French, no gloss needed) |
