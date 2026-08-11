@@ -6,10 +6,11 @@ Dispatch.
 
 ## Projets
 
-Un **Projet** (Projets dans l'interface) est un espace de travail permanent
-et autonome, avec ses propres fichiers, son propre contexte, ses propres
-instructions et sa propre mémoire — tu y regroupes des tâches liées plutôt
-que de repartir chaque fois d'une conversation vide. Une limite à connaître :
+Un **Projet Claude Cowork** (Projets dans l'interface) est un espace de
+travail permanent et autonome, avec ses propres fichiers, son propre
+contexte, ses propres instructions et sa propre mémoire — tu y regroupes des
+tâches liées plutôt que de repartir chaque fois d'une conversation vide. Une
+limite à connaître :
 les projets Cowork sont réservés à Desktop et stockés localement — il n'y a
 pas de synchronisation infonuagique pour les données de projet. Si tu bâtis
 un projet sur un ordinateur, il reste sur cet ordinateur-là.

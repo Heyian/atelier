@@ -48,8 +48,8 @@ Any one of these is reason enough to take a closer look at the roster.
 
 ## Try it right now
 
-I can already see, in this conversation, which skills are enabled on your
-account. Let's run them against the three symptoms together: is one
+I can already see which skills are enabled here, in this conversation.
+Let's run them against the three symptoms together: is one
 answering in another's place, is one never firing, are two overlapping on
 the same request. Tell me what you notice on your end, and I'll tell you
 what I see on mine.

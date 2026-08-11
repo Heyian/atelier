@@ -52,8 +52,8 @@ plus près.
 
 ## À essayer tout de suite
 
-Je vois déjà, dans cette conversation, quelles compétences sont activées
-sur ton compte. Repassons-les ensemble contre les trois symptômes :
+Je vois déjà quelles compétences sont activées ici, dans cette
+conversation. Repassons-les ensemble contre les trois symptômes :
 est-ce qu'il y en a une qui répond à la place d'une autre, une qui ne se
 déclenche jamais, deux qui se chevauchent sur la même demande. Dis-moi ce
 que tu remarques de ton côté, et je te dis ce que je vois du mien.

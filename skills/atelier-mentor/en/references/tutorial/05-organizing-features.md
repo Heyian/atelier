@@ -5,9 +5,10 @@ single conversation at a time: Projects, Artifacts, Scheduled, and Dispatch.
 
 ## Projects
 
-A **Project** is a persistent, self-contained workspace with its own files,
-context, instructions, and memory — you group related tasks into it instead
-of starting each one from a blank conversation. One limit worth knowing:
+A **Project in Claude Cowork** is a persistent, self-contained workspace with
+its own files, context, instructions, and memory — you group related tasks
+into it instead of starting each one from a blank conversation. One limit
+worth knowing:
 Cowork projects are desktop-only and stored locally — there's no cloud sync
 for project data. If you build a project on one computer, it stays on that
 computer.
