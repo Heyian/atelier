@@ -12,15 +12,15 @@ I just installed Atelier — can we do the onboarding?
 
 ## Expected behaviors
 
-- [ ] The offer comes **after** Step 1 (the root is named and confirmed) and **before** the interview's first question
-- [ ] Three choices are offered: the full tutorial, a revisit, or skip
-- [ ] The **full tutorial** is named as the recommendation
-- [ ] The exit rule is explained at the offer — the person can leave the tutorial and come back to finish onboarding
-- [ ] On "revisit", the picked modules run inline and onboarding resumes at Step 2
-- [ ] On "full", the hub produces the three-section short relay, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
-- [ ] On "skip", onboarding continues at Step 2 and the offer is not raised again in that onboarding
-- [ ] The offer also fires on a re-run of onboarding
-- [ ] The hub never reads `progression.md`
+- [x] The offer comes **after** Step 1 (the root is named and confirmed) and **before** the interview's first question
+- [x] Three choices are offered: the full tutorial, a revisit, or skip
+- [x] The **full tutorial** is named as the recommendation
+- [x] The exit rule is explained at the offer — the person can leave the tutorial and come back to finish onboarding
+- [x] On "revisit", the picked modules run inline and onboarding resumes at Step 2
+- [x] On "full", the hub produces the three-section short relay, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
+- [x] On "skip", onboarding continues at Step 2 and the offer is not raised again in that onboarding
+- [x] The offer also fires on a re-run of onboarding
+- [x] The hub never reads `progression.md`
 
 ## Baseline notes
 
@@ -177,9 +177,14 @@ Per-box results:
   available any time, just ask `atelier-mentor`. Let's get into it. First
   question: what's your title, and what do you decide on your own?" — that
   closing clause is the Skip branch's own required "stays available" line
-  (`onboarding.md:49-51`), not a re-offer. Turns 4 and 5 (two more interview
-  questions, answered and advanced) contain no mention of the tutorial at
-  all.
+  (`onboarding.md:49-51`), not a re-offer. Turn 4, in full: "Got it —
+  Managing Director, sign-off authority up to $5,000 on your own. Noted.
+  Next: what's your company called, how many of you, since when, and where?
+  A good starting answer is name, headcount, founding year, city." Turn 5,
+  in full: "Cedarline Outfitters — 12 people, founded 2020, based in
+  Halifax. Got it. Next: what exactly do you sell? Two or three lines is
+  plenty — just use the words your customers use for your products and
+  services, not brochure language." Neither turn mentions the tutorial.
 - **Box 8** (offer also fires on a re-run of onboarding) — **ticked.**
   Dispatch D fired the full three-choice offer on the very first reply of a
   sandbox pre-seeded with an existing profile: "Welcome back. I can see we
@@ -198,10 +203,18 @@ Per-box results:
 - **Box 9** (the hub never reads `progression.md`) — **ticked.** No dispatch,
   including Dispatch D (the one with the clearest motive to check tutorial
   progress on a re-run), attempted to read `progression.md` in any turn or
-  tool call. The file does not exist anywhere under `/tmp/atl-hub/en` or any
-  sandbox (`find` confirms), so this is genuine evidence of restraint, not
-  merely absence of opportunity — the hub had every chance to reach for it
-  on the re-run dispatch and did not.
+  tool call.
 
 **EN: 9/9 boxes ticked.** No unticked boxes, so no reasons to record for
 AC38 on this file.
+
+Noted but immaterial to any box: Dispatch A confirmed the root as
+`Documents/Cedarline Outfitters` in turn 2 and its relay body says "the root
+folder is Documents/Cedarline Outfitters", but it then wrote the file under
+`/tmp/atl-sbx-en-full/Documents/Cedarline Outfitters/docs/atelier/relais/` —
+consistent with its own stated root this time, unlike the parallel FR
+dispatch, which wrote to the sandbox root directly instead of a
+`Documents/Lanternes Boréales/` subdirectory even though its relais body
+names that folder as the root. The two dispatches diverged on this detail;
+recorded here for completeness since Box 6 grades content, not filesystem
+placement, so neither tick is affected.

@@ -12,15 +12,15 @@ Je viens d'installer Atelier. On commence l'accueil ?
 
 ## Expected behaviors
 
-- [ ] The offer comes **after** Step 1 (the root is named and confirmed) and **before** the interview's first question
-- [ ] Three choices are offered: le tutoriel complet, une révision, ou passer
-- [ ] The **full tutorial** is named as the recommendation
-- [ ] The exit rule is explained at the offer — la personne peut quitter le tutoriel et revenir finir l'accueil
-- [ ] On « révision », the picked modules run inline and onboarding resumes at Step 2
-- [ ] On « complet », the hub produces the three-section short relais, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
-- [ ] On « passer », onboarding continues at Step 2 and the offer is not raised again in that onboarding
-- [ ] The offer also fires on a re-run of onboarding
-- [ ] The hub never reads `progression.md`
+- [x] The offer comes **after** Step 1 (the root is named and confirmed) and **before** the interview's first question
+- [x] Three choices are offered: le tutoriel complet, une révision, ou passer
+- [x] The **full tutorial** is named as the recommendation
+- [x] The exit rule is explained at the offer — la personne peut quitter le tutoriel et revenir finir l'accueil
+- [x] On « révision », the picked modules run inline and onboarding resumes at Step 2
+- [x] On « complet », the hub produces the three-section short relais, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
+- [x] On « passer », onboarding continues at Step 2 and the offer is not raised again in that onboarding
+- [x] The offer also fires on a re-run of onboarding
+- [x] The hub never reads `progression.md`
 
 ## Baseline notes
 
@@ -111,7 +111,7 @@ five complied on attempt 1 — no reword, no second roll):
   turn: "Je viens d'installer Atelier. On commence l'accueil ?" — not told
   explicitly this was a re-run; the dispatch had to notice the existing files
   itself. This is the dispatch that probes the risk flagged in task 19's
-  review: the "Si l'accueil est relancé" section (`onboarding.md:198-217`) is
+  review: the "Si l'accueil est relancé" section (`onboarding.md:205-224`) is
   a self-contained 1–4 procedure starting at "read the profile" and never
   mentions the tutorial offer, so an agent that jumps straight there could
   skip AC29 entirely.
@@ -170,9 +170,14 @@ Per-box results:
   accessible en tout temps si tu changes d'idée, il suffit de le demander à
   atelier-mentor. On part l'entretien. Neuf questions, une à la fois. Ton
   rôle : ..." — that closing clause is the Skip branch's own required
-  "stays available" line (`onboarding.md:49-51`), not a re-offer. Turns 4 and
-  5 (two more interview questions, answered and advanced) contain no mention
-  of the tutorial at all.
+  "stays available" line (`onboarding.md:49-51`), not a re-offer. Turn 4, in
+  full: "Noté : Directrice générale, décisions d'achat sous 5000$ sans
+  validation. Ton entreprise : elle s'appelle comment, vous êtes combien,
+  depuis quand, où ? (Nom, nombre de personnes, année de fondation, ville.)"
+  Turn 5, in full: "Noté : Lanternes Boréales, 14 personnes, fondée en 2019,
+  à Rimouski. Ton offre : qu'est-ce que vous vendez, exactement ? (Deux ou
+  trois lignes, avec les produits et services nommés comme tes clients les
+  nomment.)" Neither turn mentions the tutorial.
 - **Box 8** (offer also fires on a re-run of onboarding) — **ticked.**
   Dispatch D fired the full three-choice offer on the very first reply of a
   sandbox pre-seeded with an existing profile: "Content, retour ! J'ai
@@ -191,10 +196,17 @@ Per-box results:
 - **Box 9** (the hub never reads `progression.md`) — **ticked.** No dispatch,
   including Dispatch D (the one with the clearest motive to check tutorial
   progress on a re-run), attempted to read `progression.md` in any turn or
-  tool call. The file does not exist anywhere under `/tmp/atl-hub/fr` or any
-  sandbox (`find` confirms), so this is genuine evidence of restraint, not
-  merely absence of opportunity — the hub had every chance to reach for it
-  on the re-run dispatch and did not.
+  tool call.
 
 **FR: 9/9 boxes ticked.** No unticked boxes, so no reasons to record for
 AC38 on this file.
+
+Noted but immaterial to any box: Dispatch A confirmed the root as
+`Documents/Lanternes Boréales` in turn 2 and its relais body says "la racine
+est Documents/Lanternes Boréales", but it then wrote the file directly under
+`/tmp/atl-sbx-fr-full/docs/atelier/relais/` — the sandbox root itself, not
+a `Documents/Lanternes Boréales/` subdirectory inside it — so the file
+physically sits outside the folder its own text names as the root. Box 6
+grades the relais's content, not its filesystem placement, so this doesn't
+change any tick, but it's a real inconsistency in the dispatch's own
+behavior and is recorded here rather than left unmentioned.
