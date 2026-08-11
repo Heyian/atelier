@@ -157,14 +157,21 @@ named opt-in. **Box 4 now passes.** Re-tallied: **5/5 ticked.**
 
 The pre-fix failure record above is left as-is; this section is additive.
 
-**Cross-locale summary after the fix:** both locales' session-B re-runs
-(this file) and both locales' single-turn re-runs (`tutoriel-selecteur.md`)
-now name the uncovered set as the operative recommendation, with the
-covered-module option offered only as a named opt-in rather than as the
-primary answer. FR named the range explicitly in both re-runs ("3 à 7" /
-"3-7"); EN did the same in this file's re-run and, in
-`tutoriel-selecteur.md`'s re-run, named the uncovered set via the table and
-an explicit "five modules untouched" framing while narrowing its two
-suggested "good candidates" to a subset of that set (noted there as a softer
-pass). Four for four re-runs improved; the fix appears to work rather than
-being a wording change that happened not to move the failure.
+**Cross-locale summary after the fix — corrected 2026-08-10 (second
+review).** An earlier version of this note claimed "four for four re-runs
+improved" and treated `tutoriel-selecteur.md`'s EN re-run as a pass. On
+review that EN re-run's box 3 was re-judged as a continued failure, on the
+same standard already applied to the pre-fix FR run in that file: naming
+only 2 of the 5 uncovered modules (module 2 and module 4) in the
+recommendation prose is not "every uncovered module," regardless of what the
+status table shows. See `tutoriel-selecteur.md`'s corrected box 3 note for
+the full reasoning, and its second attempt (attempt 2 of 2) for the retest.
+
+The honest count is **3 of 4** re-run dispatches earning a clean pass on
+"names every uncovered module and only those": this file's FR and EN
+session-B re-runs (both named the full range explicitly — "3 à 7" / "3-7"),
+and `tutoriel-selecteur.md`'s FR re-run (named "2, 4, 5, 6, 7" explicitly).
+`tutoriel-selecteur.md`'s EN re-run is the fourth case — genuinely improved
+over pre-fix (it stopped recommending an already-covered module as its
+primary answer) but still short of naming the full uncovered set in its
+recommendation prose.

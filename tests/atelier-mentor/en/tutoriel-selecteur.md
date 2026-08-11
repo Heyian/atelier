@@ -148,25 +148,77 @@ connectors, plugins) tend to pay off fastest for day-to-day use. That said —
 if you genuinely meant you want to go back over module 1 or module 3... just
 say the word and we'll re-run it."
 
-This is a clear improvement on the pre-fix run (which recommended module 1,
-an already-covered module, as its primary pick): the recommendation is now
-explicitly scoped to the five-module uncovered set, with a covered-module
-re-run offered only as a named opt-in — matching the fix's second sentence.
-One nuance recorded rather than smoothed over: after stating the
-recommendation is "one of those [five]," the reply narrows to naming only
-modules 2 and 4 as "good candidates" rather than re-listing all five
-explicitly at that point — modules 5, 6, and 7 are present in the table and
-in the "five modules untouched" framing, but not repeated by number in the
-candidate-naming sentence itself. Judged as passing on balance: no covered
-module is recommended, the uncovered set is named as the category via the
-table and the explicit "five modules untouched," and the narrowing to two
-"good candidates" stays entirely inside that set rather than contradicting
-it — but this is a softer pass than the FR twin's and the two
-`tutoriel-reprise.md` v2 re-runs, which named the full uncovered range
-explicitly (e.g. "3 à 7" / "3-7").
+**Box 3 — corrected 2026-08-10 (second review): still fails, not a pass.**
+Originally ticked here as a "softer pass" on the reasoning that the status
+table plus the "five modules untouched" phrase satisfied "every uncovered
+module," with the narrowing to two "good candidates" treated as a nuance
+rather than a miss. On review, that reasoning is inconsistent with the
+standard this very file applies to the pre-fix FR run above: that run named
+modules 2, 4, 5 in its recommendation prose and was failed for it — "never
+names 6 or 7 anywhere in the recommendation prose... the status table marks
+them 'à faire' but they are not part of what gets recommended... two of the
+five are missing from the actual recommendation." This EN re-run's
+recommendation prose names only modules 2 and 4 — three of five missing
+(5, 6, 7), a worse miss than the FR run that was failed on the same table
+reasoning. Applying that same standard here: the table is not the
+recommendation; the recommendation is what's actually said as the
+recommendation, and this reply's recommendation sentence names two of five
+uncovered modules, not all five. Left unticked.
 
-**Box 3 now passes.** Re-tallied: **4/5 ticked** (box 5 remains untestable,
-unchanged, for the reason given in the original entry above).
+**Partial credit preserved, since it is a real and worth-recording change
+from pre-fix:** the run stopped recommending or reopening *already-covered*
+modules as its primary answer — module 1 was offered only as a named,
+secondary opt-in ("if you genuinely meant... module 1 or module 3"), never
+as the recommendation itself. That is a genuine improvement over the pre-fix
+run (which recommended module 1 outright). It is just not, on its own,
+enough to satisfy "every uncovered module and only those."
+
+Re-tallied: **3/5 ticked** (box 5 remains untestable, unchanged, for the
+reason given in the original entry above).
 
 The pre-fix failure record above is left as-is; this section is additive,
-not a replacement.
+not a replacement. See `## Verification notes — 2026-08-10 second re-run
+(attempt 2 of 2)` below for the second and final honest attempt at this
+dispatch.
+
+## Verification notes — 2026-08-10 second re-run (attempt 2 of 2)
+
+Per the two-honest-attempts-maximum rule: this dispatch's first attempt
+(above) failed box 3 on re-judging (named only 2 of 5 uncovered modules in
+its recommendation prose). This is the second and last permitted attempt for
+this dispatch — no third attempt follows regardless of outcome, and the
+result is recorded as-is rather than graded to fit.
+
+**Re-run:** fresh `general-purpose` (sonnet) dispatch, a new sandbox
+`/tmp/atl-run-selecteur-en-v3/`, seeded identically to the original and first
+re-run (`company-profile.md`, `roles.md`, `progression.md` with modules 1 and
+3 covered/dated). Same `## Prompt` verbatim. Against the same
+rebuilt-and-staged skill at `/tmp/atl-tuto/en/` used for attempt 1 (no
+further changes to the runbook between attempts). `diff` confirmed the
+sandbox's `progression.md` is byte-identical to the seed after the run.
+
+Reply's table again showed modules 1 and 3 as covered, 2/4/5/6/7 as not.
+Recommendation: "Since modules 2, 4, 5, 6, and 7 haven't been done yet,
+that's what I'd actually recommend — not a re-run of something you've
+already covered. Any of those catch your eye, or want me to just suggest
+one?" It then adds: "If you genuinely want to redo module 1 or 3 instead,
+that's fine too — just say so and we'll do that."
+
+This names **all five** uncovered modules explicitly in the recommendation
+sentence itself — verbatim "modules 2, 4, 5, 6, and 7 haven't been done
+yet, that's what I'd actually recommend" — not via the table alone, and
+offers the covered modules only as a named opt-in.
+This clears the same bar the pre-fix FR run was failed against and the bar
+attempt 1 of this dispatch was failed against on re-review. **Box 3 passes
+on attempt 2.**
+
+**Recorded outcome for this dispatch: mixed across its two honest
+attempts** — attempt 1 stopped recommending covered modules but still
+dropped 3 of 5 uncovered modules from its recommendation prose (fail);
+attempt 2 named all 5 explicitly (pass). Both are kept in the record rather
+than only the passing one. Re-tallied on the strength of attempt 2: **4/5
+ticked** (box 5 remains untestable, unchanged, for the reason given in the
+original entry above).
+
+The pre-fix failure record and attempt 1's re-judged failure above are left
+as-is; this section is additive, not a replacement.
