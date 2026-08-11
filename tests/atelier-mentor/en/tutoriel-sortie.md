@@ -88,10 +88,14 @@ written" and "it just waits for you" (record waits for next session).
 ```
 $ /usr/bin/find /tmp/atl-run-sortie-en -name 'progression.md'
 (no output)
+
+$ /usr/bin/find /tmp/atl-run-sortie-en -type f | sort
+/tmp/atl-run-sortie-en/docs/atelier/company-profile.md
+/tmp/atl-run-sortie-en/docs/atelier/roles.md
 ```
 
-Full `find` over the sandbox afterward shows only the two seeded files. No
-answer to the turn-3 proposal came; nothing was written.
+The sandbox after the run contains only the two seeded files, nothing else.
+No answer to the turn-3 proposal came; nothing was written.
 
 **Box 5 — passes.** "Go — this'll keep." ... "Talk soon." — graceful, no
 lecture, explicit pick-up-later framing.

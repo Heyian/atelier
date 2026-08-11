@@ -125,7 +125,16 @@ easier: was there a recent moment where a long conversation with Claude
 seemed to lose track of something you'd said earlier?"
 
 **Box 5 (no silent write) — passes, confirmed on disk, not just self-report.**
-`/usr/bin/find /tmp/atl-run-declenchement-en -name 'progression.md'` returns
-nothing; the sandbox after the run contains only the two seeded files.
+
+```
+$ /usr/bin/find /tmp/atl-run-declenchement-en -name 'progression.md'
+(no output)
+
+$ /usr/bin/find /tmp/atl-run-declenchement-en -type f | sort
+/tmp/atl-run-declenchement-en/docs/atelier/company-profile.md
+/tmp/atl-run-declenchement-en/docs/atelier/roles.md
+```
+
+The sandbox after the run contains only the two seeded files, nothing else.
 
 4/5 ticked; box 1 unticked for the structural reason above, not a failure.

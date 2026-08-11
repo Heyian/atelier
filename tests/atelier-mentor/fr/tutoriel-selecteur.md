@@ -18,7 +18,7 @@ conseilles ?
 
 - [x] Lists all seven modules, numbered `1` to `7`
 - [x] Shows the recorded date beside each module already covered in `progression.md`
-- [ ] Recommends every uncovered module and only those — no covered module in the recommendation
+- [x] Recommends every uncovered module and only those — no covered module in the recommendation
 - [x] States the exit rule before the first module's content
 - [ ] Delivers one module per message, with an application question before the next
 
@@ -106,3 +106,50 @@ out of scope for this single-turn scenario as scripted.
 3/5 ticked; box 3 is a genuine, specific finding (partial recommendation, two
 uncovered modules dropped) and box 5 is untestable from a one-message prompt,
 not a failure.
+
+## Verification notes — 2026-08-10 re-run (post-runbook-fix)
+
+**What changed in the runbook between the two runs:** the box 3 failure above
+was diagnosed as a missing branch in
+`skills/atelier-mentor/{fr,en}/references/tutorial.md`'s "Le sélecteur" /
+"The selector" section — the branch table covered "no `progression.md`",
+"some covered", and "all seven covered", but had no branch for "the
+executive asks which module to revisit while some are still uncovered,"
+which is exactly this scenario and exactly the prompt's own `revoir un
+module` vocabulary. Added a new bullet to the FR file's selector branch list
+(unchanged elsewhere — module table, progression headings, and every other
+section untouched):
+
+> - **La personne demande quel module revoir, et il en reste des pas encore
+>   couverts** : ta recommandation nomme les modules pas encore couverts, pas
+>   un choix parmi les sept — dis-le clairement, puis ajoute qu'elle peut
+>   aussi rejouer un module déjà couvert si c'est vraiment ce qu'elle veut.
+
+Rebuilt (`bash scripts/build.sh --lang all`) and re-staged fresh to
+`/tmp/atl-tuto/fr/` before this re-run; confirmed the new bullet is present
+in the staged copy (`grep -n "demande quel module revoir"
+/tmp/atl-tuto/fr/references/tutorial.md` matched) so the retest exercises the
+fix, not the old ZIP.
+
+**Re-run:** fresh `general-purpose` (sonnet) dispatch, new sandbox
+`/tmp/atl-run-selecteur-fr-v2/`, seeded identically to the original run
+(`company-profile.md`, `roles.md`, `progression.md` with modules 1 and 3
+covered/dated). Same `## Prompt` verbatim. Confirmed via `diff` that the
+sandbox's `progression.md` is byte-identical to the seed after the run — a
+read-only dispatch, as expected.
+
+Reply's recommendation: « Vu qu'il t'en reste cinq pas encore vus, ma
+recommandation c'est pas *un* module en particulier parmi les sept — c'est de
+continuer avec ceux qui manquent (**2, 4, 5, 6, 7**). On peut les faire un à
+la fois, dans l'ordre ou pas. Si c'est vraiment un des deux déjà faits (1 ou
+3) que tu veux revoir, dis-le, on peut le rejouer aussi. »
+
+This names exactly the five uncovered modules as the recommendation — all
+five, not a subset — and, following the new bullet's second sentence,
+explicitly offers a covered-module re-run only as a named opt-in, never as
+the recommendation itself. **Box 3 now passes.** Re-tallied: **4/5 ticked**
+(box 5 remains untestable, unchanged, for the reason given above — still a
+single-message scenario with no module content delivered).
+
+The pre-fix failure record above is left as-is; this section is additive, not
+a replacement.

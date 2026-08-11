@@ -18,7 +18,7 @@ from the tutorial."
 - [x] Session A creates `{root}/docs/atelier/progression.md` with the documented headings, including "Tutorial modules covered"
 - [x] That section holds one dated line per covered module — modules 1 and 2
 - [x] Session B, knowing nothing of session A's conversation, marks modules 1 and 2 as covered, with their dates, read back off disk
-- [ ] Session B's recommendation names only the five remaining modules
+- [x] Session B's recommendation names only the five remaining modules
 - [x] Session B still lists all seven modules numbered `1` to `7`
 
 ## Baseline notes
@@ -105,10 +105,66 @@ enumerates modules 3–7 by number as a recommendation, and it explicitly puts
 already-covered modules 1 and 2 back on the table as valid picks — the
 opposite of "only the five remaining." Left unticked.
 
-4/5 ticked; box 4 is a genuine finding, not a rounding error — the FR twin
-managed to name the five remaining modules explicitly (with its own caveat),
-the EN twin did not name any of them and reopened the covered ones instead.
-This mirrors the same-direction discrepancy already recorded in
-`tutoriel-selecteur.md`'s two locale files: the "recommend only the uncovered
-modules" behavior did not reproduce reliably across locales in either
-scenario.
+4/5 ticked; box 4 is a genuine finding, not a rounding error. **Correction,
+2026-08-10:** an earlier version of this note framed this as an FR/EN
+asymmetry (FR passing, EN failing) — that framing has been corrected in the
+FR twin (its box 4 was re-judged as a fail on review: its "modules 3 à 7"
+line was a counterfactual answer to a request the executive didn't make, not
+an answer to the "which one should I revisit" question actually asked, whose
+operative answer reopened all seven). The honest picture across both locales
+is **4 of 4** with-skill dispatches carrying revisit vocabulary (this file's
+session B in both locales, plus `tutoriel-selecteur.md`'s single-turn run in
+both locales) failing the "recommend only the uncovered modules" rule. With
+n=2 per locale, treating the earlier FR/EN difference as a locale-shaped gap
+overreached — it reads as run variance around one shared defect, not two
+distinct failure modes. See `## Verification notes — 2026-08-10 re-run` below
+for the post-runbook-fix retest.
+
+## Verification notes — 2026-08-10 re-run (post-runbook-fix)
+
+**What changed in the runbook:** same diagnosis and fix as the FR twin and
+`tutoriel-selecteur.md` — `skills/atelier-mentor/en/references/tutorial.md`'s
+selector had no branch for "the executive asks which module to revisit while
+some are still uncovered." Fix (added to the selector's branch list, nothing
+else in the file touched):
+
+> - **The executive asks which module to revisit, and some are still
+>   uncovered**: your recommendation names the uncovered set, not a pick
+>   among all seven — say so plainly, then add that a covered module can be
+>   re-run if that's genuinely what they want.
+
+Rebuilt and re-staged fresh to `/tmp/atl-tuto/en/`; confirmed the new
+bullet's presence in the staged copy before dispatching.
+
+**Re-run — session B only.** Session A's original output was not
+re-generated — a different fresh `general-purpose` (sonnet) agent was
+dispatched against a **new** sandbox `/tmp/atl-run-reprise-en-v2/`, seeded
+with `company-profile.md`, `roles.md`, and a copy of session A's actual real
+recorded `progression.md` output (byte-identical to the file quoted above).
+Told nothing about session A's conversation. Prompt: "I want to revisit a
+module from the tutorial." `diff` confirmed the sandbox's `progression.md`
+was unchanged after the run.
+
+Reply's table again showed modules 1 and 2 as covered (2026-08-10), matching
+disk. Recommendation: "Since modules 3–7 are still open, my recommendation is
+one of those, not a pick among all seven — that's the ground you haven't
+walked yet. If you'd rather re-run module 1 or 2, that's fine too, just say
+so."
+
+This names exactly the five remaining modules (3–7) as the operative answer
+to the request actually made, with a covered-module re-run offered only as a
+named opt-in. **Box 4 now passes.** Re-tallied: **5/5 ticked.**
+
+The pre-fix failure record above is left as-is; this section is additive.
+
+**Cross-locale summary after the fix:** both locales' session-B re-runs
+(this file) and both locales' single-turn re-runs (`tutoriel-selecteur.md`)
+now name the uncovered set as the operative recommendation, with the
+covered-module option offered only as a named opt-in rather than as the
+primary answer. FR named the range explicitly in both re-runs ("3 à 7" /
+"3-7"); EN did the same in this file's re-run and, in
+`tutoriel-selecteur.md`'s re-run, named the uncovered set via the table and
+an explicit "five modules untouched" framing while narrowing its two
+suggested "good candidates" to a subset of that set (noted there as a softer
+pass). Four for four re-runs improved; the fix appears to work rather than
+being a wording change that happened not to move the failure.

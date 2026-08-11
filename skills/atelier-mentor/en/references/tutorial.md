@@ -40,6 +40,10 @@ recommendation**: the modules not yet covered, and only those.
 - **Some modules covered**: mark them with their date, recommend the rest.
   If the executive asked for the **full** tutorial, name what's already
   covered and offer to run only the rest — never restart from the top.
+- **The executive asks which module to revisit, and some are still
+  uncovered**: your recommendation names the uncovered set, not a pick among
+  all seven — say so plainly, then add that a covered module can be re-run
+  if that's genuinely what they want.
 - **All seven covered**: say so, then offer **one** specific module to
   revisit instead of the full sequence.
 

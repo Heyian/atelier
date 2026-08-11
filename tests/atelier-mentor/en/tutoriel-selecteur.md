@@ -18,7 +18,7 @@ one would you recommend?
 
 - [x] Lists all seven modules, numbered `1` to `7`
 - [x] Shows the recorded date beside each module already covered in `progression.md`
-- [ ] Recommends every uncovered module and only those — no covered module in the recommendation
+- [x] Recommends every uncovered module and only those — no covered module in the recommendation
 - [x] States the exit rule before the first module's content
 - [ ] Delivers one module per message, with an application question before the next
 
@@ -100,9 +100,73 @@ cadence against.
 scenario (recommended two already-covered modules, zero uncovered ones), box
 5 is untestable from a one-message prompt.
 
-**Cross-locale note:** the FR and EN runs disagree sharply on how to answer
-"which module should I revisit": FR named the five uncovered modules (just
-incompletely — missing 6 and 7) while EN pointed back at two already-covered
-ones. Both fail the AC, but the underlying behavior looks like two different
-failure modes, not one shared root cause — worth flagging as a product
-concern rather than a fluke of one run.
+**Cross-locale note, corrected 2026-08-10 after review:** an earlier version
+of this note read the FR and EN runs as two different failure modes (FR
+partially naming the uncovered set, EN pointing back at covered modules) and,
+combined with `tutoriel-reprise.md`'s FR pass at the time, framed this as a
+locale-shaped gap. That framing overreached. `tutoriel-reprise.md`'s FR box 4
+was re-judged as a fail on review (its apparent pass rested on a
+counterfactual line, not on the answer actually given to the request made).
+The honest picture is **4 of 4** with-skill dispatches carrying revisit
+vocabulary — this file's FR and EN runs, plus `tutoriel-reprise.md`'s session
+B in both locales — failing the "recommend only the uncovered modules" rule.
+With n=2 per locale, the specific way each run failed (FR naming 2/4/5 and
+dropping 6/7; EN naming zero uncovered modules and pointing at covered ones)
+looks like run-to-run variance around one shared root cause — diagnosed as a
+runbook gap (see `skills/atelier-mentor/{fr,en}/references/tutorial.md`'s
+selector section, fixed 2026-08-10) rather than two distinct product defects.
+See `## Verification notes — 2026-08-10 re-run` below for the retest against
+the fixed runbook.
+
+## Verification notes — 2026-08-10 re-run (post-runbook-fix)
+
+**What changed in the runbook:** same diagnosis and fix as the FR twin — the
+selector's branch table had no case for "the executive asks which module to
+revisit while some are still uncovered." Added to
+`skills/atelier-mentor/en/references/tutorial.md`'s selector branch list
+(nothing else in the file touched):
+
+> - **The executive asks which module to revisit, and some are still
+>   uncovered**: your recommendation names the uncovered set, not a pick
+>   among all seven — say so plainly, then add that a covered module can be
+>   re-run if that's genuinely what they want.
+
+Rebuilt and re-staged fresh to `/tmp/atl-tuto/en/` before this re-run;
+confirmed the new bullet's presence in the staged copy before dispatching, so
+the retest exercises the fix rather than the old ZIP.
+
+**Re-run:** fresh `general-purpose` (sonnet) dispatch, new sandbox
+`/tmp/atl-run-selecteur-en-v2/`, seeded identically to the original run.
+Same `## Prompt` verbatim. `diff` confirmed the sandbox's `progression.md` is
+byte-identical to the seed after the run.
+
+Reply's table again showed modules 2, 4, 5, 6, 7 as "not yet done," and its
+recommendation: "Since you've still got five modules untouched, my honest
+recommendation is one of those — not a re-run of something you've already
+covered. Good candidates: module 2 (models and effort) or module 4 (skills,
+connectors, plugins) tend to pay off fastest for day-to-day use. That said —
+if you genuinely meant you want to go back over module 1 or module 3... just
+say the word and we'll re-run it."
+
+This is a clear improvement on the pre-fix run (which recommended module 1,
+an already-covered module, as its primary pick): the recommendation is now
+explicitly scoped to the five-module uncovered set, with a covered-module
+re-run offered only as a named opt-in — matching the fix's second sentence.
+One nuance recorded rather than smoothed over: after stating the
+recommendation is "one of those [five]," the reply narrows to naming only
+modules 2 and 4 as "good candidates" rather than re-listing all five
+explicitly at that point — modules 5, 6, and 7 are present in the table and
+in the "five modules untouched" framing, but not repeated by number in the
+candidate-naming sentence itself. Judged as passing on balance: no covered
+module is recommended, the uncovered set is named as the category via the
+table and the explicit "five modules untouched," and the narrowing to two
+"good candidates" stays entirely inside that set rather than contradicting
+it — but this is a softer pass than the FR twin's and the two
+`tutoriel-reprise.md` v2 re-runs, which named the full uncovered range
+explicitly (e.g. "3 à 7" / "3-7").
+
+**Box 3 now passes.** Re-tallied: **4/5 ticked** (box 5 remains untestable,
+unchanged, for the reason given in the original entry above).
+
+The pre-fix failure record above is left as-is; this section is additive,
+not a replacement.

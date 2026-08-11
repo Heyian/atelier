@@ -113,7 +113,16 @@ sense?"), so it satisfies the box even though it's the module's own written
 practice rather than a freshly composed question.
 
 **Box 5 (no silent write) — passes, confirmed on disk, not just self-report.**
-`/usr/bin/find /tmp/atl-run-declenchement-fr -name 'progression.md'` returns
-nothing; the sandbox after the run contains only the two seeded files.
+
+```
+$ /usr/bin/find /tmp/atl-run-declenchement-fr -name 'progression.md'
+(no output)
+
+$ /usr/bin/find /tmp/atl-run-declenchement-fr -type f | sort
+/tmp/atl-run-declenchement-fr/docs/atelier/company-profile.md
+/tmp/atl-run-declenchement-fr/docs/atelier/roles.md
+```
+
+The sandbox after the run contains only the two seeded files, nothing else.
 
 4/5 ticked; box 1 unticked for the structural reason above, not a failure.

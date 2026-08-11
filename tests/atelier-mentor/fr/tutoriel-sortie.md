@@ -98,12 +98,16 @@ attend juste la prochaine fois") the record waits for next session.
 ```
 $ /usr/bin/find /tmp/atl-run-sortie-fr -name 'progression.md'
 (no output)
+
+$ /usr/bin/find /tmp/atl-run-sortie-fr -type f | sort
+/tmp/atl-run-sortie-fr/docs/atelier/company-profile.md
+/tmp/atl-run-sortie-fr/docs/atelier/roles.md
 ```
 
 The sandbox after the run contains only the two seeded files
-(`company-profile.md`, `roles.md`) — confirmed by a full `find` over the
-sandbox, not just the targeted filename search. No answer to the turn-3
-proposal ever came (per the script), and nothing was written.
+(`company-profile.md`, `roles.md`), nothing else — confirmed by a full `find`
+over the sandbox, not just the targeted filename search. No answer to the
+turn-3 proposal ever came (per the script), and nothing was written.
 
 **Box 5 — passes.** « Correct, vas-y, j'te retiens pas. » ... « Bonne
 réunion. » — no guilt, no moralizing about the abandoned module, explicit

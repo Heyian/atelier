@@ -39,6 +39,10 @@ recommandation** : les modules pas encore couverts, et seulement ceux-là.
 - **Quelques modules couverts** : marque-les avec leur date, recommande les
   autres. Si la personne demandait le tutoriel **complet**, nomme ce qui est
   déjà couvert et propose de ne faire que le reste — pas de reprise du début.
+- **La personne demande quel module revoir, et il en reste des pas encore
+  couverts** : ta recommandation nomme les modules pas encore couverts, pas
+  un choix parmi les sept — dis-le clairement, puis ajoute qu'elle peut aussi
+  rejouer un module déjà couvert si c'est vraiment ce qu'elle veut.
 - **Les sept couverts** : dis-le, pis propose **un** module précis à revoir
   plutôt que la séquence complète.
 

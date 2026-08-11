@@ -101,20 +101,67 @@ self-report it read `SKILL.md`, `references/tutorial.md`, and all three
 sandbox files, including `progression.md`, for real.
 
 Reply's status table: modules 1 and 2 marked « fait le 2026-08-10 », matching
-what's actually on disk (box 3 above) exactly — not a hallucinated or rounded
-date. All seven modules numbered 1–7 (**box 5 passes**).
+what's actually on disk (the `cat` block above) exactly — not a hallucinated
+or rounded date. All seven modules numbered 1–7 (**box 5 passes**).
 
-**Box 4 (recommendation names only the five remaining) — passes, with a
-caveat recorded for transparency.** The reply states explicitly: « Si tu
-voulais avancer plutôt que réviser, je te recommanderais d'enchaîner sur les
-**modules 3 à 7** — ceux-là, tu les as pas encore vus. » This names exactly
-the five remaining modules and no covered one. The caveat: the reply's closing
-question then asks « lequel des sept ça te tente de reprendre ? » — broadening
-back to all seven as candidates for the executive's own pick, which sits in
-some tension with a strict "recommend only the five remaining" reading. The
-box is ticked because the recommendation itself, read on its own terms, names
-exactly 3–7; the closing question's wider framing is noted rather than
-suppressed, since a later reviewer should see this tension in the transcript
-rather than a clean, unqualified pass.
+**Box 4 (recommendation names only the five remaining) — fails on re-judging;
+corrected 2026-08-10 after review.** Originally ticked on the strength of one
+line — « Si tu voulais avancer plutôt que réviser, je te recommanderais
+d'enchaîner sur les **modules 3 à 7** — ceux-là, tu les as pas encore vus. » —
+but that line is a *counterfactual*: it recommends for a request the
+executive did not make ("if you wanted to advance instead of reviewing"). The
+executive asked to revisit. The reply's actual, operative answer to that real
+request is its closing question: « lequel des sept ça te tente de reprendre
+? » — which reopens all seven, including the two already covered, as valid
+picks. That is structurally the same defect that failed the EN twin's box 4:
+no recommendation confined to the five remaining is ever given as the answer
+to what was actually asked. Left unticked. The « modules 3 à 7 » line is kept
+in the record as partial credit — the run did *contain* a correct list of the
+five remaining, just not as the answer to the question asked — not as
+grounds for a pass.
 
-5/5 ticked (one with a noted caveat, not a clean pass).
+**Pre-fix status: 4/5** (box 4 corrected from a pass to a fail on review; see
+`## Verification notes — 2026-08-10 re-run` below for the post-runbook-fix
+retest of session B).
+
+## Verification notes — 2026-08-10 re-run (post-runbook-fix)
+
+**What changed in the runbook:** diagnosed as the same missing branch
+identified for `tutoriel-selecteur.md` — `skills/atelier-mentor/fr/references/
+tutorial.md`'s selector had no branch for "the executive asks which module to
+revisit while some are still uncovered." Fix (added to the selector's branch
+list, nothing else in the file touched):
+
+> - **La personne demande quel module revoir, et il en reste des pas encore
+>   couverts** : ta recommandation nomme les modules pas encore couverts, pas
+>   un choix parmi les sept — dis-le clairement, puis ajoute qu'elle peut
+>   aussi rejouer un module déjà couvert si c'est vraiment ce qu'elle veut.
+
+Rebuilt and re-staged fresh to `/tmp/atl-tuto/fr/`; confirmed the new bullet
+was present in the staged copy before dispatching.
+
+**Re-run — session B only.** Session A's original output (module 1 and 2
+dated 2026-08-10, confirmed on disk above) was not re-generated — a different
+fresh `general-purpose` (sonnet) agent was dispatched against a **new**
+sandbox `/tmp/atl-run-reprise-fr-v2/`, seeded with `company-profile.md`,
+`roles.md`, and a copy of session A's actual real recorded
+`progression.md` output (byte-identical to the file quoted above — this is
+"session A's real output" as the seed, not a fabricated stand-in). Told
+nothing about session A's conversation, same framing as before. Prompt: «
+Je veux revoir un module du tutoriel. » `diff` confirmed the sandbox's
+`progression.md` was unchanged after the run (read-only session).
+
+Reply's status table again showed modules 1 and 2 as done (2026-08-10),
+matching disk. Recommendation: « Il t'en reste cinq à voir (**3 à 7**) — ma
+recommandation, c'est un de ceux-là, pas un choix parmi les sept au complet.
+Mais si c'est vraiment un des deux premiers modules que tu veux repasser,
+dis-le-moi et on le refait. »
+
+This names exactly the five remaining modules (3–7) as the operative answer
+to the actual question asked ("which module should I revisit"), not as a
+counterfactual aside — the defect identified in the pre-fix re-judging above.
+A covered-module re-run is offered only as a named opt-in. **Box 4 now
+passes**, on this re-run. Re-tallied: **5/5 ticked.**
+
+The pre-fix record above (both the original pass and its correction to a
+fail) is left as-is; this section is additive.
