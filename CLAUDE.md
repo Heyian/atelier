@@ -3,6 +3,7 @@
 Skill pack for non-technical executives on Claude Cowork/Desktop.
 Design spec: docs/superpowers/specs/2026-07-21-atelier-design.md
 Release automation: docs/superpowers/specs/2026-07-22-release-please-design.md
+Mentor tutorial: docs/superpowers/specs/2026-08-10-mentor-tutorial-design.md
 
 ## Agent skills
 
