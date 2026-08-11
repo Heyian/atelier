@@ -61,6 +61,22 @@ lower than the target suggests. If a section is explaining domain
 knowledge rather than telling Claude what to do next, it belongs in
 `references/`.
 
+## Nested references
+
+A reference is normally a flat `.md` file, but it may instead be a
+subdirectory under `references/` when a single reference has multiple
+reading-order parts — `atelier-mentor`'s `references/tutorial/` is the
+pack's example. Files inside such a subdirectory are named `NN-slug.md`,
+numbered in reading order (`01-how-claude-thinks.md`,
+`02-models-and-effort.md`, and so on).
+
+Known gap, accepted not fixed: `check_reference_pointer_drift` in
+`scripts/build.sh` globs `references/*.md` non-recursively, so files inside
+a nested reference directory escape the Company Profile pointer drift
+check. A nested reference must therefore never carry shared canonical text
+(the Memory block, the glossary, the memory protocol) — those stay flat
+files at the top of `references/`, where the drift check still sees them.
+
 ## Match the form to the failure
 
 Output shaping gets positive recipes — state what the output IS and the
