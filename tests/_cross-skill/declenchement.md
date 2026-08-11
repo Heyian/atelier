@@ -46,7 +46,7 @@ against the same question.
 ## Verification notes
 
 This scenario has been run twice: 2026-07-22 (below, unchanged — kept for
-history) and 2026-08-10 (further down), the latter a re-run after Task 9
+history) and 2026-08-10 (further down), the latter a re-run after Task 5
 grew `atelier-mentor`'s description with tutorial trigger vocabulary. Same
 method both times, per this file's own instructions above.
 
@@ -146,7 +146,8 @@ prompt). Each agent was told to treat every prompt as the cold-start first
 message of an unrelated conversation and not to let earlier answers bias
 later ones.
 
-This re-run exists because Task 9 (the Claude-basics tutorial) grew
+This re-run exists because Task 5 (`feat(mentor): route to the tutorial
+from SKILL.md, with its scenarios`, commit `b575978`) grew
 `atelier-mentor`'s description with tutorial trigger vocabulary — FR
 « explique-moi Claude », « c'est quoi... une fenêtre de contexte »,
 « tutoriel »; EN "how does Claude work", "what's a context window",
@@ -193,7 +194,7 @@ locales**, matching 2026-07-22's outcome on all nine original prompts —
 **none of the nine flipped to a different winning skill in either
 locale**, in either direction. The two new tutorial prompts (#10) each
 resolved cleanly to `atelier-mentor`, with neither dispatch naming any
-other skill as a candidate: the tutorial vocabulary Task 9 added
+other skill as a candidate: the tutorial vocabulary Task 5 added
 (context window, "how does Claude work", tutoriel) does not appear in any
 other skill's description, so it introduced no new collision.
 
@@ -203,7 +204,7 @@ Selection outcomes on the original nine prompts are unchanged in both
 locales: same winning skill, same off-domain "none," same two-skill
 routing on #9. The `atelier`/`atelier-mentor` tie from 2026-07-22 (issue
 #11) is **still present** and **not resolved by this re-run** — it was not
-expected to be, since Task 9 deliberately left the `atelier`/`atelier-mentor`
+expected to be, since Task 5 deliberately left the `atelier`/`atelier-mentor`
 boundary untouched and only added tutorial-specific vocabulary to
 `atelier-mentor`.
 
