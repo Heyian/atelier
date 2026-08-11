@@ -26,6 +26,40 @@ elle sait en une phrase à quoi elle sert.
 
 ---
 
+## L'offre de tutoriel
+
+Après l'étape 1, avant la première question de l'entretien. Dis-le comme ça, ou
+presque :
+
+> Avant les questions sur ton entreprise : il y a un tutoriel qui explique
+> comment Claude fonctionne — sept modules courts. **Je te recommande de le
+> faire au complet** ; c'est ce qui rend tout le reste plus facile après. On
+> peut aussi juste en revoir un ou deux, ou passer tout de suite à l'entretien.
+> Et tu peux quitter le tutoriel n'importe quand : tu reviens finir l'accueil,
+> on ne perd rien.
+
+Le **tutoriel complet** est la réponse recommandée, à chaque exécution.
+
+- **Complet** — écris le relais court (`relais.md`, « La forme courte
+  d'accueil ») et **arrête l'accueil ici**. La personne ouvre une conversation
+  neuve avec `atelier-mentor`, fait le tutoriel, revient : l'accueil reprend à
+  l'étape 2.
+- **Révision** — `atelier-mentor` mène le sélecteur et les modules choisis dans
+  cette conversation, puis l'accueil reprend à l'étape 2.
+- **Passer** — va directement à l'étape 2, et ne repropose pas le tutoriel plus
+  loin dans cet accueil. Il reste accessible en tout temps en le demandant à
+  `atelier-mentor`.
+
+L'offre est faite à **chaque** accueil, y compris une relance. Ne lis pas
+`progression.md` : c'est le dossier de `atelier-mentor`, et c'est lui qui évite
+de refaire ce qui est déjà couvert.
+
+**Critère d'achèvement :** les trois choix ont été offerts avec le tutoriel
+complet comme recommandation, la règle de sortie a été dite, et la suite
+correspond au choix de la personne.
+
+---
+
 ## Étape 2 — L'entretien
 
 **Un message, une question.** Pose la question, arrête-toi, attends la réponse.
@@ -194,6 +228,10 @@ créée par forge n'a disparu, aucun doublon n'est apparu.
 ## Ce que l'accueil ne crée pas
 
 L'accueil crée exactement deux fichiers : `company-profile.md` et `roles.md`.
+
+Une seule exception : sur la branche « tutoriel complet » de l'offre, l'accueil
+produit **en plus** le relais court (`relais.md`, « La forme courte
+d'accueil »). Sur les autres branches, non.
 
 Il ne crée **pas** `{racine}/docs/atelier/decisions.md`, et il ne crée **pas**
 de fichier dans `{racine}/docs/atelier/memory/` — ni vide, ni avec un
