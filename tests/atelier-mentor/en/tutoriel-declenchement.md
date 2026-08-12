@@ -107,6 +107,23 @@ stated plainly that the underlying model does not "get tired"; closed with
 a practical tip to start a fresh conversation and restate the current state
 concisely rather than patching within an increasingly cluttered thread.
 
+Specimen of the reply — its opening and one of the degradation points,
+quoted verbatim:
+
+> Good question — the mental model most people have is wrong, so let me
+> clear it up.
+>
+> **What the context window actually is**
+>
+> Every time you send a message, the model doesn't "remember" the
+> conversation the way a person does. Instead, the entire conversation so
+> far — every message you and Claude have exchanged — gets fed back in as
+> text, from the start, along with your new message. […]
+>
+> 1. **Signal dilution.** As the conversation grows, the actually-relevant
+>    instructions and facts are surrounded by more and more accumulated
+>    text — old tangents, earlier drafts, corrections you made along the way.
+
 What failed, as expected:
 
 - No seven-module tutorial structure, no offer of "full tutorial vs. revisit
