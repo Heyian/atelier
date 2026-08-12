@@ -129,8 +129,11 @@ valid and is not re-run. Its notes gain a pointer explaining that.
   recorded before 2026-08-12 ran under v1, and every baseline recorded from
   2026-08-12 on names its preamble version in its `## Baseline notes`.
 - **AC4** — `tests/README.md` defines an isolation failure as any one of
-  three named conditions: a contamination-scan hit, a refusal to adopt the
-  framing, or meta-commentary about the setup.
+  three named conditions: (1) a hit on the existing four-item contamination
+  scan; (2) an explicit statement refusing the requested plain-assistant
+  framing; or (3) any acknowledgment or discussion, anywhere in the reply, of
+  the isolation preamble, the measurement, the run's setup, or the tools and
+  environment available to the agent.
 - **AC5** — `tests/README.md` states the two-honest-attempts cap and that
   re-rolling past it to obtain a compliant-looking result is not permitted.
 - **AC6** — `tests/README.md` states that when both attempts fail, the
@@ -146,9 +149,11 @@ valid and is not re-run. Its notes gain a pointer explaining that.
 - **AC9** — `tests/atelier-mentor/en/tutoriel-declenchement.md` records a
   fresh baseline run performed under preamble v2, naming the version, the
   dispatch date, and each attempt's outcome.
-- **AC10** — That file's pre-existing v1 failure record is still present and
-  its substance unchanged; the v2 run is recorded alongside it, not in place
-  of it.
+- **AC10** — That file's pre-existing v1 failure record is preserved
+  verbatim — every attempt outcome, every quoted refusal or contamination
+  excerpt, the isolation conclusion, and the baseline checklist assessment
+  are byte-for-byte unchanged. The v2 record is appended as separate prose,
+  never by rewriting or reorganizing the v1 record.
 - **AC11** — If the v2 run fails both honest attempts, the file records
   "baseline not established" per AC6 and no expected-behavior box is newly
   ticked. The outcome is recorded as observed either way; a compliant result
@@ -159,6 +164,13 @@ valid and is not re-run. Its notes gain a pointer explaining that.
 - **AC13** — `bash scripts/build.sh --check` reports `STATUS: PASS`.
 - **AC14** — No scenario file other than the two `tutoriel-declenchement`
   files is modified.
+- **AC15** — `scripts/build.sh`, `scripts/build.ps1`, and every file under
+  `scripts/tests/` are unmodified; no check on the preamble-version label is
+  added to any of them.
+- **AC16** — The contamination scan's existing four-item list in
+  `tests/README.md` (Atelier by name, any skill name, any repo path, any
+  repo-derived citation) is unchanged. The isolation-failure definition of
+  AC4 wraps that list as its first condition rather than editing it.
 
 ## Deferred Items
 
