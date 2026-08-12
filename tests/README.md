@@ -177,15 +177,32 @@ every other scenario in this repo.
 
 ## The "triggers without the skill being named" box
 
-Every per-skill scenario file carries this box in its `## Expected
-behaviors` list, and — with one noted exception — it stays unticked. The
-reason is structural, not a gap in those tasks' execution: a with-skill
-dispatch is handed the one skill under test directly, which already
-answers the question of which skill would have fired. Ticking that box
-from such a run would be evidence of nothing; at best it's an inferred
-signal from how the agent opened its reply (`atelier-marketing`'s scenario
-file notes exactly this: ticked, but annotated as inferred, not
-controlled, because the dispatch loaded the skill for it).
+Some per-skill scenario files carry this box in their `## Expected
+behaviors` list — 8 of the 30, not all of them:
+
+- `atelier-marketing/{en,fr}` and `atelier-ventes/{en,fr}` — "Triggers
+  without being named"
+- `atelier-reunions/{en,fr}` — the same claim bound to a specific prompt
+  ("Triggers on « fais-moi le PV » without the skill being named")
+- `atelier-mentor/{en,fr}/tutoriel-declenchement.md` — the same property
+  worded for the tutorial ("Reaches the tutorial from a prompt that names
+  no skill and never says « tutoriel »")
+
+The other 22 files carry no such box, and that is fine: the property is
+covered system-wide by `tests/_cross-skill/declenchement.md` (below), so
+the absence is not an oversight to be backfilled.
+(`atelier-forge`'s scenarios do have checklist items with the word
+"trigger" in them, but those test forge's own trigger-repair workflow, not
+whether forge fires unnamed.)
+
+Where the box does appear it stays unticked, except in the two
+`atelier-marketing` files. That is structural, not a gap in those tasks'
+execution: a with-skill dispatch is handed the one skill under test
+directly, which already answers the question of which skill would have
+fired. Ticking that box from such a run would be evidence of nothing; at
+best it's an inferred signal from how the agent opened its reply — which
+is exactly what the `atelier-marketing` files say about their own tick:
+inferred from the transcript's opening move, not controlled for.
 
 `tests/_cross-skill/declenchement.md` is the real test and retires this
 box system-wide: it stages all fourteen built skills' `name`/`description`
