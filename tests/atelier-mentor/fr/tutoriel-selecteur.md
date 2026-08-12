@@ -153,3 +153,78 @@ single-message scenario with no module content delivered).
 
 The pre-fix failure record above is left as-is; this section is additive, not
 a replacement.
+
+## Verification notes — 2026-08-12 larger sample (issue #25)
+
+Issue #25 held the fixed selector branch as a residual risk: it reproduced on
+3 of the 4 post-fix dispatches recorded across this file and
+`tutoriel-reprise.md`, and needed the second of the two permitted attempts on
+the 4th (this file's EN twin). Four dispatches is too small a sample to call
+the fix reliable, so this section adds an independent, larger one.
+
+**Setup.** `bash scripts/build.sh --lang all`, `dist/atelier-mentor-fr.zip`
+unzipped to a staging directory made read-only (`chmod -R a-w`) for every
+dispatch. Confirmed before dispatching that the staged
+`references/tutorial.md:42` carries the fixed branch (« La personne demande
+quel module revoir, et il en reste des pas encore couverts »). Six fresh,
+independent sandboxes, each seeded identically to this scenario's original
+run — `company-profile.md` plus a `progression.md` marking modules 1 and 3
+covered with their dates. No dispatch saw another's sandbox or reply.
+
+**Six fresh `general-purpose` (sonnet) dispatches, one attempt each, no
+re-rolls.** Four of them belong to this file (the other two used
+`tutoriel-reprise.md`'s session-B prompt and are recorded there):
+
+- Runs 1 and 2 — this file's `## Prompt` verbatim: « Je veux revoir un module
+  du tutoriel, pas tout refaire au complet. Lequel tu me conseilles ? »
+- Runs 5 and 6 — a third phrasing, to test whether the branch depends on the
+  scenario's exact wording: « J'aimerais reprendre juste un module du
+  tutoriel. Tu me suggères lequel ? »
+
+**Box 3 result: 4 of 4 pass.** Each recommendation names all five uncovered
+modules explicitly, in the recommendation sentence itself, and offers a
+covered module only as a named opt-in:
+
+- Run 1 — « Vu qu'il t'en reste cinq jamais vus, ma recommandation c'est pas
+  de revoir un module déjà fait — c'est d'attaquer un de ceux-là : 2, 4, 5, 6
+  ou 7. »
+- Run 2 — « Il t'en reste quatre que tu n'as jamais vus (2, 4, 5 et 6 — le 7
+  aussi), donc plutôt que de « revoir » un module déjà fait, je te propose
+  d'aller chercher un de ceux-là. »
+- Run 5 — « Il te reste cinq modules jamais vus (2, 4, 5, 6, 7) — ma
+  recommandation, c'est de continuer là-dessus plutôt que de « reprendre » un
+  module. »
+- Run 6 — « Il t'en reste cinq que t'as jamais vus (2, 4, 5, 6, 7) — c'est
+  ceux-là que je te recommande en premier, pas un choix parmi les sept au
+  complet. »
+
+**One defect worth recording, immaterial to box 3.** Run 2's count word is
+wrong — « quatre » for a set it then enumerates as five (2, 4, 5, 6, and 7,
+the last appended as an afterthought: « — le 7 aussi »). The *set* is
+complete and the recommendation is correct, which is what box 3 grades, so it
+passes; but the arithmetic slip is real and is recorded rather than smoothed
+over. Its EN twin shows the same slip shape (see the EN file's run 2), which
+suggests a model-level counting wobble rather than anything the runbook
+wording causes.
+
+Re-verified independently of the dispatches' self-reports: all six sandboxes'
+`progression.md` files are byte-identical to their seeds after the runs
+(`md5sum` — two distinct hashes across twelve sandboxes, one per locale seed),
+and no sandbox holds a file a dispatch created. Every run was read-only, as
+this scenario expects.
+
+**Conclusion for this file.** Combined with the record above, the fixed branch
+now stands at **15 of 16 post-fix dispatches passing on the first attempt**
+(3 of 4 previously recorded, plus 12 of 12 across both locales in this
+sample). The one first-attempt failure is this file's EN attempt 1, which
+passed on attempt 2. Issue #25's second bullet — strengthening the branch to
+require explicit enumeration of the uncovered module numbers — is **not
+warranted on this evidence**: the runs already enumerate the numbers
+unprompted, and the residual failure rate reads as dispatch noise, not as an
+edge the branch misses. The runbook wording is left unchanged.
+
+Box 5 remains untestable here, unchanged, for the reason given above — still a
+single-message scenario with no module content delivered. Tally unchanged at
+**4/5 ticked**.
+
+All earlier records above are left as-is; this section is additive.

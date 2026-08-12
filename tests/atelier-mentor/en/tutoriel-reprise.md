@@ -175,3 +175,44 @@ and `tutoriel-selecteur.md`'s FR re-run (named "2, 4, 5, 6, 7" explicitly).
 over pre-fix (it stopped recommending an already-covered module as its
 primary answer) but still short of naming the full uncovered set in its
 recommendation prose.
+
+## Verification notes — 2026-08-12 larger sample (issue #25)
+
+Part of the larger sample issue #25 asked for. Two of the six EN dispatches
+described in `tutoriel-selecteur.md`'s `## Verification notes — 2026-08-12
+larger sample` section used **this** file's session-B prompt verbatim — "I
+want to revisit a module from the tutorial." — and are recorded here. Same
+staged, read-only skill and the same identical seeding described there.
+
+**Scope limit, stated plainly.** These two runs are session-B-*equivalent*,
+not full session A → session B chains: `progression.md` was pre-seeded on disk
+(modules 1 and 3 covered, dated) rather than produced by a live session A in
+the same sandbox. They therefore bear only on **box 4** (the recommendation
+names only the remaining modules) and on box 5 (all seven still listed). They
+are not additional evidence for boxes 1–3, which require a real session A to
+have written the file — those rest on the runs recorded above, unchanged.
+
+**Box 4 result: 2 of 2 pass.** Both name all five uncovered modules explicitly
+in the recommendation itself, with a covered-module re-run offered only as a
+named opt-in:
+
+- Run 3 — "five of the seven haven't been done yet, so my recommendation is
+  actually to knock out one of those uncovered ones (2, 4, 5, 6, or 7) rather
+  than re-run something you've already seen."
+- Run 4 — "Since five modules are still uncovered, my recommendation is one of
+  those — modules 2, 4, 5, 6, or 7 — rather than picking freely across all
+  seven."
+
+**Box 5** also holds in both: each reply lists all seven modules, numbered 1
+to 7, with the seeded dates beside modules 1 and 3.
+
+Re-verified independently of the dispatches' self-reports: both sandboxes'
+`progression.md` files are byte-identical to their seeds after the runs
+(`md5sum`), and neither sandbox holds a file a dispatch created.
+
+Tally unchanged at **5/5 ticked** — these runs confirm boxes 4 and 5 on fresh
+dispatches rather than changing any tick. See `tutoriel-selecteur.md`'s
+2026-08-12 section for the combined conclusion across all twelve runs and for
+why issue #25's proposed wording change was not made.
+
+All earlier records above are left as-is; this section is additive.

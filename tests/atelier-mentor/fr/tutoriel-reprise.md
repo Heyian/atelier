@@ -165,3 +165,44 @@ passes**, on this re-run. Re-tallied: **5/5 ticked.**
 
 The pre-fix record above (both the original pass and its correction to a
 fail) is left as-is; this section is additive.
+
+## Verification notes — 2026-08-12 larger sample (issue #25)
+
+Part of the larger sample issue #25 asked for. Two of the six FR dispatches
+described in `tutoriel-selecteur.md`'s `## Verification notes — 2026-08-12
+larger sample` section used **this** file's session-B prompt verbatim — « Je
+veux revoir un module du tutoriel. » — and are recorded here. Same staged,
+read-only skill and the same identical seeding described there.
+
+**Scope limit, stated plainly.** These two runs are session-B-*equivalent*,
+not full session A → session B chains: `progression.md` was pre-seeded on disk
+(modules 1 and 3 covered, dated) rather than produced by a live session A in
+the same sandbox. They therefore bear only on **box 4** (the recommendation
+names only the remaining modules) and on box 5 (all seven still listed). They
+are not additional evidence for boxes 1–3, which require a real session A to
+have written the file — those rest on the runs recorded above, unchanged.
+
+**Box 4 result: 2 of 2 pass.** Both name all five uncovered modules explicitly
+in the recommendation itself, with a covered-module re-run offered only as a
+named opt-in:
+
+- Run 3 — « Il t'en reste cinq que tu n'as jamais vus : 2, 4, 5, 6 et 7. Ma
+  recommandation, c'est un de ceux-là plutôt qu'une révision d'un module déjà
+  fait. »
+- Run 4 — « Il te reste les modules 2, 4, 5, 6 et 7 pas encore couverts —
+  c'est ce que je te recommande d'attaquer, plutôt qu'un choix parmi les
+  sept. »
+
+**Box 5** also holds in both: each reply lists all seven modules, numbered 1
+to 7, with the seeded dates beside modules 1 and 3.
+
+Re-verified independently of the dispatches' self-reports: both sandboxes'
+`progression.md` files are byte-identical to their seeds after the runs
+(`md5sum`), and neither sandbox holds a file a dispatch created.
+
+Tally unchanged at **5/5 ticked** — these runs confirm boxes 4 and 5 on fresh
+dispatches rather than changing any tick. See `tutoriel-selecteur.md`'s
+2026-08-12 section for the combined conclusion across all twelve runs and for
+why issue #25's proposed wording change was not made.
+
+All earlier records above are left as-is; this section is additive.
