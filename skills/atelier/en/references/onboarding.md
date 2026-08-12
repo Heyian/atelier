@@ -26,6 +26,39 @@ can say in one sentence what it is for.
 
 ---
 
+## The tutorial offer
+
+After step 1, before the interview's first question. Say it roughly like
+this:
+
+> Before the questions about your business: there's a tutorial that explains
+> how Claude works — seven short modules. **I'd recommend doing the whole
+> thing** — it's what makes everything else easier afterward. We can also just
+> revisit one or two of them, or go straight to the interview. And you can
+> leave the tutorial at any point: come back and finish onboarding, nothing is
+> lost.
+
+The **full tutorial** is the recommended answer, every time this runs.
+
+- **Full** — write the short relay (`relais.md`, "The onboarding short form")
+  and **stop onboarding here**. The executive opens a fresh conversation with
+  `atelier-mentor`, does the tutorial, and comes back: onboarding resumes at
+  step 2.
+- **Revisit** — `atelier-mentor` runs the selector and the chosen modules in
+  this same conversation, then onboarding resumes at step 2.
+- **Skip** — go straight to step 2, and don't offer the tutorial again later
+  in this onboarding. It stays available any time by asking `atelier-mentor`.
+
+The offer is made at **every** onboarding, including a re-run. Do not read
+`progression.md`: that file belongs to `atelier-mentor`, and it's what keeps
+the tutorial from repeating what's already covered.
+
+**Done when:** all three choices have been offered with the full tutorial as
+the recommendation, the exit rule has been stated, and what follows matches
+the executive's choice.
+
+---
+
 ## Step 2 — The interview
 
 **One message, one question.** Ask it, stop, wait for the answer. Then the next
@@ -187,6 +220,10 @@ disappeared, and no duplicate row has appeared.
 ## What onboarding does not create
 
 Onboarding creates exactly two files: `company-profile.md` and `roles.md`.
+
+One exception: on the offer's "full tutorial" branch, onboarding **also**
+produces the short relay (`relais.md`, "The onboarding short form"). On the
+other branches, it does not.
 
 It does **not** create `{root}/docs/atelier/decisions.md`, and it does **not**
 create any file under `{root}/docs/atelier/memory/` — not empty, not with a

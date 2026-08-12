@@ -93,6 +93,40 @@ suivante est nommée avec sa raison, et chaque document est cité par son chemin
 
 ---
 
+## La forme courte d'accueil
+
+Une seule situation : l'accueil s'est arrêté à l'offre de tutoriel et la
+personne a choisi le tutoriel complet.
+
+**Pas de balayage de consolidation** — à l'étape 1, rien n'a encore été décidé,
+donc il n'y a rien à consigner. Trois sections au lieu de cinq :
+
+```markdown
+# Relais — tutoriel — AAAA-MM-JJ
+
+## Où en est le travail
+L'accueil est commencé : la racine est <le nom du dossier>. L'entretien n'est
+pas encore fait.
+
+## Prochaines étapes
+- Faire le tutoriel avec `atelier-mentor`, dans une conversation neuve.
+- Revenir ensuite finir l'accueil avec `atelier`, à partir de l'entretien.
+
+## Pour la prochaine conversation
+Compétence à utiliser : `atelier-mentor` — c'est elle qui donne le tutoriel.
+Première phrase à écrire : « Je veux faire le tutoriel. »
+```
+
+**Critère d'achèvement de la forme courte :** les trois sections sont remplies,
+`atelier-mentor` est nommée avec la première phrase à écrire, et la personne
+sait qu'elle revient finir l'accueil après. La règle des cinq sections de
+l'étape 2 reste en vigueur pour **tous** les autres relais.
+
+Sans accès aux dossiers : affiche le relais court **en entier**, prêt à copier,
+dis où l'enregistrer, et ne dis pas que tu l'as enregistré.
+
+---
+
 ## Ce qui n'entre jamais dans un relais
 
 Omets les identifiants et mots de passe, les numéros de carte et de compte

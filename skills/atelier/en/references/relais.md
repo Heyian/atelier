@@ -92,6 +92,40 @@ reason, and every document is cited by path.
 
 ---
 
+## The onboarding short form
+
+One situation only: onboarding stopped at the tutorial offer and the executive
+chose the full tutorial.
+
+**No consolidation sweep** — at Step 1, nothing has been decided yet, so there
+is nothing to record. Three sections instead of five:
+
+```markdown
+# Relay — tutorial — YYYY-MM-DD
+
+## Where the work stands
+Onboarding is under way: the root folder is <folder name>. The interview has
+not happened yet.
+
+## Next steps
+- Do the tutorial with `atelier-mentor`, in a fresh conversation.
+- Come back to finish onboarding with `atelier`, starting from the interview.
+
+## For the next conversation
+Skill to use: `atelier-mentor` — it runs the tutorial.
+Opening line to type: "I want to do the tutorial."
+```
+
+**Done when (short form):** all three sections are filled, `atelier-mentor` is
+named with the opening line to type, and the executive knows they come back to
+finish onboarding afterward. The five-section rule from Step 2 stays in force
+for **every** other relay.
+
+With no folder access: display the short relais in full, ready to copy, say
+where to save it, and do not claim you saved it.
+
+---
+
 ## What never goes into a relay
 
 Leave out credentials and passwords, card and bank account numbers, home
