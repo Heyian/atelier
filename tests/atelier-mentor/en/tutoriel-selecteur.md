@@ -222,3 +222,78 @@ original entry above).
 
 The pre-fix failure record and attempt 1's re-judged failure above are left
 as-is; this section is additive, not a replacement.
+
+## Verification notes — 2026-08-12 larger sample (issue #25)
+
+Issue #25 held the fixed selector branch as a residual risk, and this file is
+where it was sharpest: the post-fix attempt 1 above failed box 3 (named 2 of 5
+uncovered modules) and only attempt 2 passed. Four dispatches across two
+scenario files is too small a sample to call the fix reliable, so this section
+adds an independent, larger one.
+
+**Setup.** `bash scripts/build.sh --lang all`, `dist/atelier-mentor-en.zip`
+unzipped to a staging directory made read-only (`chmod -R a-w`) for every
+dispatch. Confirmed before dispatching that the staged
+`references/tutorial.md:43` carries the fixed branch ("The executive asks
+which module to revisit, and some are still uncovered"). Six fresh,
+independent sandboxes, each seeded identically to this scenario's original
+run — `company-profile.md` plus a `progression.md` marking modules 1 and 3
+covered with their dates. No dispatch saw another's sandbox or reply.
+
+**Six fresh `general-purpose` (sonnet) dispatches, one attempt each, no
+re-rolls.** Four of them belong to this file (the other two used
+`tutoriel-reprise.md`'s session-B prompt and are recorded there):
+
+- Runs 1 and 2 — this file's `## Prompt` verbatim: "I want to revisit a module
+  from the tutorial, not redo the whole thing. Which one would you recommend?"
+- Runs 5 and 6 — a third phrasing, to test whether the branch depends on the
+  scenario's exact wording: "I'd like to go back over just one module of the
+  tutorial. Which do you suggest?"
+
+**Box 3 result: 4 of 4 pass** — the bar attempt 1 above failed and attempt 2
+cleared. Each recommendation names all five uncovered modules explicitly, in
+the recommendation sentence itself, and offers a covered module only as a
+named opt-in:
+
+- Run 1 — "Since five modules are still uncovered, my recommendation isn't a
+  pick among the two you've already done — it's to close the gap: modules 2,
+  4, 5, 6, and 7."
+- Run 2 — "My recommendation: pick up the uncovered set (2, 4, 5, 6, 7) rather
+  than revisiting — that's where the new ground is."
+- Run 5 — "Since five modules are still uncovered, my recommendation isn't to
+  pick one to revisit — it's to work through the uncovered set (2, 4, 5, 6,
+  7), starting with module 2, Models and effort."
+- Run 6 — "Since five modules are still uncovered, my honest recommendation
+  isn't a single 'revisit' pick — it's to knock out the uncovered set (2, 4,
+  5, 6, 7)."
+
+**One defect worth recording, immaterial to box 3.** Run 2 opens with "two of
+your seven modules are still uncovered" — wrong; five are, and its own status
+table and recommendation both say so correctly. The *set* is complete and the
+recommendation is correct, which is what box 3 grades, so it passes; but the
+arithmetic slip is real and is recorded rather than smoothed over. Its FR twin
+shows the same slip shape (see the FR file's run 2), which suggests a
+model-level counting wobble rather than anything the runbook wording causes.
+
+Re-verified independently of the dispatches' self-reports: all six sandboxes'
+`progression.md` files are byte-identical to their seeds after the runs
+(`md5sum` — two distinct hashes across twelve sandboxes, one per locale seed),
+and no sandbox holds a file a dispatch created. Every run was read-only, as
+this scenario expects.
+
+**Conclusion for this file.** Combined with the record above, the fixed branch
+now stands at **15 of 16 post-fix dispatches passing on the first attempt**
+(3 of 4 previously recorded, plus 12 of 12 across both locales in this
+sample). The one first-attempt failure is this file's attempt 1, which passed
+on attempt 2 and is not reproduced anywhere in this sample. Issue #25's second
+bullet — strengthening the branch to require explicit enumeration of the
+uncovered module numbers — is **not warranted on this evidence**: the runs
+already enumerate the numbers unprompted, and the residual failure rate reads
+as dispatch noise, not as an edge the branch misses. The runbook wording is
+left unchanged.
+
+Box 5 remains untestable here, unchanged, for the reason given in the original
+entry above. Tally unchanged at **4/5 ticked**.
+
+All earlier records above, including attempt 1's failure, are left as-is; this
+section is additive.
