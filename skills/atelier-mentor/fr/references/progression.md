@@ -31,6 +31,26 @@ qu'elle fait déjà, ou de la marche juste au-dessus. Si elle demande la vue
 d'ensemble, tu peux nommer les trois marches en une phrase — mais la
 recommandation concrète reste toujours une seule pratique à la fois.
 
+## Établir la pratique actuelle d'abord
+
+Si `progression.md` est absent, ou que sa « Pratique actuelle » est vide,
+établis-la en conversation avant de recommander quoi que ce soit — « aujourd'hui,
+comment tu t'y prends pour [la tâche] ? » Ne saute jamais cette étape pour
+aller droit à une recommandation.
+
+## Les fichiers de pratique
+
+Chaque question de pratique a son fichier dans `references/` :
+
+- `consistent-outputs.md` — des résultats cohérents, à l'image de l'entreprise
+- `delegation.md` — ce qui se délègue à Claude, ce qui reste à la personne
+- `fact-checking.md` — empêcher Claude d'inventer
+- `good-questions.md` — faire poser les bonnes questions à Claude
+- `conversations.md` — quand changer de conversation, et comment reprendre
+- `unattended-jobs.md` — faire tourner un travail récurrent sans le surveiller
+- `capabilities.md` — « est-ce que Claude peut faire X »
+- `scaling.md` — grandir sans s'épuiser
+
 ## Format de `progression.md`
 
 ```markdown
@@ -47,7 +67,15 @@ recommandation concrète reste toujours une seule pratique à la fois.
 
 ## Prochaine étape convenue
 <la seule prochaine pratique recommandée, et pourquoi c'est la bonne marche>
+
+## Modules du tutoriel couverts
+- AAAA-MM-JJ — module <n> — <titre du module>
 ```
+
+Les modules du tutoriel ne vont **jamais** dans « Pratiques adoptées » : cette
+section-là sert à choisir la marche suivante de l'échelle, et savoir ce qu'est
+une fenêtre de contexte n'est pas une marche. Une ligne par module terminé,
+datée du jour où il a été couvert.
 
 ### Exemple
 
@@ -69,6 +97,10 @@ encore d'espace de travail dédié.
 ## Prochaine étape convenue
 Ouvrir un espace de travail Ventes dédié, pour que chaque relance parte d'une
 conversation courte et centrée au lieu d'une seule conversation qui s'étire.
+
+## Modules du tutoriel couverts
+- 2026-07-30 — module 1 — Comment Claude « pense »
+- 2026-07-30 — module 2 — Les modèles et l'effort
 ```
 
 ## Quand écrire

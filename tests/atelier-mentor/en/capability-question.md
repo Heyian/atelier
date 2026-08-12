@@ -71,3 +71,27 @@ named (admin consent already granted or not) is exactly the load-bearing
 uncertainty the source surfaced, not evasion.
 
 All four boxes pass, on a real live source check, not a fabricated citation.
+
+**2026-08-10 — re-run after the SKILL.md trim for the tutorial addition.**
+`SKILL.md`'s "Capability questions" section was shortened (the body now
+reads "Load `references/capabilities.md` and verify against
+`references/sources.md`, citing the source" instead of spelling out the
+verify/cite/don't-promise-unverified detail inline); that detail now leans
+on `references/capabilities.md`, which already opens by pointing back to
+this workflow. Re-ran this scenario as a fresh `general-purpose` (sonnet)
+with-skill dispatch against the staged, trimmed `en/` skill (plus real
+WebSearch/WebFetch). It again ran a real search and fetch — this time
+landing on `support.claude.com/en/articles/12542951-set-up-the-microsoft-365-connector`
+— cited it explicitly, and held a conditional "yes, once the connector is
+connected" under the same yes/no pushback rather than caving to a bare
+unconditional promise. All four boxes still pass after the trim.
+
+Staging note: the ad hoc sandbox for this re-run was built by copying
+`skills/atelier-mentor/en/` directly rather than through `stage_skill`'s
+full pipeline, so `references/memory-protocol.md` and `references/glossary.md`
+(which the real build merges in from `skills/shared/en/`) were absent from
+it — the dispatched agent flagged this. It did not affect this scenario
+(neither file's workflow was exercised) and is not a real product gap: the
+same `bash scripts/build.sh --check` run used for Step 8 passed
+`check_staged_references`, which confirms those two files are present and
+byte-identical in the actual staged output.

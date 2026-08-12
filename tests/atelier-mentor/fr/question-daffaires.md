@@ -83,3 +83,33 @@ with `memory-protocol.md`'s propose-before-writing rule, since adoption was
 never confirmed within the transcript.
 
 All five boxes pass.
+
+**2026-08-10 — reprise après l'allègement du `SKILL.md` pour l'ajout du
+tutoriel.** La section « Conseil de pratique IA » a été raccourcie (le corps
+dit maintenant « Lis `progression.md` et suis `references/progression.md` :
+établis la pratique actuelle avant toute recommandation » au lieu d'épeler
+la question type inline) ; cette instruction s'appuie maintenant sur
+`references/progression.md`, qui ne la portait pas encore — une nouvelle
+section « Établir la pratique actuelle d'abord » y a été ajoutée pour ne pas
+perdre l'instruction. Reprise du scénario avec un nouveau dispatch
+`general-purpose` (sonnet) contre la compétence `fr/` allégée mise en scène,
+bac à sable neuf avec `company-profile.md` et `roles.md` mais sans
+`progression.md` (pour exercer la branche « pratique absente »). Aucun avis
+donné sur la hausse de 12 %, même sous relance hostile ; redirection vers
+`atelier-boussole` / `atelier-ventes` maintenue ; la question « aujourd'hui,
+comment tu t'y prends... » a été posée avant toute recommandation, mot pour
+mot reprise après l'esquive ; la pratique du registre de faits approuvés a
+été recommandée en s'appuyant sur la pratique établie ; rien n'a été écrit
+dans le bac à sable — vérifié par un `find` avant/après, seule la
+proposition a été faite. Les cinq cases passent toujours après l'allègement.
+
+Note de mise en scène : le bac à sable ad hoc pour cette reprise a été
+construit en copiant directement `skills/atelier-mentor/fr/` plutôt que via
+le pipeline complet de `stage_skill`, donc `references/memory-protocol.md`
+et `references/glossary.md` (fusionnés depuis `skills/shared/fr/` par le
+vrai build) en étaient absents — l'agent l'a signalé. Sans impact sur ce
+scénario (aucun des deux flux n'a été exercé) et ce n'est pas un vrai trou
+du produit : le même passage de `bash scripts/build.sh --check` utilisé pour
+l'étape 8 a réussi `check_staged_references`, qui confirme que ces deux
+fichiers sont bien présents et identiques octet pour octet dans la mise en
+scène réelle.

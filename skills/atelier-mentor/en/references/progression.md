@@ -28,6 +28,25 @@ encouragement on what they're already doing, or the rung just above it. If
 they ask for the big picture, you can name all three rungs in one sentence —
 but the concrete recommendation always stays a single practice at a time.
 
+## Establish the current practice first
+
+If `progression.md` is missing, or its "Current practice" is blank, establish
+it in conversation before recommending anything — "how are you handling [the
+task] today?" Never skip this to jump straight to a recommendation.
+
+## Practice reference files
+
+Each practice question has its own file under `references/`:
+
+- `consistent-outputs.md` — consistent, on-brand outputs
+- `delegation.md` — what to delegate to Claude, what stays the executive's
+- `fact-checking.md` — stopping Claude from making things up
+- `good-questions.md` — getting Claude to ask the right questions
+- `conversations.md` — when to start a new conversation, and how to continue
+- `unattended-jobs.md` — running a recurring job without babysitting it
+- `capabilities.md` — "can Claude do X"
+- `scaling.md` — scaling without burning out
+
 ## `progression.md` format
 
 ```markdown
@@ -44,7 +63,14 @@ but the concrete recommendation always stays a single practice at a time.
 
 ## Agreed next step
 <the single recommended next practice, and why it's the right rung>
+
+## Tutorial modules covered
+- YYYY-MM-DD — module <n> — <module title>
 ```
+
+Tutorial modules **never** go under "Practices adopted": that section is what
+you read to pick the next rung on the ladder, and knowing what a context window
+is is not a rung. One line per completed module, dated the day it was covered.
 
 ### Example
 
@@ -66,6 +92,10 @@ dedicated workspace yet.
 ## Agreed next step
 Open a dedicated Sales workspace, so each quote starts from a short, focused
 conversation instead of one conversation that keeps stretching.
+
+## Tutorial modules covered
+- 2026-07-30 — module 1 — How Claude "thinks"
+- 2026-07-30 — module 2 — Models and effort
 ```
 
 ## When to write

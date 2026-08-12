@@ -43,6 +43,11 @@ reference file in the exec's language.
 - **Red-team big decisions.** Before acting on an important plan, ask a
   fresh conversation to attack it. Advisory, never the decider.
 
+**Cross-reference — tutorial module 07.** The tutorial holds the *concepts*
+(what a hallucination is, why Claude sounds confident when it is wrong);
+`references/fact-checking.md` holds the *practices* above. The two do not
+restate each other. See `docs/tutorial-corpus.md`.
+
 ## "How do I make Claude ask me the right questions?"
 
 - **Grill, don't poll.** Have Claude interview you one question at a time,
