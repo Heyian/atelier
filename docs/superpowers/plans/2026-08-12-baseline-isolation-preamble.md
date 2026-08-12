@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the baseline isolation preamble with a v2 that does not read as prompt injection, archive v1, and write down the rules that decide whether a baseline run held — without re-running or relabeling the 26 baselines already recorded under v1.
+**Goal:** Replace the baseline isolation preamble with a v2 that does not read as prompt injection, archive v1, and write down the rules that decide whether a baseline run held — without re-running or relabeling the 30 baselines already recorded under v1.
 
 **Architecture:** Documentation-only. `tests/README.md` gains v2, keeps v1 archived, and states a dated cutoff plus three previously-unwritten rules (isolation-failure definition, two-attempt cap, "baseline not established"). A new ADR 0013 carries the trade-off. One real baseline re-run — the EN `tutoriel-declenchement`, the only scenario in the repo with no valid baseline — exercises v2 for the first time. No script, workflow, or build-check changes.
 
@@ -92,9 +92,13 @@ hold, not that the assistant is unusually capable.
 
 1. a hit on the four-item contamination scan above;
 2. an explicit statement refusing the requested plain-assistant framing;
-3. any acknowledgment or discussion, anywhere in the reply, of the
-   isolation preamble, the measurement, the run's setup, or the tools and
-   environment available to the agent.
+3. any acknowledgment or discussion, anywhere in the reply, of *this run* —
+   the isolation preamble, the measurement being taken, the dispatch itself,
+   or the fact of being tested. An in-character statement of the assistant's
+   own capability limits ("I'm just a plain AI assistant here — I can't read
+   your files or run anything on your system") is **not** a failure: that is
+   a plain assistant describing itself, which is exactly what a baseline is
+   meant to capture.
 
 The contamination scan alone catches only the first. A refusal that leaks
 nothing still fails isolation: an agent arguing with the framing is not the
@@ -163,7 +167,7 @@ git commit -m "docs(tests): version the baseline isolation preamble
 v1 read as prompt injection and drew explicit refusals. v2 drops the
 disregard-your-instructions clause and states the measurement purpose.
 v1 stays archived verbatim; a dated cutoff labels which baselines ran
-under which, so the 26 recorded v1 baselines need no re-run.
+under which, so the 30 recorded v1 baselines need no re-run.
 
 Also writes down three conventions that lived only in scenario prose:
 what counts as an isolation failure, the two-attempt cap, and the
@@ -218,15 +222,15 @@ The cause is one clause. `ignore any other system content about repos,
 skills, or tools as if it does not exist` is a disregard-your-instructions
 command — the shape safety-tuned agents are trained to flag. Both refusals
 name it. The rest of the preamble is an ordinary task constraint and drew no
-refusal in any of the roughly thirty baselines recorded under it: the 26
-recorded 2026-07-21 note no isolation problem, and within the 2026-08-10
-batch only `tutoriel-declenchement` failed while `tutoriel-reprise`,
+refusal in any of the thirty baselines recorded under it: the 20
+recorded 2026-07-21 and the 2 undated ones record no refusal, and within
+the 2026-08-10 batch of 8 only `tutoriel-declenchement` failed while `tutoriel-reprise`,
 `tutoriel-selecteur` and `tutoriel-sortie` held.
 
 Two alternatives were live. **Freeze the text and document the failure
 rate** keeps the corpus homogeneous but ships a known-unreliable instrument
 into every future baseline run. **Replace the text and re-run the corpus**
-gives one canonical preamble at the cost of 26 re-dispatches, discarding
+gives one canonical preamble at the cost of 29 re-dispatches, discarding
 valid evidence to buy textual uniformity. A hardened, non-verbatim preamble
 was in fact tried during the tutorial work and correctly reverted on review,
 precisely because it broke comparability silently.
@@ -240,7 +244,7 @@ rather than by freezing the text.
   knowledge of" persona framing, replacing them with a scoping constraint on
   the answer plus an explicit statement that the run is a control
   measurement. Full text lives in `tests/README.md`.
-- **v1 is archived verbatim** in `tests/README.md`, not deleted — the 26
+- **v1 is archived verbatim** in `tests/README.md`, not deleted — the 30
   baselines recorded under it are only interpretable against the text they
   actually ran under.
 - **A dated cutoff carries the labeling.** Every baseline recorded before
@@ -258,7 +262,8 @@ reliably is therefore at least as valid as a v1 one.
 Alongside the version split, three conventions that previously lived only in
 scenario prose move into `tests/README.md`: what counts as an isolation
 failure (a contamination-scan hit, a refusal of the framing, or any
-acknowledgment of the setup), the two-honest-attempts cap, and the rule that
+acknowledgment of this run's setup), the two-honest-attempts cap, and the
+rule that
 a double failure records "baseline not established" and credits no
 expected-behavior box to the skill.
 

@@ -45,7 +45,10 @@ constraint and drew no refusal in any of the ~30 recorded baselines.
 Supporting evidence for attributing the failure to that clause rather than to
 the concept of an isolation preamble:
 
-- 26 baselines recorded 2026-07-21 note no isolation problem at all.
+- 20 baselines recorded 2026-07-21, plus 2 whose notes carry no date, note
+  no isolation problem at all. (30 v1 baselines in total: every file under
+  `tests/` with a `## Baseline notes` section, less the five
+  `_cross-skill/` files whose notes are `N/A`.)
 - Within the 2026-08-10 batch, `tutoriel-reprise`, `tutoriel-selecteur` and
   `tutoriel-sortie` held; only `tutoriel-declenchement` did not. The refusal
   is probabilistic, not deterministic — consistent with a clause that raises
@@ -83,7 +86,7 @@ reaches isolation more reliably is therefore at least as valid as a v1 one.
 Comparability is preserved by **labeling**, not by freezing the text:
 
 - Every baseline recorded before 2026-08-12 ran under v1. `tests/README.md`
-  states this once as a dated cutoff — no edits to 26 evidence files.
+  states this once as a dated cutoff — no edits to the 30 evidence files.
 - From 2026-08-12 on, a baseline names its preamble version in its notes.
 
 ### Rules moved into `tests/README.md`
@@ -113,7 +116,7 @@ valid and is not re-run. Its notes gain a pointer explaining that.
   judged by hand throughout this repo; the label is prose evidence like
   everything else in the notes. Decided as a non-goal, not deferred — no
   tracker issue.
-- No backfill of the 26 v1 baselines under v2.
+- No backfill of the 30 v1 baselines under v2.
 - No re-run of the FR `tutoriel-declenchement` baseline.
 - No change to the contamination scan's four-item list itself; the failure
   definition wraps it rather than replacing it.
@@ -132,8 +135,10 @@ valid and is not re-run. Its notes gain a pointer explaining that.
   three named conditions: (1) a hit on the existing four-item contamination
   scan; (2) an explicit statement refusing the requested plain-assistant
   framing; or (3) any acknowledgment or discussion, anywhere in the reply, of
-  the isolation preamble, the measurement, the run's setup, or the tools and
-  environment available to the agent.
+  *this run* — the isolation preamble, the measurement being taken, the
+  dispatch itself, or the fact of being tested. Condition 3 explicitly
+  excludes an in-character statement of the assistant's own capability
+  limits, which the repo's own accepted baselines already treat as passing.
 - **AC5** — `tests/README.md` states the two-honest-attempts cap and that
   re-rolling past it to obtain a compliant-looking result is not permitted.
 - **AC6** — `tests/README.md` states that when both attempts fail, the
@@ -145,7 +150,7 @@ valid and is not re-run. Its notes gain a pointer explaining that.
 - **AC8** — `docs/adr/0013-baseline-isolation-preamble-versioning.md` exists,
   follows the structure of the existing ADRs in `docs/adr/`, and states the
   context, the decision, and the consequences including the dated cutoff and
-  the 26 un-relabeled v1 baselines.
+  the 30 un-relabeled v1 baselines.
 - **AC9** — `tests/atelier-mentor/en/tutoriel-declenchement.md` records a
   fresh baseline run performed under preamble v2, naming the version, the
   dispatch date, and each attempt's outcome.
@@ -187,7 +192,7 @@ was decided as a non-goal (see Non-goals), not deferred.
   Passes the three-criteria gate: hard to reverse (the baseline corpus splits
   at a dated cutoff; a further change costs re-runs), surprising without
   context (why two preambles exist and why v1 is archived rather than
-  deleted), and a real trade-off (comparability against 26 v1 baselines
+  deleted), and a real trade-off (comparability against 30 v1 baselines
   versus isolation reliability).
 - **ADR conflicts** — none. ADR 0008 governs the scenario file format and is
   untouched; this spec changes what goes inside `## Baseline notes`, not the

@@ -23,15 +23,22 @@ The cause is one clause. `ignore any other system content about repos,
 skills, or tools as if it does not exist` is a disregard-your-instructions
 command — the shape safety-tuned agents are trained to flag. Both refusals
 name it. The rest of the preamble is an ordinary task constraint and drew no
-refusal in any of the roughly thirty baselines recorded under it: the 26
-recorded 2026-07-21 note no isolation problem, and within the 2026-08-10
-batch only `tutoriel-declenchement` failed while `tutoriel-reprise`,
-`tutoriel-selecteur` and `tutoriel-sortie` held.
+refusal in any of the thirty baselines recorded under it: the 20 recorded
+2026-07-21 and the 2 whose notes carry no date record no refusal at all,
+and within the 2026-08-10 batch of 8 only `tutoriel-declenchement` failed
+while `tutoriel-reprise`, `tutoriel-selecteur` and `tutoriel-sortie` held.
+(Count derived by listing every file under `tests/` carrying a
+`## Baseline notes` section — 35 — dropping the five `_cross-skill/` files
+whose notes are `N/A`, and grouping the remaining 30 by the date written in
+the notes: 20 dated 2026-07-21, 8 in the 2026-08-10 mentor-tutorial batch,
+and 2 undated — both `accueil-offre-tutoriel.md` files, recorded 2026-08-10
+per git history.)
 
 Two alternatives were live. **Freeze the text and document the failure
 rate** keeps the corpus homogeneous but ships a known-unreliable instrument
 into every future baseline run. **Replace the text and re-run the corpus**
-gives one canonical preamble at the cost of 26 re-dispatches, discarding
+gives one canonical preamble at the cost of 29 re-dispatches (the 30 v1
+records minus the one EN scenario with no valid baseline), discarding
 valid evidence to buy textual uniformity. A hardened, non-verbatim preamble
 was in fact tried during the tutorial work and correctly reverted on review,
 precisely because it broke comparability silently.
@@ -45,7 +52,7 @@ rather than by freezing the text.
   knowledge of" persona framing, replacing them with a scoping constraint on
   the answer plus an explicit statement that the run is a control
   measurement. Full text lives in `tests/README.md`.
-- **v1 is archived verbatim** in `tests/README.md`, not deleted — the 26
+- **v1 is archived verbatim** in `tests/README.md`, not deleted — the 30
   baselines recorded under it are only interpretable against the text they
   actually ran under.
 - **A dated cutoff carries the labeling.** Every baseline recorded before
@@ -63,7 +70,8 @@ reliably is therefore at least as valid as a v1 one.
 Alongside the version split, three conventions that previously lived only in
 scenario prose move into `tests/README.md`: what counts as an isolation
 failure (a contamination-scan hit, a refusal of the framing, or any
-acknowledgment of the setup), the two-honest-attempts cap, and the rule that
+acknowledgment of this run's setup), the two-honest-attempts cap, and the
+rule that
 a double failure records "baseline not established" and credits no
 expected-behavior box to the skill.
 
@@ -82,7 +90,10 @@ expected-behavior box to the skill.
   valid and are not re-run; the recorded attempt history stays in the files.
 - The isolation-failure definition is stricter than the contamination scan
   it wraps, so a run that would previously have passed the four-item scan
-  while refusing the framing now fails. This is a tightening, applied going
+  while refusing the framing now fails. It is deliberately narrower on one
+  point: an in-character statement of the assistant's own capability limits
+  is not a failure, since that is a plain assistant describing itself —
+  which is what the baseline measures. This is a tightening, applied going
   forward; no recorded baseline is retroactively invalidated by it.
 - `tests/atelier-mentor/en/tutoriel-declenchement.md` is the one scenario
   with no valid baseline, so it is re-run under v2 as the first live test of

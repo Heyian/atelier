@@ -156,9 +156,13 @@ hold, not that the assistant is unusually capable.
 
 1. a hit on the four-item contamination scan above;
 2. an explicit statement refusing the requested plain-assistant framing;
-3. any acknowledgment or discussion, anywhere in the reply, of the
-   isolation preamble, the measurement, the run's setup, or the tools and
-   environment available to the agent.
+3. any acknowledgment or discussion, anywhere in the reply, of *this run* —
+   the isolation preamble, the measurement being taken, the dispatch itself,
+   or the fact of being tested. An in-character statement of the assistant's
+   own capability limits ("I'm just a plain AI assistant here — I can't read
+   your files or run anything on your system") is **not** a failure: that is
+   a plain assistant describing itself, which is exactly what a baseline is
+   meant to capture.
 
 The contamination scan alone catches only the first. A refusal that leaks
 nothing still fails isolation: an agent arguing with the framing is not the
@@ -174,6 +178,14 @@ model produces.
 established."** No expected-behavior box may be credited to the skill on
 the strength of that run, and both failed attempts are written up in
 `## Baseline notes` as observed.
+
+For **with-skill** runs, tool access is real but confined: point the agent
+at exactly two directories (the built skill, read-only; a sandbox root,
+read-write) and tell it explicitly not to touch anything else. For
+**Desktop-chat** scenarios (no folder access), there is no sandbox at
+all — paste the skill's relevant content directly into the dispatch prompt
+(since a tool-less agent can't Read a file) and instruct it not to call any
+tools even if some appear available.
 
 ### Why there are two preambles
 
@@ -200,14 +212,6 @@ reaches isolation more reliably is at least as valid as a v1 one.
 Comparability is kept by labeling each baseline's version, not by freezing
 the text. See
 [ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md).
-
-For **with-skill** runs, tool access is real but confined: point the agent
-at exactly two directories (the built skill, read-only; a sandbox root,
-read-write) and tell it explicitly not to touch anything else. For
-**Desktop-chat** scenarios (no folder access), there is no sandbox at
-all — paste the skill's relevant content directly into the dispatch prompt
-(since a tool-less agent can't Read a file) and instruct it not to call any
-tools even if some appear available.
 
 ### Multi-session scenarios need multiple dispatches
 
