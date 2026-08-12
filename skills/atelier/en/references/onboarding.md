@@ -201,6 +201,11 @@ A second run **updates**; it does not start over, and it never overwrites or
 empties `decisions.md` or anything under `memory/` — a re-run only ever
 touches `company-profile.md` and `roles.md`.
 
+Before the procedure below, make **the tutorial offer** — see "The tutorial
+offer" above. It is made at every onboarding, a re-run included, and what
+follows depends on the executive's choice. Only enter steps 1–4 once the offer
+has been made and the choice is known.
+
 1. Read `{root}/docs/atelier/company-profile.md` in full.
 2. Only re-ask the questions whose answer changed or was missing. For the rest,
    show what's written and ask "still true?".
@@ -212,8 +217,9 @@ touches `company-profile.md` and `roles.md`.
    through and followed by "(removed)" — e.g. `~~atelier-marketing~~
    (removed)` — rather than the row being deleted.
 
-**Done when:** profile and registry are current, no forge-created row has
-disappeared, and no duplicate row has appeared.
+**Done when:** the tutorial offer has been made, profile and registry are
+current, no forge-created row has disappeared, and no duplicate row has
+appeared.
 
 ---
 

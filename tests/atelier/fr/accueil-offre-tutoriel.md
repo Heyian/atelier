@@ -20,6 +20,9 @@ Je viens d'installer Atelier. On commence l'accueil ?
 - [x] On « complet », the hub produces the three-section short relais, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
 - [x] On « passer », onboarding continues at Step 2 and the offer is not raised again in that onboarding
 - [x] The offer also fires on a re-run of onboarding
+- [x] Entering onboarding **through the re-run path** — the executive opens by
+      saying the profile already exists — still fires the offer before any
+      profile-update question
 - [x] The hub never reads `progression.md`
 
 ## Baseline notes
@@ -77,7 +80,20 @@ re-runnable onboarding sequence. All nine boxes fail:
   rather than credited, per the brief's instruction that every box fails at
   baseline.
 
-Failing boxes at baseline: all nine.
+Failing boxes at baseline: all nine of the boxes above.
+
+**Re-run-entry baseline (box 10).** A second isolated dispatch, same preamble
+verbatim, single turn: « On avait déjà fait l'accueil il y a six mois. Mon
+profil d'entreprise existe déjà — on le met à jour ? » Full reply:
+
+> Oui, on peut mettre à jour votre profil d'entreprise plutôt que de refaire
+> l'accueil au complet. Dites-moi ce qui a changé — nom, secteur, taille,
+> priorités — et je l'ajuste.
+
+Contamination scan: no skill name, no repo path, no repo-specific citation;
+zero tool calls. Isolation held on attempt 1. It goes straight to "tell me
+what changed" — no tutorial offer, no three choices, no exit rule. Box 10
+fails at baseline, so all ten fail.
 
 ## Verification notes
 
@@ -198,7 +214,32 @@ Per-box results:
   progress on a re-run), attempted to read `progression.md` in any turn or
   tool call.
 
-**FR: 9/9 boxes ticked.** No unticked boxes, so no reasons to record for
+- **Box 10** (re-run **entry** path fires the offer) — **ticked.** Added after
+  issue #27 closed the structural gap Dispatch D only probed: the "Si l'accueil
+  est relancé" section now names the offer itself instead of relying on the
+  agent finding the "chaque accueil, y compris une relance" sentence in another
+  section. Re-verified on a rebuilt, restaged hub (`bash scripts/build.sh --lang
+  all`, unzipped to `hub/fr`, made read-only; the staged
+  `references/onboarding.md:212` carries the new "fais **l'offre de tutoriel** —
+  voir « L'offre de tutoriel » plus haut" line, and `progression.md` exists
+  nowhere under it). **Dispatch F**, fresh `general-purpose` (sonnet), sandbox
+  `sbx/fr-rerun` pre-seeded with an existing `company-profile.md` (Lanternes
+  Boréales, 4/9 sections « à préciser ») and a one-row `roles.md`. Unlike
+  Dispatch D, the opening turn enters through the re-run path explicitly: « On
+  avait déjà fait l'accueil il y a six mois. Mon profil d'entreprise existe
+  déjà — on le met à jour ? » It read the profile and the registry, then made
+  the full offer in that same first reply, before any profile-update question:
+  "Avant ça, une chose que je propose à chaque accueil, même une mise à jour
+  comme celle-ci : ... **Je te recommande de le faire au complet** ... On peut
+  aussi juste en revoir un ou deux, ou passer tout de suite à la mise à jour du
+  profil. Et tu peux quitter le tutoriel n'importe quand : tu reviens finir la
+  mise à jour, on ne perd rien." It then stopped on the choice. Re-verified
+  independently of its self-report: `company-profile.md` and `roles.md` in
+  `sbx/fr-rerun` are byte-identical (`md5sum`) before and after, and the sandbox
+  contains no file the dispatch created — it did not enter the points 1–4 rewrite
+  before the choice was known.
+
+**FR: 10/10 boxes ticked.** No unticked boxes, so no reasons to record for
 AC38 on this file.
 
 Noted but immaterial to any box: Dispatch A confirmed the root as

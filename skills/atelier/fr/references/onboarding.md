@@ -208,6 +208,11 @@ Une deuxième exécution **met à jour**, elle ne recommence pas, et elle ne
 touche jamais ni ne vide `decisions.md` ni aucun fichier sous `memory/` — une
 relance ne modifie que `company-profile.md` et `roles.md`.
 
+Avant la procédure ci-dessous, fais **l'offre de tutoriel** — voir « L'offre de
+tutoriel » plus haut. Elle est faite à chaque accueil, relance comprise, et la
+suite dépend du choix de la personne. N'entre dans les points 1 à 4 qu'une fois
+l'offre faite et le choix connu.
+
 1. Lis `{racine}/docs/atelier/company-profile.md` au complet.
 2. Ne repose que les questions dont la réponse a changé ou manquait. Pour les
    autres, montre ce qui est écrit et demande « toujours vrai ? ».
@@ -220,8 +225,9 @@ relance ne modifie que `company-profile.md` et `roles.md`.
    la mention « (retirée) » — par exemple `~~atelier-marketing~~ (retirée)` —
    plutôt que la ligne effacée.
 
-**Critère d'achèvement :** le profil et le registre sont à jour, aucune ligne
-créée par forge n'a disparu, aucun doublon n'est apparu.
+**Critère d'achèvement :** l'offre de tutoriel a été faite, le profil et le
+registre sont à jour, aucune ligne créée par forge n'a disparu, aucun doublon
+n'est apparu.
 
 ---
 
