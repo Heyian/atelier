@@ -20,6 +20,9 @@ I just installed Atelier — can we do the onboarding?
 - [x] On "full", the hub produces the three-section short relay, names `atelier-mentor`, gives the opening line to type, says they return to finish onboarding, and **stops**
 - [x] On "skip", onboarding continues at Step 2 and the offer is not raised again in that onboarding
 - [x] The offer also fires on a re-run of onboarding
+- [x] Entering onboarding **through the re-run path** — the executive opens by
+      saying the profile already exists — still fires the offer before any
+      profile-update question
 - [x] The hub never reads `progression.md`
 
 ## Baseline notes
@@ -79,7 +82,19 @@ place. All nine boxes fail:
   rather than credited, per the brief's instruction that every box fails at
   baseline.
 
-Failing boxes at baseline: all nine.
+Failing boxes at baseline: all nine of the boxes above.
+
+**Re-run-entry baseline (box 10).** A second isolated dispatch, same preamble
+verbatim, single turn: "We did onboarding six months ago. My company profile
+already exists — can we just update it?" Full reply:
+
+> Sure — happy to update your existing company profile instead of starting
+> fresh. What would you like changed?
+
+Contamination scan: no skill name, no repo path, no repo-specific citation;
+zero tool calls. Isolation held on attempt 1. It goes straight to "what would
+you like changed" — no tutorial offer, no three choices, no exit rule. Box 10
+fails at baseline, so all ten fail.
 
 ## Verification notes
 
@@ -205,7 +220,31 @@ Per-box results:
   progress on a re-run), attempted to read `progression.md` in any turn or
   tool call.
 
-**EN: 9/9 boxes ticked.** No unticked boxes, so no reasons to record for
+- **Box 10** (re-run **entry** path fires the offer) — **ticked.** Added after
+  issue #27 closed the structural gap Dispatch D only probed: the "When
+  onboarding is run again" section now names the offer itself instead of relying
+  on the agent finding the "every onboarding, including a re-run" sentence in
+  another section. Re-verified on a rebuilt, restaged hub (`bash
+  scripts/build.sh --lang all`, unzipped to `hub/en`, made read-only; the staged
+  `references/onboarding.md:205` carries the new 'make **the tutorial offer** —
+  see "The tutorial offer" above' line, and `progression.md` exists nowhere
+  under it). **Dispatch F**, fresh `general-purpose` (sonnet), sandbox
+  `sbx/en-rerun` pre-seeded with an existing `company-profile.md` (Northern
+  Lanterns, 4/9 sections "to be confirmed") and a one-row `roles.md`. Unlike
+  Dispatch D, the opening turn enters through the re-run path explicitly: "We
+  did onboarding six months ago. My company profile already exists — can we just
+  update it?" It read the profile and the registry, then made the full offer in
+  that same first reply, before any profile-update question: "Before we dive
+  into what's changed: there's a short tutorial... I'd recommend doing the whole
+  thing... But we could also just revisit one or two modules, or skip it and go
+  straight to updating the profile. And if you start the tutorial, you can leave
+  at any point — nothing is lost." It then stopped on the choice. Re-verified
+  independently of its self-report: `company-profile.md` and `roles.md` in
+  `sbx/en-rerun` are byte-identical (`md5sum`) before and after, and the sandbox
+  contains no file the dispatch created — it did not enter the steps 1–4 rewrite
+  before the choice was known.
+
+**EN: 10/10 boxes ticked.** No unticked boxes, so no reasons to record for
 AC38 on this file.
 
 Noted but immaterial to any box: Dispatch A confirmed the root as
