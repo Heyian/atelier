@@ -49,5 +49,5 @@ See `docs/adr/0009-release-automation-and-changelog-split.md` and
 Skills live in `skills/<canonical-fr-name>/<locale>/`; canonical cross-skill
 texts in `skills/shared/<locale>/`; exec-voice scenarios in
 `tests/<canonical-fr-name>/<locale>/` (plus `tests/_cross-skill/` for
-system-level scenarios not tied to one skill). Authoring standards:
-`docs/AUTHORING.md`.
+system-level scenarios not tied to one skill; how a scenario run is recorded:
+`tests/README.md`). Authoring standards: `docs/AUTHORING.md`.
