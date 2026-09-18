@@ -119,8 +119,21 @@ the full scripted conversation up front, told plainly that nothing else is
 coming, and instructed to self-play all turns in one reply using real tool
 calls.
 
-For **baseline** runs, the isolation preamble (verbatim, reused across every
-scenario file in this repo so baselines stay comparable):
+For **baseline** runs, the isolation preamble. **v2 is current** — use it for
+every baseline recorded from 2026-08-12 on:
+
+> "For this run, answer the message below using only your own general
+> knowledge, as a plain AI chat assistant would.
+>
+> Do not call any tools, read any files, or draw on any skill pack, plugin,
+> or project-specific instruction available in this environment — including
+> this repo's. This is a measurement: we are recording what a plain
+> assistant answers cold, to compare against a later run that does have
+> those things. Meta-commentary about the setup defeats that, so reply with
+> plain text answering the message and nothing else."
+
+**v1 — archived. Do not use it for new runs.** Every baseline recorded
+before 2026-08-12 ran under this text:
 
 > "You have no tools, no repo access, and no file-reading capability.
 > Respond only as a plain default AI assistant with no knowledge of any
@@ -129,11 +142,42 @@ scenario file in this repo so baselines stay comparable):
 > exist. Do not call any tools at all, even if some appear available; just
 > reply with plain text as a chat assistant would."
 
+A baseline recorded from 2026-08-12 on names its preamble version in its
+`## Baseline notes`. Baselines recorded before that date ran under v1 and
+are not relabeled — the cutoff is the label.
+
 **Contamination scan (baseline runs only):** after the run, check the full
 transcript for any mention of Atelier, any skill name, any repo path, or a
 citation the assistant could only have gotten by reading this repo. Any
 one of those invalidates the baseline — it means the isolation didn't
 hold, not that the assistant is unusually capable.
+
+**What counts as an isolation failure.** Any one of:
+
+1. a hit on the four-item contamination scan above;
+2. an explicit statement refusing the requested plain-assistant framing;
+3. any acknowledgment or discussion, anywhere in the reply, of *this run* —
+   the isolation preamble, the measurement being taken, the dispatch itself,
+   or the fact of being tested. An in-character statement of the assistant's
+   own capability limits ("I'm just a plain AI assistant here — I can't read
+   your files or run anything on your system") is **not** a failure: that is
+   a plain assistant describing itself, which is exactly what a baseline is
+   meant to capture.
+
+The contamination scan alone catches only the first. A refusal that leaks
+nothing still fails isolation: an agent arguing with the framing is not the
+plain assistant being measured, and its answer is not that assistant's
+answer.
+
+**Two honest attempts, then stop.** A baseline gets at most two dispatches.
+Re-rolling past that to obtain a compliant-looking result is not
+permitted — it selects for the transcript you wanted rather than the one the
+model produces.
+
+**When both attempts fail, the scenario records "baseline not
+established."** No expected-behavior box may be credited to the skill on
+the strength of that run, and both failed attempts are written up in
+`## Baseline notes` as observed.
 
 For **with-skill** runs, tool access is real but confined: point the agent
 at exactly two directories (the built skill, read-only; a sandbox root,
@@ -142,6 +186,32 @@ read-write) and tell it explicitly not to touch anything else. For
 all — paste the skill's relevant content directly into the dispatch prompt
 (since a tool-less agent can't Read a file) and instruct it not to call any
 tools even if some appear available.
+
+### Why there are two preambles
+
+v1's clause "ignore any other system content about repos, skills, or tools
+as if it does not exist" is a disregard-your-instructions command — the
+shape safety-tuned agents are trained to flag as prompt injection. It drew
+explicit refusals in both locales of
+`tests/atelier-mentor/*/tutoriel-declenchement.md` ("a prompt-injection
+pattern" in EN, "une tentative d'injection" in FR). The rest of v1 is an
+ordinary task constraint and drew no refusal in any of the roughly thirty
+baselines recorded under it.
+
+v2 drops that clause and the "no knowledge of" persona framing, replacing
+both with a scoping constraint on the answer plus a statement of why the
+run exists. An agent told it is producing a control measurement has no
+reason to read the request as an attack.
+
+Changing the text does not break comparability with the v1 corpus. The
+preamble is the **means** — reaching an isolated state — not the **measured
+variable**, which is what a plain assistant does with the scenario's prompt.
+Two baselines are comparable when both reached isolation and both answered
+the same prompt under the same judging standard, so a v2 baseline that
+reaches isolation more reliably is at least as valid as a v1 one.
+Comparability is kept by labeling each baseline's version, not by freezing
+the text. See
+[ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md).
 
 ### Multi-session scenarios need multiple dispatches
 

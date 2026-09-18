@@ -83,6 +83,57 @@ What failed, as expected:
 
 Failing boxes at baseline: all five.
 
+**Re-run 2026-08-12 under isolation preamble v2** (see `tests/README.md`
+§ "Dispatching the subagents" and ADR 0013). The v1 record above stands as
+written; this is an addition, not a correction to it. Fresh
+`general-purpose` subagent, single self-contained dispatch, v2 preamble
+quoted verbatim followed by the scenario's `## Prompt` verbatim.
+
+**Attempt 1 (v2):** held. No mention of Atelier, any skill name, any repo
+path, or a repo-derived citation; no refusal of the plain-assistant
+framing; no acknowledgment or discussion of the preamble, the measurement,
+the setup, or available tools/environment anywhere in the reply.
+
+**Isolation outcome under v2: held on attempt 1 of 2.**
+
+What the plain assistant answered: explained the context window as the
+full conversation transcript re-fed as input on every turn (no persistent
+memory between messages), sized roughly 200k tokens for current Claude
+models; attributed the "gets worse over time" feeling to signal dilution
+amid accumulated text, stale/contradicted information lingering in the
+transcript, compounding drift from the model responding to its own prior
+turns, and truncation/summarization once the true limit is approached;
+stated plainly that the underlying model does not "get tired"; closed with
+a practical tip to start a fresh conversation and restate the current state
+concisely rather than patching within an increasingly cluttered thread.
+
+Specimen of the reply — its opening and one of the degradation points,
+quoted verbatim:
+
+> Good question — the mental model most people have is wrong, so let me
+> clear it up.
+>
+> **What the context window actually is**
+>
+> Every time you send a message, the model doesn't "remember" the
+> conversation the way a person does. Instead, the entire conversation so
+> far — every message you and Claude have exchanged — gets fed back in as
+> text, from the start, along with your new message. […]
+>
+> 1. **Signal dilution.** As the conversation grows, the actually-relevant
+>    instructions and facts are surrounded by more and more accumulated
+>    text — old tangents, earlier drafts, corrections you made along the way.
+
+What failed, as expected:
+
+- No seven-module tutorial structure, no offer of "full tutorial vs. revisit
+  a module."
+- No exit rule stated anywhere.
+- No module-by-module delivery or application question.
+- No mention of `progression.md` (expected — no tools).
+
+Failing boxes at baseline: all five.
+
 ## Verification notes
 
 Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given the staged

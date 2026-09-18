@@ -70,6 +70,14 @@ Failing boxes at baseline: all five.
 
 **Isolation outcome: held on attempt 2 of 2, under the unmodified preamble.**
 
+**Preamble version: v1** (see `tests/README.md` § "Dispatching the
+subagents", and ADR 0013). This baseline predates the 2026-08-12 cutoff and
+ran under the archived v1 text. It is **not** re-run under v2: isolation
+held cleanly on attempt 2, so the recorded transcript is a valid baseline,
+and re-running it would discard good evidence to buy textual uniformity —
+exactly the trade ADR 0013 declines. Its EN twin *is* re-run, because that
+one has no valid baseline at all.
+
 ## Verification notes
 
 Run 2026-08-10, fresh `general-purpose` subagent (sonnet), given the staged
