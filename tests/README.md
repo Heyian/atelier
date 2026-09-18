@@ -52,6 +52,12 @@ versus things any capable assistant already does.
 What the built, staged skill actually did when run for real — quoted
 evidence, file paths, on-disk confirmation, not just the dispatched agent's
 self-report.
+
+## Verification notes — <date> <reason>
+
+Optional, and repeatable: one sibling section per re-run, appended below
+the previous ones, oldest first. See "Recording a run" below for what may
+and may not change in an earlier record.
 ```
 
 `triggers:` feeds `scripts/build.sh`'s AC6 check (`check_triggers`): every
