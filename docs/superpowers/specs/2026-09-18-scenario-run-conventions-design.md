@@ -73,7 +73,9 @@ Baselines use a fifth shape: a bold-lead dated paragraph inside the single
 v2 re-run — "this is an addition, not a correction to it").
 
 Nothing mechanical touches any of this. `scripts/build.sh --check` validates
-`triggers:` (AC6) and scenario presence (AC15) only; it never reads section
+`triggers:` and scenario presence only (the `AC6` / `AC15` labels in
+`scripts/build.sh` belong to the atelier design spec, not to this one); it never
+reads section
 headings. The PowerShell twin matches. So this change is documentation-only and
 carries no CI risk.
 
@@ -105,8 +107,10 @@ recording rules exactly where the cycle hands off to them. It carries four rules
   agent did, quoted, and what was confirmed on disk — is never edited or deleted.
   The *verdict* is current state and is updated in place: the `## Expected
   behaviors` boxes, the running tally, and a prior run's judgment when review
-  overturns it. The new section states what changed and why; the superseded text
-  stands. Live examples: commit `8239f2c` flipped all five boxes in
+  overturns it. A corrected judgment is replaced by a dated correction note in the
+  same position that says what the judgment originally said and why it changed — so
+  the superseded reasoning survives inside its own correction, rather than being
+  dropped or left standing as if still current. Live examples: commit `8239f2c` flipped all five boxes in
   `tests/atelier-mentor/fr/tutoriel-reprise.md` while appending the re-run below;
   `tests/atelier-mentor/en/tutoriel-reprise.md` re-judges an earlier run's box 3 as
   a continued failure and restates the honest count.
@@ -162,6 +166,10 @@ line; the index gains no design content.
   no checkbox, tally, or run record is edited by this work.
 - **No new ADR.** The amendment to 0008 carries the reasoning; a second ADR would
   duplicate it.
+- **No fix to `docs/AUTHORING.md:93`.** Its "(see Testing)" parenthetical points at
+  a `## Testing` section that does not exist in that file. Adjacent, but out of
+  scope: this work stays documentation-only across four paths. Decided deliberately
+  on 2026-09-18; not deferred, and no issue tracks it.
 
 ## Acceptance Criteria
 
@@ -183,19 +191,30 @@ positioned after `## The four-step baseline/with-skill cycle` and before
 `## Dispatching the subagents`.
 
 **AC6** — `## Recording a run` states that a verification re-run is appended as a new
-`## Verification notes — <date> <reason>` sibling section and that prior sections are
-not edited, and cites at least one scenario file by path as a live example.
+`## Verification notes — <date> <reason>` sibling section below the existing ones,
+oldest first; that a prior section's record of what was observed is never rewritten
+to match it; and that the only in-place changes permitted to prior material are the
+verdict updates AC7 allows. It cites at least one scenario file by path as a live
+example.
 
-**AC7** — Given a re-run that changes a result, `## Recording a run` states that the
-quoted observation of any prior run is never edited or deleted, and that the
-`## Expected behaviors` boxes, the tally, and a superseded judgment are updated in
-place with the change explained in the new section. It cites at least one live
-example of each half.
+**AC7** — Given a re-run *or a later review* that changes a result, `## Recording a
+run` states all three of:
 
-**AC8** — `## Recording a run` distinguishes an *attempt* (a retry of one dispatch,
-capped at two) from a *sample* (N dispatches each held to one attempt), and cites at
-least two existing multi-dispatch samples by path, stating they are not cap
-violations.
+  a. the *observation* of any prior run — what the agent did, quoted, and what was
+     confirmed on disk — is never edited or deleted;
+  b. the *verdict* is current state and is updated in place: the `## Expected
+     behaviors` boxes, the running tally, and a prior run's judgment;
+  c. a corrected judgment is replaced, in the position it already occupies, by a
+     dated correction note that states what the judgment originally said and why it
+     changed, with the new section explaining the change.
+
+It cites at least one live example of (a)+(b) and at least one of (c).
+
+**AC8** — `## Recording a run` defines an *attempt* as one execution of a dispatch,
+counting the first, so that a single dispatch gets at most two attempts in total; and
+a *sample* as N **independent** dispatches each held to one attempt, which are
+deliberately not retried because a sample measures a rate. It cites at least two
+existing multi-dispatch samples by path and states that neither is a cap violation.
 
 **AC9** — `## Recording a run` states that a baseline re-run is recorded as a dated
 paragraph inside the single `## Baseline notes` rather than as a new sibling section,
@@ -208,11 +227,13 @@ states that both are left as written.
 
 **AC11** — The `## Scenario file format` code block in `tests/README.md` shows
 `## Verification notes — <date> <reason>` as a repeatable sibling of
-`## Verification notes`.
+`## Verification notes`, and points the reader at `## Recording a run` for the rules.
 
 **AC12** — `docs/adr/0008-scenario-file-format.md` carries a dated amendment note
 under **Decision** stating that `## Verification notes` may repeat with a dated
-suffix and that `## Baseline notes` does not.
+suffix, that `## Baseline notes` does not repeat and takes dated paragraphs instead,
+and giving the reason: a run record is evidence, and a superseded record is still
+what was observed.
 
 **AC13** — `CLAUDE.md`'s Layout paragraph points at `tests/README.md` for scenario
 run-recording conventions, in one clause, adding no more than one line to the file.
@@ -224,9 +245,15 @@ can shift).
 
 **AC15** — `git diff --name-only` for this work lists only
 `tests/README.md`, `docs/adr/0008-scenario-file-format.md`, `CLAUDE.md`, and this
-spec. No file under `tests/` other than `README.md` is modified.
+spec. That allowlist is authoritative over the Implementation Plan Guidance below:
+no file under `tests/` other than `README.md` is modified, no new ADR file is
+created, no file marked "None" in Config & Infrastructure Impact is edited, and
+`docs/AUTHORING.md` is not touched.
 
 **AC16** — `bash scripts/build.sh --check` reports `STATUS: PASS`.
+
+**AC17** — `bash scripts/build.sh --lang all` completes successfully and writes the
+per-locale ZIPs into `dist/`.
 
 ## Deferred Items
 
@@ -273,7 +300,6 @@ None — every change lands in the diff.
 | `tests/README.md` | Generalize the attempts cap; add `## Recording a run`; add the repeatable heading to the format block. |
 | `docs/adr/0008-scenario-file-format.md` | Dated amendment note under **Decision**. |
 | `CLAUDE.md` | One-clause pointer to `tests/README.md` on the Layout line. |
-| `docs/AUTHORING.md:93` | Optional, pending the user's call: the parenthetical "(see Testing)" points at a `## Testing` section that does not exist in that file. One-word fix is to point it at `tests/README.md`. Not required by any AC. |
 
 ## Implementation Plan Guidance
 
