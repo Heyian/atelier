@@ -169,12 +169,20 @@ nothing still fails isolation: an agent arguing with the framing is not the
 plain assistant being measured, and its answer is not that assistant's
 answer.
 
-**Two honest attempts, then stop.** A baseline gets at most two dispatches.
-Re-rolling past that to obtain a compliant-looking result is not
-permitted — it selects for the transcript you wanted rather than the one the
-model produces.
+**Two honest attempts, then stop.** Any dispatch gets at most two
+attempts — a baseline and a with-skill verification alike. An *attempt* is one
+execution of a dispatch, counting the first, so the ceiling is one retry. A
+second attempt is warranted in exactly two cases: an isolation failure on a
+baseline (the three-item list above), or a failed `## Expected behaviors` box
+on a verification run. Re-rolling past that to obtain a compliant-looking
+result is not permitted — it selects for the transcript you wanted rather than
+the one the model produces. A verification re-roll is the more tempting of the
+two, because it produces a green checklist. Both attempts' outcomes are
+recorded, not only the second or the passing one:
+`tests/atelier-mentor/en/tutoriel-selecteur.md` runs a verification dispatch
+twice under this rule and writes up both.
 
-**When both attempts fail, the scenario records "baseline not
+**When both attempts fail on a baseline, the scenario records "baseline not
 established."** No expected-behavior box may be credited to the skill on
 the strength of that run, and both failed attempts are written up in
 `## Baseline notes` as observed.
