@@ -150,8 +150,8 @@ the judgment originally said and why it changed — so the superseded reasoning
 survives inside its own correction, rather than being dropped or left standing
 as if it were still current. The new section carries the full explanation.
 
-Live examples, all from commit `8239f2c`. The verdict is updated in place in
-both directions. The box:
+Live examples. The verdict is updated in place in both directions, both in
+commit `8239f2c`. The box:
 `tests/atelier-mentor/en/tutoriel-reprise.md`'s "Session B's recommendation
 names only the five remaining modules" goes from `- [ ]` to `- [x]`, while
 that file's `2026-08-10 re-run (post-runbook-fix)` section is appended below.
@@ -163,12 +163,13 @@ line the original tick rested on, says why that line answers a question the
 executive never asked, and restates the pre-fix tally as 4/5. That file's own
 appended re-run then re-earns the box and re-tallies to 5/5. The observation
 survives either way, and the FR file says so in place: the pre-fix record "is
-left as-is; this section is additive." The correction-note form across files:
+left as-is; this section is additive." The correction-note form across files
+comes from a later commit, `144c308`:
 `tests/atelier-mentor/en/tutoriel-reprise.md`'s "Cross-locale summary after
-the fix — corrected 2026-08-10 (second review)" quotes its own earlier claim
-("four for four re-runs improved"), records that `tutoriel-selecteur.md`'s EN
-re-run was re-judged a continued failure on review, and restates the honest
-count as 3 of 4.
+the fix — corrected 2026-08-10 (second review)" quotes the claim `8239f2c`
+had made in that same spot ("four for four re-runs improved"), records that
+`tutoriel-selecteur.md`'s EN re-run was re-judged a continued failure on
+review, and restates the honest count as 3 of 4.
 
 **An attempt is not a dispatch in a sample.** An *attempt* is one execution of
 a dispatch, counting the first, so one dispatch gets at most two attempts in
