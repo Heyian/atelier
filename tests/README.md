@@ -124,7 +124,7 @@ it.
 
 **Re-runs append.** When a scenario is re-run — after a fix, for a larger
 sample, for any reason — the new results go in a new
-`## Verification notes — <date> <short reason>` sibling section, appended
+`## Verification notes — <date> <reason>` sibling section, appended
 below the existing ones, oldest first. The prior `## Verification notes`
 section stays exactly as written: its record of what was observed is never
 rewritten to match the new run, and the only in-place changes permitted
