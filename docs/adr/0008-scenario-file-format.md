@@ -56,6 +56,16 @@ triggers:
   skill works, and must be recorded as such.
 - **`Verification notes`** records the with-skill run.
 
+**Amended 2026-09-18.** Those four sections are the minimum, not a ceiling.
+`## Verification notes` may repeat with a dated suffix —
+`## Verification notes — <date> <reason>` — one sibling section per re-run,
+appended oldest first. `## Baseline notes` does **not** repeat; a baseline
+re-run is a dated paragraph inside the single section. Both shapes follow
+from the same fact: a run record is evidence, and a superseded record is
+still what was observed, so a re-run adds to the file instead of replacing
+part of it. `tests/README.md`'s `## Recording a run` carries the full
+conventions, including what a re-run may update in place.
+
 `tests/_cross-skill/` holds system-level scenarios not tied to one skill. It is
 underscore-prefixed deliberately: the AC15 coverage scan iterates `skills/*/`,
 so it never looks for a matching skill and never counts these files.
