@@ -471,6 +471,22 @@ Expect-CheckFail $d 'skills/atelier-ventes/fr/references/tutorial/03.md:5' `
   '2026-09-19/AC4 rejects an English lead-in under /fr/'
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# --- 2026-09-19/AC5: a bold span with no date fails, naming file and line
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') {
+  param($t) $t -replace '\*\*Last verified \d{4}-\d{2}-\d{2}\*\*', '**Last verified**' }
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md:5' `
+  '2026-09-19/AC5 rejects a bold span with no date'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC5: an unclosed bold span fails too
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') {
+  param($t) $t -replace '\*\*Last verified (\d{4}-\d{2}-\d{2})\*\* — source:', '**Last verified $1 — source:' }
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md:5' `
+  '2026-09-19/AC5 rejects an unclosed bold span'
+Remove-Item -Recurse -Force -LiteralPath $d
+
 # --- 2026-09-19/AC6: a date that is not a real calendar day fails
 $d = New-FixtureRepo
 Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') {

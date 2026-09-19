@@ -974,13 +974,12 @@ write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 20
 printf 'skills/atelier-ventes/en/references/tutorial/01.md
 ' >> "$d/skills/dated-claims.tsv"
 write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/01.md" 200
-out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
-if grep -qF 'skills/atelier-ventes/en/references/tutorial/01.md:5' <<<"$out" \
-   && ! grep -qF 'NOTE:' <<<"$out" \
-   || grep -A 1 'NOTE: oldest dated claim' <<<"$out" | grep -qF 'tutorial/01.md:5'; then
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] \
+   && grep -A 1 'NOTE: oldest dated claim' <<<"$out" | grep -qF 'tutorial/01.md:5'; then
   pass "2026-09-19/AC3b a path tie resolves to the lexicographically first file"
 else
-  fail "2026-09-19/AC3b picked the wrong file on a tie (out=$out)"
+  fail "2026-09-19/AC3b picked the wrong file on a tie (rc=$rc, out=$out)"
 fi
 rm -rf "$d"
 

@@ -80,7 +80,15 @@ function Get-DatedClaimRecords {
     }
   }
 
-  foreach ($file in ($files | Sort-Object -Property Rel -CaseSensitive)) {
+  # 2026-09-19/AC3b, AC24 — ordinal sort, not Sort-Object -CaseSensitive
+  # (which is still culture-aware: a hyphen sorts differently than under
+  # `LC_ALL=C sort`, the byte-exact order build.sh's scan order relies on).
+  # List<T>.Sort with an explicit ordinal comparison is a stable-enough(*)
+  # substitute — (*) List<T>.Sort is an unstable introsort, but Rel is
+  # unique per file so no tie ever needs breaking here.
+  $filesArr = [System.Collections.Generic.List[object]]::new(@($files))
+  $filesArr.Sort([Comparison[object]]{ param($a, $b) [string]::CompareOrdinal($a.Rel, $b.Rel) })
+  foreach ($file in $filesArr) {
     if ($file.Locale -ceq 'en') {
       $lead = '> **Last verified '; $sep = '** — source: '
       $own  = 'Last verified';      $other = 'Vérifié le'
@@ -94,9 +102,13 @@ function Get-DatedClaimRecords {
     foreach ($raw in [System.IO.File]::ReadAllLines($file.Full)) {
       $lineNo++
       $line = $raw -replace "`r$", ''
-      if ($line.StartsWith('```')) { $fence = -not $fence; continue }
+      # Ordinal, not the culture-sensitive default of String.StartsWith(String)
+      # — 2026-09-19/AC3b, AC4: the culture-aware overload ignores zero-weight
+      # characters (e.g. U+200B), which would let a malformed lead-in through
+      # that bash's byte-exact substr() comparison correctly rejects.
+      if ($line.StartsWith('```', [System.StringComparison]::Ordinal)) { $fence = -not $fence; continue }
       if ($fence) { continue }
-      if (-not $line.StartsWith('> **')) { continue }
+      if (-not $line.StartsWith('> **', [System.StringComparison]::Ordinal)) { continue }
 
       $hasOwn = $line.Contains($own)
       $hasOther = $line.Contains($other)
@@ -105,7 +117,7 @@ function Get-DatedClaimRecords {
       $verdict = 'ok'; $date = ''
       if (-not $hasOwn) {
         $verdict = 'wrong-locale'
-      } elseif (-not $line.StartsWith($lead)) {
+      } elseif (-not $line.StartsWith($lead, [System.StringComparison]::Ordinal)) {
         $verdict = 'bad-leadin'
       } else {
         $rest = $line.Substring($lead.Length)
@@ -125,7 +137,7 @@ function Get-DatedClaimRecords {
             else { $verdict = 'no-date'; $date = '' }
           } elseif ($parsed -gt $today) {
             $verdict = 'future-date'
-          } elseif (-not $tail.StartsWith($sep)) {
+          } elseif (-not $tail.StartsWith($sep, [System.StringComparison]::Ordinal)) {
             $verdict = 'no-source'
           } elseif ($tail.Substring($sep.Length).Trim() -eq '') {
             $verdict = 'no-source'
@@ -170,7 +182,10 @@ function Test-DatedClaimAnchors {
   foreach ($r in $script:DatedClaimRecords) { $detected[$r.Rel] = $true }
   foreach ($raw in [System.IO.File]::ReadAllLines($DatedClaimsTsv)) {
     $p = ($raw -split "`t")[0].TrimEnd("`r")
-    if ([string]::IsNullOrWhiteSpace($p)) { continue }
+    # 2026-09-19/AC24 — match bash's `[[ -n "$p" ]] || continue`: only a
+    # genuinely empty line is skipped. A whitespace-only line is not empty,
+    # so it falls through and gets reported as a missing path, same as bash.
+    if ($p -eq '') { continue }
     if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $p) -PathType Leaf)) {
       Add-CheckFailure "$p — listed in skills/dated-claims.tsv but no such file (renamed?)"
       continue
@@ -190,10 +205,22 @@ function Show-DatedClaimReport {
     return
   }
   $today = (Get-Date).Date
-  $fileCount = ($valid | Select-Object -ExpandProperty Rel -Unique).Count
-  # Sort is stable and the records are already in scan order, so a tie keeps
-  # the first of them (2026-09-19/AC3b).
-  $oldest = $valid | Sort-Object -Property { [datetime]::ParseExact($_.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture) } | Select-Object -First 1
+  # 2026-09-19/AC15, AC24 — Select-Object -Unique has no -CaseSensitive
+  # switch (that belongs to Sort-Object), and its own comparer is not
+  # guaranteed ordinal, so two reference paths differing only in case could
+  # collapse to one file here while awk's case-sensitive files[$1] counts
+  # two. A HashSet<string> with an explicit ordinal comparer matches awk's
+  # associative-array semantics exactly, on any PowerShell version.
+  $fileSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+  foreach ($r in $valid) { [void]$fileSet.Add($r.Rel) }
+  $fileCount = $fileSet.Count
+  # 2026-09-19/AC3b, AC24 — Sort-Object is NOT stable by default (confirmed
+  # on pwsh 7.4.6: with a tied minimum key it can return an element well
+  # after the first tied one in scan order). -Stable is required to keep the
+  # first tied record in scan order, matching bash's strict `<` comparison
+  # in report_dated_claims's awk (scripts/build.sh:404), which only replaces
+  # the running oldest on dn < oldestDays.
+  $oldest = $valid | Sort-Object -Stable -Property { [datetime]::ParseExact($_.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture) } | Select-Object -First 1
   $age = ($today - [datetime]::ParseExact($oldest.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture)).Days
   Write-Host "dated claims: $($valid.Count) annotations across $fileCount files, oldest $($oldest.Date) ($age days)"
   if ($script:CheckFailures -eq 0 -and $age -ge $ReportAgeDays) {
