@@ -12,9 +12,9 @@ that requires actually running the skill.
 ```
 tests/<canonical-skill-name>/<locale>/<scenario>.md   — per-skill scenarios
 tests/<canonical-skill-name>/<locale>/runs/<scenario>/<date>-<kind>.md
-                                                     — that scenario's run transcripts
-tests/_cross-skill/<scenario>.md                     — system-level scenarios
-tests/_cross-skill/runs/<scenario>/<date>-<kind>.md  — their run transcripts
+                                                      — that scenario's run transcripts
+tests/_cross-skill/<scenario>.md                      — system-level scenarios
+tests/_cross-skill/runs/<scenario>/<date>-<kind>.md   — their run transcripts
 ```
 
 `<canonical-skill-name>` is the skill's folder name under `skills/` (e.g.
