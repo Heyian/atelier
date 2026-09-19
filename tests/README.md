@@ -113,11 +113,16 @@ For a per-skill scenario:
    `skills/<name>/<locale>/` tree) and a sandbox to read/write in, and the
    full scripted conversation. Confine it to exactly those two
    directories.
-4. **Judge and record** — tick only boxes the with-skill run actually
+4. **Judge and record** — save the dispatch's transcript first (see
+   "Recording a run" below), then tick only boxes the with-skill run actually
    demonstrated, re-verified by reading the resulting files directly, not
-   by trusting the dispatched agent's self-report. Note honestly which
-   boxes the baseline already passed (regression guards, not evidence the
-   skill works) and which genuinely required the skill.
+   by trusting the dispatched agent's self-report. The ordering is the
+   point: the record gets written from the saved file rather than from a
+   memory of the reply. Where the output was lost, the run is recorded
+   under that section's `no transcript — <reason>` line rather than
+   discarded. Note honestly which boxes the baseline already passed
+   (regression guards, not evidence the skill works) and which genuinely
+   required the skill.
 
 Cross-skill scenarios generally skip step 2 (see "Baseline notes" above)
 and instead need **multiple** with-skill dispatches — see below.
@@ -414,6 +419,14 @@ read-write) and tell it explicitly not to touch anything else. For
 all — paste the skill's relevant content directly into the dispatch prompt
 (since a tool-less agent can't Read a file) and instruct it not to call any
 tools even if some appear available.
+
+**A dispatch is not finished when it returns.** It is finished when its
+transcript is on disk — or, where the output was lost, when its
+`no transcript — <reason>` line is recorded. `## Recording a run` gives the
+path shape and the contents. One consequence belongs here rather than there:
+the contamination scan above stops being an assertion only its author can
+make. With the full transcript committed, a reader other than the author can
+run the same four-item scan over the same text, and disagree.
 
 ### Why there are two preambles
 
