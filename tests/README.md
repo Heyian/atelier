@@ -303,6 +303,31 @@ repo does re-judge verdicts on review — commits `8239f2c` and `144c308`
 above are both that — and until the cutoff below, those reviews had only the
 author's chosen quotes to work from.
 
+**Each run's record opens by pointing at its transcript.** A
+`## Verification notes` sibling opens, on its first line, with a link to its
+transcript file — or with `no transcript — <reason>`. A baseline re-run does
+the same on the first line of its dated paragraph inside the existing
+`## Baseline notes`, so that no earlier record is relabeled to carry a line
+its own run never had. A run whose output was lost is recorded that way
+rather than discarded: making a transcript a hard validity requirement would
+create pressure to re-roll a dispatch until the paperwork was clean, which is
+precisely the failure **Two honest attempts, then stop.** exists to resist.
+
+**The cutoff is 2026-09-18.** Runs recorded on or after that date carry a
+transcript. Runs recorded before it do not — their quoted excerpts are their
+only record — and no existing scenario file is relabeled to say so. That is
+the shape
+[ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md) used
+for preamble v1/v2, and it is what this section's own rule about never tidying
+a record to match a later convention requires. Nothing can be backfilled in
+any case: every pre-cutoff run's sandbox was under `/tmp/` and its transcript
+exists nowhere.
+
+**Quoting is unchanged.** A ticked box still names the line that earned it.
+With a transcript alongside it, a quote stops being the evidence and becomes a
+citation into it — which is exactly what makes a quote checkable for whether
+it was representative.
+
 ## Dispatching the subagents
 
 **Always synchronous, one self-contained dispatch per run.** Never
