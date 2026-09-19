@@ -345,6 +345,34 @@ check_dated_claims() {
       *)            check_fail "$rel:$line — unrecognized dated-claim verdict '$verdict'" ;;
     esac
   done <<<"$DATED_CLAIMS_RECORDS"
+  check_dated_claims_anchors
+}
+
+# --- 2026-09-19/AC9, AC10, AC10b — the weaker, mechanically decidable version
+# of ADR-0011's real rule. No script can decide whether a sentence is
+# capability-sensitive, but it can notice that a module known to be full of
+# such claims has ended up with none.
+check_dated_claims_anchors() {
+  if [[ ! -f "$DATED_CLAIMS_TSV" ]]; then
+    check_fail "skills/dated-claims.tsv — anchor list not found"
+    return
+  fi
+  local p
+  while IFS= read -r p || [[ -n "$p" ]]; do
+    p="${p%%$'\t'*}"     # single-column today, but tolerate a second column
+    p="${p%$'\r'}"       # a CRLF checkout must not append \r to the path
+    [[ -n "$p" ]] || continue
+    if [[ ! -f "$REPO_ROOT/$p" ]]; then
+      check_fail "$p — listed in skills/dated-claims.tsv but no such file (renamed?)"
+      continue
+    fi
+    # "Detected", not "valid": a malformed annotation still counts here and
+    # fails separately through check_dated_claims, so one broken annotation
+    # does not produce two failures for the same line.
+    if ! grep -qF -- "$p"$'\t' <<<"$DATED_CLAIMS_RECORDS"; then
+      check_fail "$p — listed in skills/dated-claims.tsv but carries no dated claim"
+    fi
+  done < "$DATED_CLAIMS_TSV"
 }
 
 # --- Minimal JSON support, hand-rolled on purpose.

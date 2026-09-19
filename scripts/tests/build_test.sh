@@ -20,6 +20,74 @@ expect_check_fail() {
   fi
 }
 
+# --- Dated-claim fixture helpers (2026-09-19 spec).
+#
+# AC35: every fixture date is computed from the run date, never written as a
+# literal, so no test's outcome changes as the calendar advances. Both
+# conversions are the civil algorithm in awk — `date -d` is GNU-only and the
+# build script is forbidden from using it, so the tests do not either.
+days_ago() {
+  awk -v n="$1" -v today="$(date +%Y-%m-%d)" '
+    function days_from_civil(y, m, d,   era, yoe, doy, doe) {
+      if (m <= 2) y -= 1
+      era = int((y >= 0 ? y : y - 399) / 400)
+      yoe = y - era * 400
+      doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
+      doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+      return era * 146097 + doe - 719468
+    }
+    function civil_from_days(z,   era, doe, yoe, y, doy, mp, d, m) {
+      z += 719468
+      era = int((z >= 0 ? z : z - 146096) / 146097)
+      doe = z - era * 146097
+      yoe = int((doe - int(doe / 1460) + int(doe / 36524) - int(doe / 146096)) / 365)
+      y = yoe + era * 400
+      doy = doe - (365 * yoe + int(yoe / 4) - int(yoe / 100))
+      mp = int((5 * doy + 2) / 153)
+      d = doy - int((153 * mp + 2) / 5) + 1
+      m = mp + (mp < 10 ? 3 : -9)
+      if (m <= 2) y += 1
+      return sprintf("%04d-%02d-%02d", y, m, d)
+    }
+    BEGIN {
+      t = days_from_civil(substr(today,1,4)+0, substr(today,6,2)+0, substr(today,9,2)+0)
+      print civil_from_days(t - n)
+    }'
+}
+
+# Write one valid annotation of the given locale, dated n days ago, into a
+# reference file inside the fixture.
+write_annotation() {
+  local dir="$1" locale="$2" rel="$3" days="$4" d
+  d="$(days_ago "$days")"
+  mkdir -p "$(dirname "$dir/$rel")"
+  if [[ "$locale" == "en" ]]; then
+    cat > "$dir/$rel" <<EOF
+# Module
+
+Prose above the annotation.
+
+> **Last verified $d** — source: Anthropic help center, article 15520349
+> ("Use Claude Cowork on web, desktop, and mobile"). Continuation prose the
+> check never reads.
+
+Prose below.
+EOF
+  else
+    cat > "$dir/$rel" <<EOF
+# Module
+
+Prose au-dessus de l'annotation.
+
+> **Vérifié le $d** — source : centre d'aide Anthropic, article 15520349
+> (« Use Claude Cowork on web, desktop, and mobile »). Prose de continuation
+> que la vérification ne lit jamais.
+
+Prose en dessous.
+EOF
+  fi
+}
+
 # Build a minimal but valid repo in a temp dir: real build.sh, real shared texts,
 # one two-locale skill with differing localized names, and its scenarios.
 make_fixture_repo() {
@@ -126,75 +194,13 @@ EOF
 **English** — First release.
 EOF
 
+  # 2026-09-19/AC10b makes an absent anchor list fatal, so the clean fixture
+  # carries one, pointing at one anchored module with a valid annotation.
+  mkdir -p "$dir/skills/atelier-ventes/en/references/tutorial"
+  printf 'skills/atelier-ventes/en/references/tutorial/03.md\n' > "$dir/skills/dated-claims.tsv"
+  write_annotation "$dir" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+
   echo "$dir"
-}
-
-# --- Dated-claim fixture helpers (2026-09-19 spec).
-#
-# AC35: every fixture date is computed from the run date, never written as a
-# literal, so no test's outcome changes as the calendar advances. Both
-# conversions are the civil algorithm in awk — `date -d` is GNU-only and the
-# build script is forbidden from using it, so the tests do not either.
-days_ago() {
-  awk -v n="$1" -v today="$(date +%Y-%m-%d)" '
-    function days_from_civil(y, m, d,   era, yoe, doy, doe) {
-      if (m <= 2) y -= 1
-      era = int((y >= 0 ? y : y - 399) / 400)
-      yoe = y - era * 400
-      doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
-      doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
-      return era * 146097 + doe - 719468
-    }
-    function civil_from_days(z,   era, doe, yoe, y, doy, mp, d, m) {
-      z += 719468
-      era = int((z >= 0 ? z : z - 146096) / 146097)
-      doe = z - era * 146097
-      yoe = int((doe - int(doe / 1460) + int(doe / 36524) - int(doe / 146096)) / 365)
-      y = yoe + era * 400
-      doy = doe - (365 * yoe + int(yoe / 4) - int(yoe / 100))
-      mp = int((5 * doy + 2) / 153)
-      d = doy - int((153 * mp + 2) / 5) + 1
-      m = mp + (mp < 10 ? 3 : -9)
-      if (m <= 2) y += 1
-      return sprintf("%04d-%02d-%02d", y, m, d)
-    }
-    BEGIN {
-      t = days_from_civil(substr(today,1,4)+0, substr(today,6,2)+0, substr(today,9,2)+0)
-      print civil_from_days(t - n)
-    }'
-}
-
-# Write one valid annotation of the given locale, dated n days ago, into a
-# reference file inside the fixture.
-write_annotation() {
-  local dir="$1" locale="$2" rel="$3" days="$4" d
-  d="$(days_ago "$days")"
-  mkdir -p "$(dirname "$dir/$rel")"
-  if [[ "$locale" == "en" ]]; then
-    cat > "$dir/$rel" <<EOF
-# Module
-
-Prose above the annotation.
-
-> **Last verified $d** — source: Anthropic help center, article 15520349
-> ("Use Claude Cowork on web, desktop, and mobile"). Continuation prose the
-> check never reads.
-
-Prose below.
-EOF
-  else
-    cat > "$dir/$rel" <<EOF
-# Module
-
-Prose au-dessus de l'annotation.
-
-> **Vérifié le $d** — source : centre d'aide Anthropic, article 15520349
-> (« Use Claude Cowork on web, desktop, and mobile »). Prose de continuation
-> que la vérification ne lit jamais.
-
-Prose en dessous.
-EOF
-  fi
 }
 
 # --- AC1: --lang all produces one ZIP per skill per locale, SKILL.md at root
@@ -808,6 +814,47 @@ else
   pass "AC57 no archive member contains x-release-please-version"
 fi
 rm -rf "$x" "$d"
+
+# --- 2026-09-19/AC9: an anchored file carrying no annotation fails
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/en/references/tutorial/03.md" <<'EOF'
+# Module
+
+Every dated claim was dropped from this module by a bad merge.
+EOF
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md" \
+  "2026-09-19/AC9 rejects an anchored file with no dated claim"
+rm -rf "$d"
+
+# --- 2026-09-19/AC10: an anchored path that does not exist fails
+d="$(make_fixture_repo)"
+printf 'skills/atelier-ventes/en/references/tutorial/99-renamed.md\n' \
+  >> "$d/skills/dated-claims.tsv"
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/99-renamed.md" \
+  "2026-09-19/AC10 rejects an anchored path that does not exist"
+rm -rf "$d"
+
+# --- 2026-09-19/AC10b: an absent anchor list is itself fatal. A repository
+# must not be able to opt out of AC9 by deleting the list.
+d="$(make_fixture_repo)"
+rm -f "$d/skills/dated-claims.tsv"
+expect_check_fail "$d" "skills/dated-claims.tsv" \
+  "2026-09-19/AC10b rejects an absent anchor list"
+rm -rf "$d"
+
+# --- Review Focus 4: a trailing newline is normal in a text file, and a
+# Windows editor writes CRLF. Neither may become an empty or \r-suffixed
+# anchor path that fails with a meaningless name.
+d="$(make_fixture_repo)"
+printf 'skills/atelier-ventes/en/references/tutorial/03.md\r\n\r\n\n' \
+  > "$d/skills/dated-claims.tsv"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "anchor list tolerates blank lines and CRLF"
+else
+  fail "anchor list rejected blank or CRLF lines (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
 
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
