@@ -42,6 +42,10 @@ than an exemption.
 - A standing re-verification obligation across fourteen module files. The index
   keeps the cost to one list, but the obligation is real and has no owner in
   automation yet — a build check for stale dates is deferred to issue #18.
+  This is now owned: see [ADR-0015](0015-staleness-policy-for-dated-claims.md),
+  which makes the annotation grammar a machine-readable contract, reports the
+  oldest claim's age on every `--check` run, and fails a monthly job once a
+  claim passes a year.
 - The rule mentor states ("never from memory") and what mentor ships (a dated
   matrix) now visibly agree: the date is what makes the shipped claim honest
   rather than an exception carved out of the rule.
