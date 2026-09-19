@@ -114,7 +114,7 @@ exists to catch elsewhere in this repository.
 
 ### 2. What fails `--check`
 
-Seven cases, each reported through the existing `check_fail`, each naming the
+Eight cases, each reported through the existing `check_fail`, each naming the
 offending file and — where a line is involved — its line number:
 
 1. The detected marker is the other locale's, given the file's path.
@@ -125,6 +125,9 @@ offending file and — where a line is involved — its line number:
 5. The `— source:` / `— source :` segment is absent, or has nothing after it.
 6. A file listed in `skills/dated-claims.tsv` carries zero detected annotations.
 7. `skills/dated-claims.tsv` names a path that does not exist.
+8. `skills/dated-claims.tsv` itself does not exist. A repository must not be
+   able to opt out of case 6 by deleting the list, so an absent anchor file is
+   fatal the way an absent `skills/names.tsv` already is.
 
 Case 4 is the single wall-clock dependency in an otherwise change-triggered
 check, and it is intentional rather than an oversight. A future date is a typo —
@@ -152,8 +155,8 @@ script knows what a tutorial module is. The day a dated claim is added to
 
 ### 4. What `--check` prints
 
-Every successful run prints exactly one summary line before `STATUS:`,
-regardless of age:
+Every run that reaches a `STATUS:` line — passing or failing — prints exactly
+one summary line before it, regardless of age:
 
 ```
 dated claims: 19 annotations across 6 files, oldest 2026-08-10 (40 days)
@@ -164,7 +167,10 @@ pattern quietly ceasing to match after someone rewords a module, at which point
 every tier goes silent and the whole mechanism is dead without a single red
 mark. A line that always states how many annotations were found makes that
 visible on the next pull request, and gives a reviewer a count to sanity-check
-against a diff that adds or removes a claim.
+against a diff that adds or removes a claim. That is also why the line prints on
+a failing run and why it has an explicit zero form — `dated claims: 0
+annotations across 0 files, no dated claim found` — since the run where every
+annotation stopped matching is precisely the one worth seeing it on.
 
 Once the oldest annotation reaches `REPORT_AGE_DAYS`, a second line is printed
 and the exit status is still 0:
@@ -312,8 +318,8 @@ next spec inherits it rather than rediscovering the collision.
 
 ### Form failures
 
-Each of AC4–AC10 fails `bash scripts/build.sh --check` with a non-zero exit and
-names the offending path in its output; AC4–AC8 also name the line number.
+Each of AC4–AC10b fails `bash scripts/build.sh --check` with a non-zero exit
+and names the offending path in its output; AC4–AC8 also name the line number.
 
 - **AC4** — Given a detected annotation whose marker belongs to the other locale
   (an English marker under `/fr/`, or a French marker under `/en/`), When
@@ -333,6 +339,10 @@ names the offending path in its output; AC4–AC8 also name the line number.
   detected annotation, When `--check` runs, Then it fails naming that file.
 - **AC10** — Given a path listed in `skills/dated-claims.tsv` that does not
   exist, When `--check` runs, Then it fails naming that path.
+- **AC10b** — Given `skills/dated-claims.tsv` does not exist, When `--check`
+  runs, Then it fails naming that path, the way a missing `skills/names.tsv`
+  is already fatal. A repository cannot silently opt out of the anchor check by
+  deleting the list.
 - **AC11** — Given a repository whose annotations all satisfy AC1–AC3 and whose
   anchor list satisfies AC9–AC10, When `--check` runs and no other check fails,
   Then it exits 0 and prints `STATUS: PASS (mechanical checks)`.
@@ -353,10 +363,19 @@ names the offending path in its output; AC4–AC8 also name the line number.
   convention (`REPORT_AGE_DAYS` / `FAIL_AGE_DAYS` in bash,
   `$ReportAgeDays` / `$FailAgeDays` in PowerShell). Neither threshold value
   appears as a bare literal anywhere else in either script.
-- **AC15** — Every `--check` run that reaches its status line first prints
-  exactly one summary line stating the count of valid annotations, the count of
-  files carrying them, the oldest annotation's date, and that date's age in
-  whole days.
+- **AC15** — Every `--check` run that reaches its status line, whether that
+  line is `STATUS: PASS` or `STATUS: FAIL`, first prints exactly one summary
+  line stating the count of valid annotations and the count of files carrying
+  them.
+- **AC15b** — Given at least one valid annotation exists, When `--check` runs,
+  Then that summary line also states the oldest annotation's date and that
+  date's age in whole days.
+- **AC15c** — Given no valid annotation exists anywhere in the scan scope —
+  every annotation removed, or every detected annotation failing AC4–AC8 —
+  When `--check` runs, Then the summary line reports both counts as zero and
+  states that no dated claim was found, in place of a date and an age. The
+  line's presence and form is all this criterion governs; whether the run
+  exits non-zero is decided by AC4–AC10 and AC10b alone.
 - **AC16** — Given the oldest valid annotation is at least `REPORT_AGE_DAYS`
   old, When `--check` runs and no check fails, Then it additionally prints a
   note naming that annotation's file and line and pointing at
@@ -369,22 +388,24 @@ names the offending path in its output; AC4–AC8 also name the line number.
 ### `--check-freshness`
 
 - **AC19** — `bash scripts/build.sh --check-freshness` runs the scan and the
-  AC4–AC10 validation, stages no skill, and writes nothing to `dist/`.
+  AC4–AC10b validation, stages no skill, and writes nothing to `dist/`.
 - **AC20** — Given every annotation is valid and younger than `FAIL_AGE_DAYS`,
   When `--check-freshness` runs, Then it exits 0.
 - **AC21** — Given at least one valid annotation is at least `FAIL_AGE_DAYS`
   old, When `--check-freshness` runs, Then it exits non-zero and prints, for
   every annotation at least `REPORT_AGE_DAYS` old, that annotation's file, line,
   date and age.
-- **AC22** — Given any failure from AC4–AC10, When `--check-freshness` runs,
+- **AC22** — Given any failure from AC4–AC10b, When `--check-freshness` runs,
   Then it exits non-zero regardless of every annotation's age.
 - **AC23** — No `--check` or `-Check` run exits non-zero because of an
   annotation's age alone.
 
 ### PowerShell twin
 
-- **AC24** — `./scripts/build.ps1 -Check` applies AC1–AC13 and AC15–AC18,
-  producing the same failures and naming the same paths as `--check`.
+- **AC24** — `./scripts/build.ps1 -Check` applies AC1–AC13 inclusive of AC3b
+  and AC10b, and AC15–AC18 inclusive of AC15b and AC15c, producing the same failures, the same summary
+  line in both its populated and its empty form, and naming the same paths as
+  `--check`.
 - **AC25** — `./scripts/build.ps1 -CheckFreshness` applies AC19–AC23.
 - **AC26** — Neither script hard-codes an anchor path; both read
   `skills/dated-claims.tsv`.
@@ -398,32 +419,39 @@ names the offending path in its output; AC4–AC8 also name the line number.
 
 ### The scheduled workflow
 
-- **AC28** — `.github/workflows/dated-claims.yml` triggers on a monthly
-  `schedule` and on `workflow_dispatch`, checks out with `actions/checkout@v7`,
-  and declares `contents: read` and `issues: write`.
+- **AC28** — `.github/workflows/dated-claims.yml` triggers on a `schedule`
+  whose cron runs on the first day of every month and on `workflow_dispatch`,
+  checks out with `actions/checkout@v7`, and declares `contents: read` and
+  `issues: write`.
 - **AC29** — Given `--check-freshness` exits non-zero and no open issue carries
   the `stale-claims` label, When the job runs, Then it creates one issue
-  labelled `stale-claims` whose body carries the check's output.
+  labelled `stale-claims` whose body carries both the check's output and a
+  pointer to the `Claims to re-verify` index in `docs/tutorial-corpus.md`.
 - **AC30** — Given `--check-freshness` exits non-zero and an open issue already
   carries the `stale-claims` label, When the job runs, Then it creates no issue.
+- **AC30b** — Given `--check-freshness` exits 0, When the job runs, Then it
+  creates no issue, whether or not an open `stale-claims` issue exists, and it
+  neither closes nor comments on an existing one.
 - **AC31** — The job exits 0 whether or not it filed an issue.
 - **AC32** — The open-issue lookup matches on the `stale-claims` label alone and
   never on issue title text.
 
 ### Tests
 
-- **AC33** — `scripts/tests/build_test.sh` covers each of AC4–AC10 as its own
+- **AC33** — `scripts/tests/build_test.sh` covers each of AC4–AC10b as its own
   fixture mutation, asserted through `expect_check_fail`, which requires both a
   non-zero exit and the offending path in the combined output.
 - **AC34** — `scripts/tests/build_test.sh` additionally covers: a clean fixture
-  passing and printing the AC15 summary line; a fixture whose oldest annotation
+  passing and printing the AC15/AC15b summary line; a fixture with every
+  annotation stripped from one anchored module, asserting the AC15c empty form
+  of that line alongside the AC9 failure; a fixture whose oldest annotation
   is past `REPORT_AGE_DAYS` but under `FAIL_AGE_DAYS` exiting 0 and printing the
   AC16 note; `--check-freshness` exiting non-zero past `FAIL_AGE_DAYS` and 0
   under it.
 - **AC35** — Every annotation date in an AC33–AC34 fixture is computed relative
   to the run date, never written as a literal, so no test's outcome changes as
   the calendar advances.
-- **AC36** — `scripts/tests/build_test.ps1` covers AC4–AC10 through
+- **AC36** — `scripts/tests/build_test.ps1` covers AC4–AC10b through
   `Expect-CheckFail`.
 
 ### ADR and documentation
@@ -445,6 +473,14 @@ names the offending path in its output; AC4–AC8 also name the line number.
 - **AC42** — Every comment added to `scripts/build.sh` or `scripts/build.ps1`
   by this work that cites an acceptance criterion writes it as
   `2026-09-19/ACn`.
+
+### Scope guard
+
+- **AC43** — This work's diff changes no annotation date in any shipped
+  reference file: all nineteen annotations still read `2026-08-10` when it
+  lands. Test fixtures, which AC35 requires to compute their dates relative to
+  the run date, are not shipped reference files and are out of this criterion's
+  scope.
 
 ## Deferred Items
 
@@ -536,7 +572,7 @@ None — the one repository-level write this design needs, creating the
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC42, including AC3b) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC43, including AC3b, AC10b, AC15b, AC15c and AC30b) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus the three test scripts, and `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
