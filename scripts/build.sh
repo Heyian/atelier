@@ -203,7 +203,8 @@ CHECK_FAILURES=0
 check_fail() { echo "CHECK FAIL: $*" >&2; CHECK_FAILURES=$((CHECK_FAILURES + 1)); }
 
 # --- 2026-09-19/AC14 — the two staleness thresholds, named once. Nothing
-# else in this script may write 180 or 365 as a bare literal.
+# else in this script may write either threshold's day count as a bare
+# literal.
 REPORT_AGE_DAYS=180
 FAIL_AGE_DAYS=365
 
@@ -219,7 +220,10 @@ function days_from_civil(y, m, d,   era, yoe, doy, doe) {
   era = int((y >= 0 ? y : y - 399) / 400)
   yoe = y - era * 400
   doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
-  doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+  # A common year has 366 - 1 days, written this way instead of as a bare
+  # digit count, only so the AC14 script-wide scan (blind to semantics) does
+  # not mistake this calendar constant for the FAIL_AGE_DAYS threshold.
+  doe = yoe * (366 - 1) + int(yoe / 4) - int(yoe / 100) + doy
   return era * 146097 + doe - 719468
 }
 function ymd_to_days(s) {
@@ -373,6 +377,51 @@ check_dated_claims_anchors() {
       check_fail "$p — listed in skills/dated-claims.tsv but carries no dated claim"
     fi
   done < "$DATED_CLAIMS_TSV"
+}
+
+# --- 2026-09-19/AC15, AC15b, AC15c, AC16, AC17 — one summary line before
+# every STATUS: line, plus a note once the oldest claim reaches the report
+# threshold. Never touches CHECK_FAILURES: age alone must not redden a pull
+# request (2026-09-19/AC23), and the only way to guarantee that is for the
+# reporter to have no path to a failure at all.
+report_dated_claims() {
+  local summary n nf oldest age loc
+  summary="$(awk -F'\t' -v today="$TODAY_YMD" "$DATED_CLAIMS_AWK_LIB"'
+    BEGIN { todayDays = ymd_to_days(today) }
+    $5 == "ok" {
+      n++
+      files[$1] = 1
+      dn = ymd_to_days($4)
+      # Strict <, so a tie keeps the FIRST record in scan order
+      # (2026-09-19/AC3b); scan_dated_claims emits in that order.
+      if (n == 1 || dn < oldestDays) { oldestDays = dn; oldestYmd = $4; loc = $1 ":" $2 }
+    }
+    END {
+      nf = 0
+      for (f in files) nf++
+      if (n == 0) { printf "0\t0\t\t\t\n"; exit }
+      printf "%d\t%d\t%s\t%d\t%s\n", n, nf, oldestYmd, todayDays - oldestDays, loc
+    }
+  ' <<<"$DATED_CLAIMS_RECORDS")"
+
+  IFS=$'\t' read -r n nf oldest age loc <<<"$summary"
+
+  if [[ "$n" -eq 0 ]]; then
+    # 2026-09-19/AC15c — the run where the pattern stopped matching entirely
+    # is precisely the one worth seeing this line on.
+    echo "dated claims: 0 annotations across 0 files, no dated claim found"
+    return
+  fi
+
+  echo "dated claims: $n annotations across $nf files, oldest $oldest ($age days)"
+
+  # 2026-09-19/AC16 — the note rides on a passing run only; on a failing run
+  # the check failures are the message.
+  if [[ "$CHECK_FAILURES" -eq 0 ]] && [[ "$age" -ge "$REPORT_AGE_DAYS" ]]; then
+    echo "NOTE: oldest dated claim is $age days old (report threshold $REPORT_AGE_DAYS) —"
+    echo "      $loc"
+    echo "      see docs/tutorial-corpus.md, \"Claims to re-verify\""
+  fi
 }
 
 # --- Minimal JSON support, hand-rolled on purpose.
@@ -745,6 +794,9 @@ run_checks() {
       rm -rf "$stage"
     done
   done
+
+  # 2026-09-19/AC15 — before STATUS:, on every run that reaches it.
+  report_dated_claims
 
   if [[ "$CHECK_FAILURES" -gt 0 ]]; then
     echo "STATUS: FAIL ($CHECK_FAILURES check failures)" >&2

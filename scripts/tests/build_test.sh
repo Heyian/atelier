@@ -856,5 +856,145 @@ else
 fi
 rm -rf "$d"
 
+# --- 2026-09-19/AC15, AC15b: the clean fixture prints exactly one summary line
+d="$(make_fixture_repo)"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+n="$(grep -c '^dated claims: ' <<<"$out")"
+if [[ "$rc" -eq 0 ]] && [[ "$n" -eq 1 ]] \
+   && grep -qE '^dated claims: 1 annotations across 1 files, oldest [0-9]{4}-[0-9]{2}-[0-9]{2} \(10 days\)$' <<<"$out"; then
+  pass "2026-09-19/AC15 clean fixture prints exactly one summary line with date and age"
+else
+  fail "2026-09-19/AC15 summary line wrong (rc=$rc, count=$n, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC15c: with every annotation gone the line prints its zero
+# form, and the run fails on AC9 rather than on the reporter
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/en/references/tutorial/03.md" <<'EOF'
+# Module
+
+Every dated claim was dropped from this module.
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] \
+   && grep -qxF 'dated claims: 0 annotations across 0 files, no dated claim found' <<<"$out" \
+   && grep -qF 'carries no dated claim' <<<"$out"; then
+  pass "2026-09-19/AC15c zero form prints on a failing run"
+else
+  fail "2026-09-19/AC15c zero form wrong (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC16, AC23: past the report threshold, --check prints the note
+# and still exits 0
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 200
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] \
+   && grep -qF 'NOTE: oldest dated claim is 200 days old (report threshold 180)' <<<"$out" \
+   && grep -qF 'skills/atelier-ventes/en/references/tutorial/03.md:5' <<<"$out" \
+   && grep -qF 'docs/tutorial-corpus.md' <<<"$out"; then
+  pass "2026-09-19/AC16 note printed past the report threshold, exit still 0"
+else
+  fail "2026-09-19/AC16 note wrong (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC17: under the report threshold there is no note
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 179
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && ! grep -qF 'NOTE: oldest dated claim' <<<"$out"; then
+  pass "2026-09-19/AC17 no note under the report threshold"
+else
+  fail "2026-09-19/AC17 printed a note it should not have (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC11: a clean repo exits 0 with the exact PASS line, with the
+# summary line above it
+d="$(make_fixture_repo)"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && grep -qxF 'STATUS: PASS (mechanical checks)' <<<"$out"; then
+  pass "2026-09-19/AC11 clean repo exits 0 with the exact PASS line"
+else
+  fail "2026-09-19/AC11 clean repo did not pass cleanly (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC14: neither threshold appears as a bare literal outside its
+# constant definition
+for pair in "REPORT_AGE_DAYS 180" "FAIL_AGE_DAYS 365"; do
+  set -- $pair
+  hits="$(grep -nE "(^|[^A-Za-z0-9_])$2([^0-9]|$)" "$REPO_ROOT/scripts/build.sh" \
+          | grep -vE "^[0-9]+:$1=" | wc -l)"
+  if [[ "$hits" -eq 0 ]]; then
+    pass "2026-09-19/AC14 $2 appears only as $1"
+  else
+    fail "2026-09-19/AC14 $2 appears as a bare literal $hits time(s) in build.sh"
+  fi
+done
+
+# --- Review Focus 5: an annotation dated today is age 0, not a future date
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 0
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && grep -qF 'oldest '"$(days_ago 0)"' (0 days)' <<<"$out"; then
+  pass "an annotation dated today is age 0, not a future date"
+else
+  fail "today's date mishandled (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- Review Focus 5: exactly REPORT_AGE_DAYS prints the note (>=, not >)
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 180
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && grep -qF 'NOTE: oldest dated claim is 180 days old' <<<"$out"; then
+  pass "exactly REPORT_AGE_DAYS prints the note"
+else
+  fail "the report threshold is exclusive where it should be inclusive (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC3b: on a tie, "the oldest" is the first in scan order —
+# lexicographic by path, then ascending by line
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 200
+printf 'skills/atelier-ventes/en/references/tutorial/01.md
+' >> "$d/skills/dated-claims.tsv"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/01.md" 200
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'skills/atelier-ventes/en/references/tutorial/01.md:5' <<<"$out" \
+   && ! grep -qF 'NOTE:' <<<"$out" \
+   || grep -A 1 'NOTE: oldest dated claim' <<<"$out" | grep -qF 'tutorial/01.md:5'; then
+  pass "2026-09-19/AC3b a path tie resolves to the lexicographically first file"
+else
+  fail "2026-09-19/AC3b picked the wrong file on a tie (out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC3b: two annotations at the same date in ONE file resolve to
+# the lower line number
+d="$(make_fixture_repo)"
+dd="$(days_ago 200)"
+cat > "$d/skills/atelier-ventes/en/references/tutorial/03.md" <<EOF
+# Module
+
+> **Last verified $dd** — source: first annotation, line 3.
+
+Prose between them.
+
+> **Last verified $dd** — source: second annotation, line 7.
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -A 1 'NOTE: oldest dated claim' <<<"$out" | grep -qF 'tutorial/03.md:3'; then
+  pass "2026-09-19/AC3b a line tie resolves to the lower line number"
+else
+  fail "2026-09-19/AC3b picked the wrong line on a tie (out=$out)"
+fi
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
