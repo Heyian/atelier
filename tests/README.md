@@ -11,12 +11,20 @@ that requires actually running the skill.
 
 ```
 tests/<canonical-skill-name>/<locale>/<scenario>.md   — per-skill scenarios
-tests/_cross-skill/<scenario>.md                       — system-level scenarios
+tests/<canonical-skill-name>/<locale>/runs/<scenario>/<date>-<kind>.md
+                                                      — that scenario's run transcripts
+tests/_cross-skill/<scenario>.md                      — system-level scenarios
+tests/_cross-skill/runs/<scenario>/<date>-<kind>.md   — their run transcripts
 ```
 
 `<canonical-skill-name>` is the skill's folder name under `skills/` (e.g.
 `atelier-reunions`, not its English `name:` frontmatter value
-`atelier-meetings`). `<locale>` is `fr` or `en`.
+`atelier-meetings`). `<locale>` is `fr` or `en`. `<scenario>` inside a
+`runs/` path is the scenario file's own name without `.md`, and
+`tests/_cross-skill/` holds its scenario files directly, with no locale
+directories, so its transcripts sit one level shallower. What a transcript
+is, what goes in one, and when a run may have none: see "Recording a run"
+below.
 
 ## Scenario file format
 
@@ -105,22 +113,29 @@ For a per-skill scenario:
    `skills/<name>/<locale>/` tree) and a sandbox to read/write in, and the
    full scripted conversation. Confine it to exactly those two
    directories.
-4. **Judge and record** — tick only boxes the with-skill run actually
+4. **Judge and record** — save the dispatch's transcript first (see
+   "Recording a run" below), then tick only boxes the with-skill run actually
    demonstrated, re-verified by reading the resulting files directly, not
-   by trusting the dispatched agent's self-report. Note honestly which
-   boxes the baseline already passed (regression guards, not evidence the
-   skill works) and which genuinely required the skill.
+   by trusting the dispatched agent's self-report. The ordering is the
+   point: the record gets written from the saved file rather than from a
+   memory of the reply. Where the output was lost, the run is recorded
+   under that section's `no transcript — <reason>` line rather than
+   discarded. Note honestly which boxes the baseline already passed
+   (regression guards, not evidence the skill works) and which genuinely
+   required the skill.
 
 Cross-skill scenarios generally skip step 2 (see "Baseline notes" above)
 and instead need **multiple** with-skill dispatches — see below.
 
 ## Recording a run
 
-Step 4 above says "judge and record." These four rules say what *record*
-means. They exist for one reason: a run record is evidence. It is the only
-trace of what an agent actually did on a given day, and a rewritten record is
-evidence destroyed — `git` is the only witness, and only a reviewer acts on
-it.
+Step 4 above says "judge and record." These five rules say what *record*
+means — the fifth, **Every dispatch leaves a transcript**, runs long enough
+to carry its own subsection at the end. They exist for one reason: a run
+record is evidence. Together with the transcript it points to, it is the
+trace of what an agent actually did on a given day, and a rewritten record
+is evidence destroyed — `git` is the only witness, and only a reviewer acts
+on it.
 
 **Re-runs append.** When a scenario is re-run — after a fix, for a larger
 sample, for any reason — the new results go in a new
@@ -203,6 +218,121 @@ as a bold-lead dated paragraph with no heading at all. Neither is migrated to
 the shape above. Editing a record to match a later convention is the habit
 this section exists to prevent — tidying a heading is the first step toward
 tidying what it records.
+
+### Every dispatch leaves a transcript
+
+A run record quotes the lines a verdict rests on. The **transcript** is the
+run itself — the prompts, the replies, the sandbox, and anything the dispatch
+wrote — saved as a file and committed to the repo beside the scenario it
+belongs to. One file per run:
+
+```
+tests/<skill>/<locale>/runs/<scenario-basename>/<date>-<kind>.md
+tests/_cross-skill/runs/<scenario-basename>/<date>-<kind>.md
+```
+
+`<scenario-basename>` is the scenario file's name without `.md`.
+`tests/_cross-skill/` holds its scenario files directly, with no locale
+directories, so its transcripts follow the same shape one level shallower.
+`<kind>` is `baseline` or `verification`, optionally followed by a short
+reason slug matching the run section's own reason. Concrete, both shapes:
+
+```
+tests/atelier/en/runs/accueil-offre-tutoriel/2026-08-10-baseline.md
+tests/atelier-mentor/en/runs/tutoriel-selecteur/2026-08-12-verification-larger-sample.md
+tests/_cross-skill/runs/declenchement/2026-08-10-verification.md
+```
+
+The per-scenario level exists because a single locale directory can hold six
+scenarios, several with more than one run; flat naming there sorts badly and
+gets long.
+
+**`runs/` is a subdirectory, and that is load-bearing.** Both scans that read
+this tree are non-recursive: `check_scenarios` — the build script's AC15
+coverage check — and `check_triggers` (its AC6 check) in `scripts/build.sh`
+each pass `-maxdepth 1` to `find`, and their PowerShell twins call
+`Get-ChildItem` without `-Recurse`. A transcript saved as a sibling `.md`
+next to a scenario file would therefore be counted as a scenario, and a
+directory could pass "has a scenario" on transcripts alone. Inside `runs/`,
+transcripts are invisible to both. (`AC15` and `AC6` here are the build
+script's own check names — after the design spec's criteria of the same
+numbers they enforce — not this transcript convention's own numbering.)
+
+**The unit is one run, not one section.** One file per `## Verification
+notes` and one per `## Verification notes — <date> <reason>` sibling, and one
+per baseline run — including each dated re-run paragraph appended inside the
+single `## Baseline notes`, which does not repeat. That paragraph gets its own
+`<date>-baseline.md` alongside the earlier baseline's transcript rather than
+editing it, so the rule that a prior record is never rewritten covers
+transcripts without needing new wording.
+
+**What a transcript contains.** A header naming the scenario file's path, the
+date, the kind, the isolation preamble version (baselines only, per
+[ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md)), and
+the agent type and model dispatched. Then one block per dispatch, labeled
+exactly as the run section labels that dispatch (`## Dispatch A — "full"`),
+carrying four things:
+
+1. **The prompt, verbatim** — the full scripted conversation as handed to the
+   agent, including the isolation preamble for a baseline. A reply without the
+   prompt that produced it cannot be judged.
+2. **The reply, verbatim and complete** — not excerpted.
+3. **The sandbox after the run** — the `find` listing, or an explicit
+   "no sandbox" for a Desktop-chat dispatch, which has none.
+4. **Every file the dispatch created or modified** — pasted in full when the
+   file is smaller than 16384 bytes. A file of 16384 bytes or more gets its
+   path, its byte count, its `md5sum`, and the excerpt the verdict rests on.
+
+Both attempts of a re-attempted dispatch appear, labeled `attempt 1 of 2` and
+`attempt 2 of 2` — the same cap and the same both-outcomes rule as
+**Two honest attempts, then stop.** under `## Dispatching the subagents`.
+
+**A transcript is written once and never edited afterward, and transcripts are
+never pruned.** This is the observation half of the split above, applied to a
+separate file: the observation is never edited or deleted, and the verdict
+lives in the scenario file, where it can be corrected in place. The retention
+decision and the alternative that was rejected are in
+[ADR 0014](../docs/adr/0014-scenario-run-transcripts.md).
+
+**Sandbox seeds are invented.** Seed a sandbox with fictional companies, as
+the corpus already does — Cedarline Outfitters, Lanternes Boréales. This was
+a habit while the sandboxes were disposable; committing transcripts puts
+whatever seeded them into the repo, which makes it a rule.
+
+**What a transcript does not buy.** It is saved by the same author who writes
+the verdict, so it does not prove the run happened — nothing in this
+procedure does, and the transcript should not be described as if it did. What
+it buys is narrower and worth naming precisely: a second reader gets the full
+context around a quoted excerpt and can judge whether the quote was
+representative, and a later review has something to re-judge against. This
+repo does re-judge verdicts on review — commits `8239f2c` and `144c308`
+above are both that — and until the cutoff below, those reviews had only the
+author's chosen quotes to work from.
+
+**Each run's record opens by pointing at its transcript.** A
+`## Verification notes` sibling opens, on its first line, with a link to its
+transcript file — or with `no transcript — <reason>`. A baseline re-run does
+the same on the first line of its dated paragraph inside the existing
+`## Baseline notes`, so that no earlier record is relabeled to carry a line
+its own run never had. A run whose output was lost is recorded that way
+rather than discarded: making a transcript a hard validity requirement would
+create pressure to re-roll a dispatch until the paperwork was clean, which is
+precisely the failure **Two honest attempts, then stop.** exists to resist.
+
+**The cutoff is 2026-09-18.** Runs recorded on or after that date carry a
+transcript. Runs recorded before it do not — their quoted excerpts are their
+only record — and no existing scenario file is relabeled to say so. That is
+the shape
+[ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md) used
+for preamble v1/v2, and it is what this section's own rule about never tidying
+a record to match a later convention requires. Nothing can be backfilled in
+any case: every pre-cutoff run's sandbox was under `/tmp/` and its transcript
+exists nowhere.
+
+**Quoting is unchanged.** A ticked box still names the line that earned it.
+With a transcript alongside it, a quote stops being the evidence and becomes a
+citation into it — which is exactly what makes a quote checkable for whether
+it was representative.
 
 ## Dispatching the subagents
 
@@ -290,6 +420,14 @@ read-write) and tell it explicitly not to touch anything else. For
 all — paste the skill's relevant content directly into the dispatch prompt
 (since a tool-less agent can't Read a file) and instruct it not to call any
 tools even if some appear available.
+
+**A dispatch is not finished when it returns.** It is finished when its
+transcript is on disk — or, where the output was lost, when its
+`no transcript — <reason>` line is recorded. `## Recording a run` gives the
+path shape and the contents. One consequence belongs here rather than there:
+the contamination scan above stops being an assertion only its author can
+make. With the full transcript committed, a reader other than the author can
+run the same four-item scan over the same text, and disagree.
 
 ### Why there are two preambles
 
