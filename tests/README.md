@@ -11,12 +11,20 @@ that requires actually running the skill.
 
 ```
 tests/<canonical-skill-name>/<locale>/<scenario>.md   — per-skill scenarios
-tests/_cross-skill/<scenario>.md                       — system-level scenarios
+tests/<canonical-skill-name>/<locale>/runs/<scenario>/<date>-<kind>.md
+                                                     — that scenario's run transcripts
+tests/_cross-skill/<scenario>.md                     — system-level scenarios
+tests/_cross-skill/runs/<scenario>/<date>-<kind>.md  — their run transcripts
 ```
 
 `<canonical-skill-name>` is the skill's folder name under `skills/` (e.g.
 `atelier-reunions`, not its English `name:` frontmatter value
-`atelier-meetings`). `<locale>` is `fr` or `en`.
+`atelier-meetings`). `<locale>` is `fr` or `en`. `<scenario>` inside a
+`runs/` path is the scenario file's own name without `.md`, and
+`tests/_cross-skill/` holds its scenario files directly, with no locale
+directories, so its transcripts sit one level shallower. What a transcript
+is, what goes in one, and when a run may have none: see "Recording a run"
+below.
 
 ## Scenario file format
 
