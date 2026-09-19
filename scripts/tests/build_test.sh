@@ -1005,5 +1005,50 @@ else
 fi
 rm -rf "$d"
 
+# --- 2026-09-19/AC20: everything younger than FAIL_AGE_DAYS exits 0
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 364
+( cd "$d" && bash scripts/build.sh --check-freshness >/dev/null 2>&1 ) \
+  && pass "2026-09-19/AC20 --check-freshness exits 0 under FAIL_AGE_DAYS" \
+  || fail "2026-09-19/AC20 --check-freshness failed under FAIL_AGE_DAYS"
+rm -rf "$d"
+
+# --- 2026-09-19/AC21 + Review Focus 5: exactly FAIL_AGE_DAYS fails, and the
+# report lists every annotation at or over REPORT_AGE_DAYS with file, line,
+# date and age
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 365
+printf 'skills/atelier-ventes/fr/references/tutorial/03.md\n' >> "$d/skills/dated-claims.tsv"
+write_annotation "$d" fr "skills/atelier-ventes/fr/references/tutorial/03.md" 200
+out="$( cd "$d" && bash scripts/build.sh --check-freshness 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] \
+   && grep -qF "skills/atelier-ventes/en/references/tutorial/03.md:5 $(days_ago 365) (365 days)" <<<"$out" \
+   && grep -qF "skills/atelier-ventes/fr/references/tutorial/03.md:5 $(days_ago 200) (200 days)" <<<"$out"; then
+  pass "2026-09-19/AC21 --check-freshness fails at exactly FAIL_AGE_DAYS and lists every claim past REPORT_AGE_DAYS"
+else
+  fail "2026-09-19/AC21 stale report wrong (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC22: a form failure fails regardless of age
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 1
+sed -i 's/^> \*\*Last verified [0-9-]*\*\*/> **Last verified 2026-02-30**/' \
+  "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+out="$( cd "$d" && bash scripts/build.sh --check-freshness 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -ne 0 ]] && grep -qF 'not a real calendar day' <<<"$out"; then
+  pass "2026-09-19/AC22 --check-freshness fails on a form error regardless of age"
+else
+  fail "2026-09-19/AC22 form error did not fail --check-freshness (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC19: --check-freshness writes nothing to dist/
+d="$(make_fixture_repo)"
+( cd "$d" && bash scripts/build.sh --check-freshness >/dev/null 2>&1 )
+[[ ! -d "$d/dist" ]] && pass "2026-09-19/AC19 --check-freshness leaves dist/ untouched" \
+                     || fail "2026-09-19/AC19 --check-freshness created dist/"
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi

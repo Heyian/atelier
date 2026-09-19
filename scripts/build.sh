@@ -35,11 +35,13 @@ make_stage_dir() {
 
 usage() {
   cat <<'EOF'
-Usage: build.sh [--lang fr|en|all] [--check]
+Usage: build.sh [--lang fr|en|all] [--check] [--check-freshness]
 
   --lang fr|en|all   Build that locale without prompting.
   --check            Run the mechanical checks only; build to a temp dir and
                      leave dist/ untouched. Exits non-zero on any failure.
+  --check-freshness  Validate every dated capability claim and fail if the
+                     oldest has passed the freshness threshold. Builds nothing.
 
 With no --lang, the script asks which language to build.
 EOF
@@ -151,18 +153,26 @@ build_locale() {
 }
 
 main() {
-  local lang="" check=0
+  local lang="" check=0 freshness=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --lang) [[ $# -ge 2 ]] || die "--lang needs a value"; lang="$2"; shift 2 ;;
       --lang=*) lang="${1#--lang=}"; shift ;;
       --check) check=1; shift ;;
+      --check-freshness) freshness=1; shift ;;
       -h|--help) usage; exit 0 ;;
       *) die "unknown argument: $1" ;;
     esac
   done
 
   [[ -f "$NAMES_TSV" ]] || die "missing $NAMES_TSV"
+
+  # 2026-09-19/AC19 — neither stages a skill nor writes to dist/, so it
+  # returns before any of the build machinery below.
+  if [[ "$freshness" -eq 1 ]]; then
+    run_freshness_check
+    exit $?
+  fi
 
   if [[ -z "$lang" ]]; then
     if [[ "$check" -eq 1 ]]; then
@@ -419,6 +429,45 @@ report_dated_claims() {
     echo "      $loc"
     echo "      see docs/tutorial-corpus.md, \"Claims to re-verify\""
   fi
+}
+
+# --- 2026-09-19/AC19–AC22 — the second tier. Stages nothing, writes nothing
+# to dist/, and carries the form validation deliberately: if the pattern
+# stopped matching, this job is the last thing that would notice, and it must
+# fail rather than report a cheerful zero.
+run_freshness_check() {
+  check_dated_claims
+
+  if [[ "$CHECK_FAILURES" -gt 0 ]]; then
+    echo "STATUS: FAIL ($CHECK_FAILURES check failures)" >&2
+    exit 1
+  fi
+
+  local stale
+  stale="$(awk -F'\t' -v today="$TODAY_YMD" -v fail_age="$FAIL_AGE_DAYS" \
+               -v report_age="$REPORT_AGE_DAYS" "$DATED_CLAIMS_AWK_LIB"'
+    BEGIN { todayDays = ymd_to_days(today); anyFail = 0 }
+    $5 == "ok" {
+      age = todayDays - ymd_to_days($4)
+      if (age >= fail_age) anyFail = 1
+      if (age >= report_age) lines[++n] = sprintf("  %s:%s %s (%d days)", $1, $2, $4, age)
+    }
+    END {
+      if (!anyFail) exit 0
+      for (i = 1; i <= n; i++) print lines[i]
+      exit 0
+    }
+  ' <<<"$DATED_CLAIMS_RECORDS")"
+
+  if [[ -n "$stale" ]]; then
+    echo "Dated capability claims are past the freshness threshold (fail threshold $FAIL_AGE_DAYS days,"
+    echo "listing everything at or over $REPORT_AGE_DAYS days):"
+    echo "$stale"
+    return 1
+  fi
+
+  echo "dated claims: every claim is younger than $FAIL_AGE_DAYS days"
+  return 0
 }
 
 # --- Minimal JSON support, hand-rolled on purpose.
