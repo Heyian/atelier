@@ -52,6 +52,12 @@ versus things any capable assistant already does.
 What the built, staged skill actually did when run for real — quoted
 evidence, file paths, on-disk confirmation, not just the dispatched agent's
 self-report.
+
+## Verification notes — <date> <reason>
+
+Optional, and repeatable: one sibling section per re-run, appended below
+the previous ones, oldest first. See "Recording a run" below for what may
+and may not change in an earlier record.
 ```
 
 `triggers:` feeds `scripts/build.sh`'s AC6 check (`check_triggers`): every
@@ -107,6 +113,96 @@ For a per-skill scenario:
 
 Cross-skill scenarios generally skip step 2 (see "Baseline notes" above)
 and instead need **multiple** with-skill dispatches — see below.
+
+## Recording a run
+
+Step 4 above says "judge and record." These four rules say what *record*
+means. They exist for one reason: a run record is evidence. It is the only
+trace of what an agent actually did on a given day, and a rewritten record is
+evidence destroyed — `git` is the only witness, and only a reviewer acts on
+it.
+
+**Re-runs append.** When a scenario is re-run — after a fix, for a larger
+sample, for any reason — the new results go in a new
+`## Verification notes — <date> <reason>` sibling section, appended
+below the existing ones, oldest first. The prior `## Verification notes`
+section stays exactly as written: its record of what was observed is never
+rewritten to match the new run, and the only in-place changes permitted
+anywhere above the new section are the verdict updates the next rule allows.
+Live example: `tests/atelier-mentor/en/tutoriel-selecteur.md` carries three
+such records on top of its original — `2026-08-10 re-run
+(post-runbook-fix)`, `2026-08-10 second re-run (attempt 2 of 2)`, and
+`2026-08-12 larger sample (issue #25)`.
+
+**What additivity covers, and what it does not.** Split a record in two.
+
+- The **observation** — what the agent did, quoted, and what was confirmed on
+  disk — is never edited and never deleted. That holds for a superseded run
+  as firmly as for a current one: a run that a later fix made obsolete is
+  still what the model produced that day.
+- The **verdict** is current state, and is updated in place: the
+  `## Expected behaviors` boxes, the running tally, and a prior run's
+  judgment when a re-run *or a later review* overturns it.
+
+A corrected judgment is not deleted and not silently flipped. It is replaced,
+in the position it already occupies, by a dated correction note stating what
+the judgment originally said and why it changed — so the superseded reasoning
+survives inside its own correction, rather than being dropped or left standing
+as if it were still current. The new section carries the full explanation.
+
+Live examples. The verdict is updated in place in both directions, both in
+commit `8239f2c`. The box:
+`tests/atelier-mentor/en/tutoriel-reprise.md`'s "Session B's recommendation
+names only the five remaining modules" goes from `- [ ]` to `- [x]`, while
+that file's `2026-08-10 re-run (post-runbook-fix)` section is appended below.
+The prior judgment: in the FR twin,
+`tests/atelier-mentor/fr/tutoriel-reprise.md`, the same commit re-judges the
+same box the other way — a pass corrected to a fail on review — in the
+position it already occupied, behind a dated correction note that quotes the
+line the original tick rested on, says why that line answers a question the
+executive never asked, and restates the pre-fix tally as 4/5. That file's own
+appended re-run then re-earns the box and re-tallies to 5/5. The observation
+survives either way, and the FR file says so in place: the pre-fix record "is
+left as-is; this section is additive." The correction-note form across files
+comes from a later commit, `144c308`:
+`tests/atelier-mentor/en/tutoriel-reprise.md`'s "Cross-locale summary after
+the fix — corrected 2026-08-10 (second review)" quotes the claim `8239f2c`
+had made in that same spot ("four for four re-runs improved"), records that
+`tutoriel-selecteur.md`'s EN re-run was re-judged a continued failure on
+review, and restates the honest count as 3 of 4.
+
+**An attempt is not a dispatch in a sample.** An *attempt* is one execution of
+a dispatch, counting the first, so one dispatch gets at most two attempts in
+total — see **Two honest attempts, then stop.** under `## Dispatching the
+subagents`. A *sample* is a different thing: N **independent** dispatches,
+each held to a single attempt, where the rate across them is the
+measurement. Not retrying a failed dispatch inside a sample is the point, not
+laxity — re-rolling one would bias the rate toward the result you wanted.
+Live examples: `tests/atelier-mentor/en/tutoriel-selecteur.md`'s
+`## Verification notes — 2026-08-12 larger sample (issue #25)` records six
+dispatches, one attempt each, and `tests/atelier/en/accueil-offre-tutoriel.md`
+records five. Neither is a cap violation.
+
+**Baselines differ, deliberately.** A baseline re-run is a dated paragraph
+inside the single `## Baseline notes`, not a new sibling section —
+`## Baseline notes` does not repeat. Live example:
+`tests/atelier-mentor/en/tutoriel-declenchement.md`'s **Re-run 2026-08-12
+under isolation preamble v2** paragraph, written below the v1 record it adds
+to. Whether to re-run a baseline at all is case-by-case: a re-run under a new
+preamble is the same measurement taken a second way, which is why
+[ADR 0013](../docs/adr/0013-baseline-isolation-preamble-versioning.md) labels
+preamble versions instead of replacing runs. That file's FR twin,
+`tests/atelier-mentor/fr/tutoriel-declenchement.md`, was deliberately not
+re-run under v2 and says so in place.
+
+**Two files predate this convention, and stay as written.**
+`tests/_cross-skill/declenchement.md` nests its runs as `### Run <date>`
+subsections under one `## Verification notes`;
+`tests/atelier-mentor/en/capability-question.md` records its 2026-08-10 re-run
+as a bold-lead dated paragraph with no heading at all. Neither is migrated to
+the shape above. Editing a record to match a later convention is the habit
+this section exists to prevent — tidying a heading is the first step toward
+tidying what it records.
 
 ## Dispatching the subagents
 
@@ -169,12 +265,20 @@ nothing still fails isolation: an agent arguing with the framing is not the
 plain assistant being measured, and its answer is not that assistant's
 answer.
 
-**Two honest attempts, then stop.** A baseline gets at most two dispatches.
-Re-rolling past that to obtain a compliant-looking result is not
-permitted — it selects for the transcript you wanted rather than the one the
-model produces.
+**Two honest attempts, then stop.** Any dispatch gets at most two
+attempts — a baseline and a with-skill verification alike. An *attempt* is one
+execution of a dispatch, counting the first, so the ceiling is one retry. A
+second attempt is warranted in exactly two cases: an isolation failure on a
+baseline (the three-item list above), or a failed `## Expected behaviors` box
+on a verification run. Re-rolling past that to obtain a compliant-looking
+result is not permitted — it selects for the transcript you wanted rather than
+the one the model produces. A verification re-roll is the more tempting of the
+two, because it produces a green checklist. Both attempts' outcomes are
+recorded, not only the second or the passing one:
+`tests/atelier-mentor/en/tutoriel-selecteur.md` runs a verification dispatch
+twice under this rule and writes up both.
 
-**When both attempts fail, the scenario records "baseline not
+**When both attempts fail on a baseline, the scenario records "baseline not
 established."** No expected-behavior box may be credited to the skill on
 the strength of that run, and both failed attempts are written up in
 `## Baseline notes` as observed.
