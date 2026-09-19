@@ -202,6 +202,151 @@ main() {
 CHECK_FAILURES=0
 check_fail() { echo "CHECK FAIL: $*" >&2; CHECK_FAILURES=$((CHECK_FAILURES + 1)); }
 
+# --- 2026-09-19/AC14 — the two staleness thresholds, named once. Nothing
+# else in this script may write 180 or 365 as a bare literal.
+REPORT_AGE_DAYS=180
+FAIL_AGE_DAYS=365
+
+DATED_CLAIMS_TSV="$SKILLS_DIR/dated-claims.tsv"
+TODAY_YMD="$(date +%Y-%m-%d)"
+
+# The day-number conversion every dated-claim awk shares. `date -d` is
+# GNU-only and would break for a contributor on macOS (2026-09-19/AC18), so
+# the civil algorithm is inlined into each awk program that needs it.
+DATED_CLAIMS_AWK_LIB='
+function days_from_civil(y, m, d,   era, yoe, doy, doe) {
+  if (m <= 2) y -= 1
+  era = int((y >= 0 ? y : y - 399) / 400)
+  yoe = y - era * 400
+  doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
+  doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+  return era * 146097 + doe - 719468
+}
+function ymd_to_days(s) {
+  return days_from_civil(substr(s, 1, 4) + 0, substr(s, 6, 2) + 0, substr(s, 9, 2) + 0)
+}
+function real_calendar_day(y, m, d,   dim) {
+  if (m < 1 || m > 12 || d < 1) return 0
+  dim = 31
+  if (m == 4 || m == 6 || m == 9 || m == 11) dim = 30
+  else if (m == 2) dim = ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0) ? 29 : 28
+  return d <= dim
+}
+'
+
+# --- 2026-09-19/AC12, AC13 — every *.md at any depth under
+# skills/<skill>/<locale>/references/, for every skill in names.tsv and both
+# locales, and nothing outside that set. Emitted in lexicographic path order
+# (2026-09-19/AC3b); LC_ALL=C so the order does not depend on the locale the
+# contributor happens to run under.
+dated_claims_files() {
+  local canonical locale dir
+  for canonical in $(list_skills); do
+    for locale in "${LOCALES[@]}"; do
+      dir="$SKILLS_DIR/$canonical/$locale/references"
+      [[ -d "$dir" ]] || continue
+      find "$dir" -type f -name '*.md' -print
+    done
+  done | LC_ALL=C sort
+}
+
+# --- Scan one file, emitting one TSV record per detected annotation.
+#
+# Detection is deliberately looser than validation (Decision §1): a line
+# beginning `> **` that carries EITHER locale's marker is detected, then must
+# satisfy its own locale's full pattern. If the strict pattern were also the
+# detector, a typo in a date would make the line invisible and the check would
+# report one fewer annotation rather than failing.
+scan_one_dated_claim_file() {
+  local file="$1" rel locale lead sep own other
+  rel="${file#"$REPO_ROOT"/}"
+
+  # The locale is the segment directly under the skill directory, not just any
+  # /en/ or /fr/ in the path — skills/x/en/references/fr/notes.md is legal and
+  # is an English file.
+  locale="$(awk -F/ '{ for (i = 1; i < NF; i++) if ($i == "skills") { print $(i + 2); exit } }' <<<"$rel")"
+  case "$locale" in
+    en) lead='> **Last verified '; sep='** — source: '; own='Last verified'; other='Vérifié le' ;;
+    fr) lead='> **Vérifié le ';    sep='** — source : '; own='Vérifié le';   other='Last verified' ;;
+    *) return 0 ;;
+  esac
+
+  awk -v rel="$rel" -v locale="$locale" -v lead="$lead" -v sep="$sep" \
+      -v own="$own" -v other="$other" -v today="$TODAY_YMD" \
+      "$DATED_CLAIMS_AWK_LIB"'
+    BEGIN { todayDays = ymd_to_days(today) }
+    {
+      line = $0
+      sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
+
+      # A fenced block quoting the pattern (docs/AUTHORING.md mirrors it) is
+      # an example, not an annotation.
+      if (substr(line, 1, 3) == "```") { fence = !fence; next }
+      if (fence) next
+
+      if (substr(line, 1, 4) != "> **") next
+      hasOwn = index(line, own) > 0
+      hasOther = index(line, other) > 0
+      if (!hasOwn && !hasOther) next
+
+      verdict = "ok"; date = ""
+      if (!hasOwn) {
+        verdict = "wrong-locale"
+      } else if (substr(line, 1, length(lead)) != lead) {
+        verdict = "bad-leadin"
+      } else {
+        rest = substr(line, length(lead) + 1)
+        date = substr(rest, 1, 10)
+        tail = substr(rest, 11)
+        if (date !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) {
+          verdict = "no-date"; date = ""
+        } else if (!real_calendar_day(substr(date,1,4)+0, substr(date,6,2)+0, substr(date,9,2)+0)) {
+          verdict = "bad-date"
+        } else if (ymd_to_days(date) > todayDays) {
+          verdict = "future-date"
+        } else if (substr(tail, 1, length(sep)) != sep) {
+          verdict = "no-source"
+        } else {
+          src = substr(tail, length(sep) + 1)
+          gsub(/[ \t]/, "", src)
+          if (src == "") verdict = "no-source"
+        }
+      }
+      printf "%s\t%d\t%s\t%s\t%s\n", rel, FNR, locale, date, verdict
+    }
+  ' "$file"
+}
+
+scan_dated_claims() {
+  local f
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && scan_one_dated_claim_file "$f"
+  done < <(dated_claims_files)
+}
+
+DATED_CLAIMS_RECORDS=""
+
+# --- 2026-09-19/AC4–AC8 — every detected line that fails its locale's pattern
+# is a check failure naming the file and line, never a line the scan passes
+# over.
+check_dated_claims() {
+  DATED_CLAIMS_RECORDS="$(scan_dated_claims)"
+  local rel line locale date verdict
+  while IFS=$'\t' read -r rel line locale date verdict; do
+    [[ -n "$rel" ]] || continue
+    case "$verdict" in
+      ok) ;;
+      wrong-locale) check_fail "$rel:$line — carries the other locale's verified lead-in (this file is $locale)" ;;
+      bad-leadin)   check_fail "$rel:$line — malformed verified lead-in for locale $locale" ;;
+      no-date)      check_fail "$rel:$line — verified annotation has no YYYY-MM-DD in its bold span" ;;
+      bad-date)     check_fail "$rel:$line — '$date' is not a real calendar day" ;;
+      future-date)  check_fail "$rel:$line — verified date '$date' is later than today ($TODAY_YMD)" ;;
+      no-source)    check_fail "$rel:$line — verified annotation names no source after the em dash" ;;
+      *)            check_fail "$rel:$line — unrecognized dated-claim verdict '$verdict'" ;;
+    esac
+  done <<<"$DATED_CLAIMS_RECORDS"
+}
+
 # --- Minimal JSON support, hand-rolled on purpose.
 # AC56 requires --check to run with jq off PATH, and the repo has no other
 # JSON dependency, so these two helpers cover exactly what the coherence
@@ -552,6 +697,9 @@ run_checks() {
 
   # Repo-wide, not per-locale: run it once.
   check_version_coherence
+  # 2026-09-19/AC13 — the scanner finds its own files, so it runs once here
+  # rather than inside the per-skill, per-locale loop below.
+  check_dated_claims
 
   for locale in "${selected[@]}"; do
     for canonical in $(list_skills); do

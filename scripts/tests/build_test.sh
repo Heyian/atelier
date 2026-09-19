@@ -129,6 +129,74 @@ EOF
   echo "$dir"
 }
 
+# --- Dated-claim fixture helpers (2026-09-19 spec).
+#
+# AC35: every fixture date is computed from the run date, never written as a
+# literal, so no test's outcome changes as the calendar advances. Both
+# conversions are the civil algorithm in awk — `date -d` is GNU-only and the
+# build script is forbidden from using it, so the tests do not either.
+days_ago() {
+  awk -v n="$1" -v today="$(date +%Y-%m-%d)" '
+    function days_from_civil(y, m, d,   era, yoe, doy, doe) {
+      if (m <= 2) y -= 1
+      era = int((y >= 0 ? y : y - 399) / 400)
+      yoe = y - era * 400
+      doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
+      doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+      return era * 146097 + doe - 719468
+    }
+    function civil_from_days(z,   era, doe, yoe, y, doy, mp, d, m) {
+      z += 719468
+      era = int((z >= 0 ? z : z - 146096) / 146097)
+      doe = z - era * 146097
+      yoe = int((doe - int(doe / 1460) + int(doe / 36524) - int(doe / 146096)) / 365)
+      y = yoe + era * 400
+      doy = doe - (365 * yoe + int(yoe / 4) - int(yoe / 100))
+      mp = int((5 * doy + 2) / 153)
+      d = doy - int((153 * mp + 2) / 5) + 1
+      m = mp + (mp < 10 ? 3 : -9)
+      if (m <= 2) y += 1
+      return sprintf("%04d-%02d-%02d", y, m, d)
+    }
+    BEGIN {
+      t = days_from_civil(substr(today,1,4)+0, substr(today,6,2)+0, substr(today,9,2)+0)
+      print civil_from_days(t - n)
+    }'
+}
+
+# Write one valid annotation of the given locale, dated n days ago, into a
+# reference file inside the fixture.
+write_annotation() {
+  local dir="$1" locale="$2" rel="$3" days="$4" d
+  d="$(days_ago "$days")"
+  mkdir -p "$(dirname "$dir/$rel")"
+  if [[ "$locale" == "en" ]]; then
+    cat > "$dir/$rel" <<EOF
+# Module
+
+Prose above the annotation.
+
+> **Last verified $d** — source: Anthropic help center, article 15520349
+> ("Use Claude Cowork on web, desktop, and mobile"). Continuation prose the
+> check never reads.
+
+Prose below.
+EOF
+  else
+    cat > "$dir/$rel" <<EOF
+# Module
+
+Prose au-dessus de l'annotation.
+
+> **Vérifié le $d** — source : centre d'aide Anthropic, article 15520349
+> (« Use Claude Cowork on web, desktop, and mobile »). Prose de continuation
+> que la vérification ne lit jamais.
+
+Prose en dessous.
+EOF
+  fi
+}
+
 # --- AC1: --lang all produces one ZIP per skill per locale, SKILL.md at root
 d="$(make_fixture_repo)"
 ( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
@@ -543,6 +611,159 @@ expect_check_fail "$d" ".release-please-manifest.json" \
   "AC54 rejects an unparseable .release-please-manifest.json"
 rm -rf "$d"
 
+# --- 2026-09-19/AC4: an English lead-in under /fr/ fails, naming file and line
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/fr/references/tutorial/03.md" 10
+expect_check_fail "$d" "skills/atelier-ventes/fr/references/tutorial/03.md:5" \
+  "2026-09-19/AC4 rejects an English lead-in under /fr/"
+rm -rf "$d"
+
+# --- 2026-09-19/AC5: a bold span with no date fails, naming file and line
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+sed -i 's/^> \*\*Last verified [0-9-]*\*\*/> **Last verified**/' \
+  "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+  "2026-09-19/AC5 rejects a bold span with no date"
+rm -rf "$d"
+
+# --- 2026-09-19/AC5: an unclosed bold span fails too
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+sed -i 's/^> \*\*Last verified \([0-9-]*\)\*\* — source:/> **Last verified \1 — source:/' \
+  "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+  "2026-09-19/AC5 rejects an unclosed bold span"
+rm -rf "$d"
+
+# --- 2026-09-19/AC6: a date shaped right but not a real calendar day fails
+for bad in 2026-02-30 2026-13-01 2025-02-29; do
+  d="$(make_fixture_repo)"
+  write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+  sed -i "s/^> \*\*Last verified [0-9-]*\*\*/> **Last verified $bad**/" \
+    "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+  expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+    "2026-09-19/AC6 rejects $bad"
+  rm -rf "$d"
+done
+
+# --- 2026-09-19/AC7: a date later than the run date fails
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" -30
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+  "2026-09-19/AC7 rejects a future date"
+rm -rf "$d"
+
+# --- 2026-09-19/AC8: an absent source segment fails
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+sed -i 's/^\(> \*\*Last verified [0-9-]*\*\*\) — source:.*/\1 no source segment here/' \
+  "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+  "2026-09-19/AC8 rejects an absent source segment"
+rm -rf "$d"
+
+# --- 2026-09-19/AC8: a source segment followed only by whitespace fails
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+sed -i 's/^\(> \*\*Last verified [0-9-]*\*\* — source:\).*/\1   /' \
+  "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/03.md:5" \
+  "2026-09-19/AC8 rejects a source segment of whitespace only"
+rm -rf "$d"
+
+# --- 2026-09-19/AC2: a valid French annotation passes
+d="$(make_fixture_repo)"
+write_annotation "$d" fr "skills/atelier-ventes/fr/references/tutorial/03.md" 10
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "2026-09-19/AC2 a valid French annotation passes"
+else
+  fail "2026-09-19/AC2 rejected a valid French annotation (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19/AC2: dropping the space before the colon fails. French
+# typography requires it, and an editor that "tidies" it away must land red.
+d="$(make_fixture_repo)"
+write_annotation "$d" fr "skills/atelier-ventes/fr/references/tutorial/03.md" 10
+sed -i 's/\*\* — source :/** — source:/' \
+  "$d/skills/atelier-ventes/fr/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/fr/references/tutorial/03.md:5" \
+  "2026-09-19/AC2 rejects a French annotation missing the space before the colon"
+rm -rf "$d"
+
+# --- 2026-09-19/AC2: a French annotation with a bad calendar date fails
+d="$(make_fixture_repo)"
+write_annotation "$d" fr "skills/atelier-ventes/fr/references/tutorial/03.md" 10
+sed -i 's/^> \*\*Vérifié le [0-9-]*\*\*/> **Vérifié le 2026-13-01**/' \
+  "$d/skills/atelier-ventes/fr/references/tutorial/03.md"
+expect_check_fail "$d" "skills/atelier-ventes/fr/references/tutorial/03.md:5" \
+  "2026-09-19/AC2 rejects a French annotation with an impossible date"
+rm -rf "$d"
+
+# --- 2026-09-19/AC4: a French lead-in under /en/ fails, the mirror of the
+# first test in this task
+d="$(make_fixture_repo)"
+write_annotation "$d" fr "skills/atelier-ventes/en/references/tutorial/04.md" 10
+expect_check_fail "$d" "skills/atelier-ventes/en/references/tutorial/04.md:5" \
+  "2026-09-19/AC4 rejects a French lead-in under /en/"
+rm -rf "$d"
+
+# --- Review Focus 1: a fenced block quoting the pattern is an example, not an
+# annotation. docs/AUTHORING.md mirrors the exact lead-in (2026-09-19/AC39),
+# and the day someone copies that example into a skill's references/ the build
+# must not fail on it.
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/authoring-example.md" <<'EOF'
+# How to write one
+
+Copy this shape exactly:
+
+```
+> **Last verified 2026-02-30** — source:
+```
+
+The date above is deliberately impossible; it is an example.
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "fenced annotation example is not detected"
+else
+  fail "fenced annotation example was detected (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- Review Focus 2: a CRLF checkout must produce the same verdict as LF.
+# Without the `sub(/\r$/, "", line)` in the scanner the trailing \r lands after
+# the source text and a perfectly valid annotation reads as no-source.
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
+f="$d/skills/atelier-ventes/en/references/tutorial/03.md"
+awk '{ printf "%s\r\n", $0 }' "$f" > "$f.crlf" && mv "$f.crlf" "$f"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "a CRLF annotation validates like its LF twin"
+else
+  fail "a CRLF annotation failed validation (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- Review Focus 3: skills/<skill>/en/references/fr/… is an English file.
+# The locale is the segment directly under the skill directory, not the last
+# /en/ or /fr/ anywhere in the path.
+d="$(make_fixture_repo)"
+write_annotation "$d" en "skills/atelier-ventes/en/references/fr/notes.md" 10
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "locale comes from the skill directory, not a nested path segment"
+else
+  fail "a nested /fr/ segment misread an English file (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
 # --- AC55: the clean fixture passes, with the exact PASS line
 d="$(make_fixture_repo)"
 out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
@@ -558,7 +779,7 @@ rm -rf "$d"
 # from it by construction, so this proves the checks never reach for it.
 d="$(make_fixture_repo)"
 shim="$(mktemp -d)"
-for tool in bash awk grep find zip unzip sed cat head sort wc cmp mktemp rm mkdir cp mv tr basename dirname printf; do
+for tool in bash awk grep find zip unzip sed cat head sort wc cmp mktemp rm mkdir cp mv tr basename dirname printf date; do
   src="$(command -v "$tool" 2>/dev/null)" || continue
   ln -sf "$src" "$shim/$tool"
 done
