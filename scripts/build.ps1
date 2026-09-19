@@ -13,6 +13,11 @@
   PowerShell's own error text instead of build.sh's custom string.)
 .PARAMETER Check
   Run the mechanical checks only; build to a temp dir and leave dist/ untouched.
+.PARAMETER CheckFreshness
+  Validate every dated capability claim and fail if the oldest has passed the
+  freshness threshold. Builds nothing and writes nothing to dist/. Mirrors
+  build.sh's --check-freshness. No CI job calls this on Windows by design; it
+  exists so the twin stays a twin.
 .NOTES
   build.sh also accepts -h/--help (prints a custom usage block) and dies with
   a custom "unknown argument: $1" message on anything else. CmdletBinding
@@ -24,7 +29,8 @@
 param(
   [ValidateSet('fr', 'en', 'all', IgnoreCase = $false)]
   [string]$Lang,
-  [switch]$Check
+  [switch]$Check,
+  [switch]$CheckFreshness
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,6 +46,185 @@ $script:CheckFailures = 0
 function Add-CheckFailure([string]$Message) {
   Write-Host "CHECK FAIL: $Message"
   $script:CheckFailures++
+}
+
+# --- 2026-09-19/AC14 — the two staleness thresholds, named once.
+$ReportAgeDays = 180
+$FailAgeDays   = 365
+
+$DatedClaimsTsv = Join-Path $SkillsDir 'dated-claims.tsv'
+$script:DatedClaimRecords = @()
+
+# --- 2026-09-19/AC12, AC13, AC3b — every *.md at any depth under
+# skills/<skill>/<locale>/references/, in lexicographic repo-relative order.
+#
+# Divergence from build.sh: PowerShell has real DateTime parsing, so the civil
+# algorithm build.sh inlines into awk (because `date -d` is GNU-only) has no
+# counterpart here. ParseExact with a fixed 'yyyy-MM-dd' format doubles as the
+# calendar-validity test — 2026-02-30 throws.
+function Get-DatedClaimRecords {
+  $records = [System.Collections.Generic.List[object]]::new()
+  $today = (Get-Date).Date
+
+  $files = foreach ($canonical in Get-SkillList) {
+    foreach ($locale in $AllLocales) {
+      $dir = Join-Path (Join-Path (Join-Path $SkillsDir $canonical) $locale) 'references'
+      if (-not (Test-Path -LiteralPath $dir)) { continue }
+      foreach ($f in Get-ChildItem -LiteralPath $dir -Filter '*.md' -File -Recurse) {
+        [pscustomobject]@{
+          Rel    = ($f.FullName.Substring($RepoRoot.Length + 1) -replace '\\', '/')
+          Full   = $f.FullName
+          Locale = $locale
+        }
+      }
+    }
+  }
+
+  foreach ($file in ($files | Sort-Object -Property Rel -CaseSensitive)) {
+    if ($file.Locale -ceq 'en') {
+      $lead = '> **Last verified '; $sep = '** — source: '
+      $own  = 'Last verified';      $other = 'Vérifié le'
+    } else {
+      $lead = '> **Vérifié le ';    $sep = '** — source : '
+      $own  = 'Vérifié le';         $other = 'Last verified'
+    }
+
+    $lineNo = 0
+    $fence = $false
+    foreach ($raw in [System.IO.File]::ReadAllLines($file.Full)) {
+      $lineNo++
+      $line = $raw -replace "`r$", ''
+      if ($line.StartsWith('```')) { $fence = -not $fence; continue }
+      if ($fence) { continue }
+      if (-not $line.StartsWith('> **')) { continue }
+
+      $hasOwn = $line.Contains($own)
+      $hasOther = $line.Contains($other)
+      if (-not $hasOwn -and -not $hasOther) { continue }
+
+      $verdict = 'ok'; $date = ''
+      if (-not $hasOwn) {
+        $verdict = 'wrong-locale'
+      } elseif (-not $line.StartsWith($lead)) {
+        $verdict = 'bad-leadin'
+      } else {
+        $rest = $line.Substring($lead.Length)
+        if ($rest.Length -lt 10) {
+          $verdict = 'no-date'
+        } else {
+          $date = $rest.Substring(0, 10)
+          $tail = $rest.Substring(10)
+          $parsed = [datetime]::MinValue
+          if (-not [datetime]::TryParseExact($date, 'yyyy-MM-dd',
+                [cultureinfo]::InvariantCulture,
+                [System.Globalization.DateTimeStyles]::None, [ref]$parsed)) {
+            # Shape-right-but-impossible and shape-wrong are different
+            # failures (2026-09-19/AC5 vs AC6), so separate them here the way
+            # build.sh's awk does.
+            if ($date -match '^\d{4}-\d{2}-\d{2}$') { $verdict = 'bad-date' }
+            else { $verdict = 'no-date'; $date = '' }
+          } elseif ($parsed -gt $today) {
+            $verdict = 'future-date'
+          } elseif (-not $tail.StartsWith($sep)) {
+            $verdict = 'no-source'
+          } elseif ($tail.Substring($sep.Length).Trim() -eq '') {
+            $verdict = 'no-source'
+          }
+        }
+      }
+
+      $records.Add([pscustomobject]@{
+        Rel = $file.Rel; Line = $lineNo; Locale = $file.Locale
+        Date = $date; Verdict = $verdict
+      })
+    }
+  }
+  return , $records.ToArray()
+}
+
+# --- 2026-09-19/AC4–AC8
+function Test-DatedClaims {
+  $script:DatedClaimRecords = Get-DatedClaimRecords
+  foreach ($r in $script:DatedClaimRecords) {
+    switch ($r.Verdict) {
+      'ok' { }
+      'wrong-locale' { Add-CheckFailure "$($r.Rel):$($r.Line) — carries the other locale's verified lead-in (this file is $($r.Locale))" }
+      'bad-leadin'   { Add-CheckFailure "$($r.Rel):$($r.Line) — malformed verified lead-in for locale $($r.Locale)" }
+      'no-date'      { Add-CheckFailure "$($r.Rel):$($r.Line) — verified annotation has no YYYY-MM-DD in its bold span" }
+      'bad-date'     { Add-CheckFailure "$($r.Rel):$($r.Line) — '$($r.Date)' is not a real calendar day" }
+      'future-date'  { Add-CheckFailure "$($r.Rel):$($r.Line) — verified date '$($r.Date)' is later than today ($((Get-Date).Date.ToString('yyyy-MM-dd')))" }
+      'no-source'    { Add-CheckFailure "$($r.Rel):$($r.Line) — verified annotation names no source after the em dash" }
+      default        { Add-CheckFailure "$($r.Rel):$($r.Line) — unrecognized dated-claim verdict '$($r.Verdict)'" }
+    }
+  }
+  Test-DatedClaimAnchors
+}
+
+# --- 2026-09-19/AC9, AC10, AC10b, AC26 — never hard-codes an anchor path.
+function Test-DatedClaimAnchors {
+  if (-not (Test-Path -LiteralPath $DatedClaimsTsv)) {
+    Add-CheckFailure 'skills/dated-claims.tsv — anchor list not found'
+    return
+  }
+  $detected = @{}
+  foreach ($r in $script:DatedClaimRecords) { $detected[$r.Rel] = $true }
+  foreach ($raw in [System.IO.File]::ReadAllLines($DatedClaimsTsv)) {
+    $p = ($raw -split "`t")[0].TrimEnd("`r")
+    if ([string]::IsNullOrWhiteSpace($p)) { continue }
+    if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $p) -PathType Leaf)) {
+      Add-CheckFailure "$p — listed in skills/dated-claims.tsv but no such file (renamed?)"
+      continue
+    }
+    if (-not $detected.ContainsKey($p)) {
+      Add-CheckFailure "$p — listed in skills/dated-claims.tsv but carries no dated claim"
+    }
+  }
+}
+
+# --- 2026-09-19/AC15, AC15b, AC15c, AC16, AC17. Never touches
+# $script:CheckFailures: age alone must not redden a pull request (AC23).
+function Show-DatedClaimReport {
+  $valid = @($script:DatedClaimRecords | Where-Object { $_.Verdict -ceq 'ok' })
+  if ($valid.Count -eq 0) {
+    Write-Host 'dated claims: 0 annotations across 0 files, no dated claim found'
+    return
+  }
+  $today = (Get-Date).Date
+  $fileCount = ($valid | Select-Object -ExpandProperty Rel -Unique).Count
+  # Sort is stable and the records are already in scan order, so a tie keeps
+  # the first of them (2026-09-19/AC3b).
+  $oldest = $valid | Sort-Object -Property { [datetime]::ParseExact($_.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture) } | Select-Object -First 1
+  $age = ($today - [datetime]::ParseExact($oldest.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture)).Days
+  Write-Host "dated claims: $($valid.Count) annotations across $fileCount files, oldest $($oldest.Date) ($age days)"
+  if ($script:CheckFailures -eq 0 -and $age -ge $ReportAgeDays) {
+    Write-Host "NOTE: oldest dated claim is $age days old (report threshold $ReportAgeDays) —"
+    Write-Host "      $($oldest.Rel):$($oldest.Line)"
+    Write-Host '      see docs/tutorial-corpus.md, "Claims to re-verify"'
+  }
+}
+
+# --- 2026-09-19/AC19–AC22
+function Invoke-FreshnessCheck {
+  Test-DatedClaims
+  if ($script:CheckFailures -gt 0) {
+    Write-Host "STATUS: FAIL ($script:CheckFailures check failures)"
+    return 1
+  }
+  $today = (Get-Date).Date
+  $aged = foreach ($r in ($script:DatedClaimRecords | Where-Object { $_.Verdict -ceq 'ok' })) {
+    $age = ($today - [datetime]::ParseExact($r.Date, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture)).Days
+    [pscustomobject]@{ Rel = $r.Rel; Line = $r.Line; Date = $r.Date; Age = $age }
+  }
+  if (-not ($aged | Where-Object { $_.Age -ge $FailAgeDays })) {
+    Write-Host "dated claims: every claim is younger than $FailAgeDays days"
+    return 0
+  }
+  Write-Host "Dated capability claims are past the freshness threshold (fail threshold $FailAgeDays days,"
+  Write-Host "listing everything at or over $ReportAgeDays days):"
+  foreach ($a in ($aged | Where-Object { $_.Age -ge $ReportAgeDays })) {
+    Write-Host "  $($a.Rel):$($a.Line) $($a.Date) ($($a.Age) days)"
+  }
+  return 1
 }
 
 # --- Temp-dir tracking, mirroring build.sh's STAGE_MANIFEST + `trap ... EXIT`.
@@ -541,6 +726,8 @@ function Invoke-Checks {
   param([string[]]$Locales)
   # Repo-wide, not per-locale: run it once.
   Test-VersionCoherence
+  # 2026-09-19/AC13 — the scanner finds its own files, so it runs once here.
+  Test-DatedClaims
 
   foreach ($locale in $Locales) {
     foreach ($canonical in Get-SkillList) {
@@ -559,6 +746,9 @@ function Invoke-Checks {
       Remove-Item -Recurse -Force -LiteralPath $stage
     }
   }
+  # 2026-09-19/AC15 — before STATUS:, on every run that reaches it.
+  Show-DatedClaimReport
+
   # No `exit` here — see the main body below for why: cleanup must run first.
   if ($script:CheckFailures -gt 0) {
     Write-Host "STATUS: FAIL ($script:CheckFailures check failures)"
@@ -568,6 +758,13 @@ function Invoke-Checks {
 }
 
 if (-not (Test-Path -LiteralPath $NamesTsv)) { throw "ERROR: missing $NamesTsv" }
+
+# 2026-09-19/AC19 — stages nothing and writes nothing to dist/, so it returns
+# before any of the build machinery below. No managed temp dir is created, so
+# there is nothing for Remove-ManagedTempDirs to sweep.
+if ($CheckFreshness) {
+  exit (Invoke-FreshnessCheck)
+}
 
 if (-not $Lang) {
   $Lang = if ($Check) { 'all' } else { Read-LocaleChoice }

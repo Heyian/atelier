@@ -22,6 +22,45 @@ function Write-Lf([string]$Path, [string]$Text) {
   [System.IO.File]::WriteAllText($Path, ($Text -replace "`r`n", "`n"))
 }
 
+# 2026-09-19/AC35 — fixture dates are computed from the run date, never
+# written as literals. PowerShell has real date arithmetic, so unlike bash
+# this needs no civil-algorithm helper.
+function Get-DaysAgo([int]$Days) {
+  return (Get-Date).Date.AddDays(-$Days).ToString('yyyy-MM-dd')
+}
+
+function Write-Annotation([string]$Dir, [string]$Locale, [string]$Rel, [int]$Days) {
+  $d = Get-DaysAgo $Days
+  $full = Join-Path $Dir $Rel
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $full) | Out-Null
+  if ($Locale -ceq 'en') {
+    $body = @"
+# Module
+
+Prose above the annotation.
+
+> **Last verified $d** — source: Anthropic help center, article 15520349
+> ("Use Claude Cowork on web, desktop, and mobile"). Continuation prose the
+> check never reads.
+
+Prose below.
+"@
+  } else {
+    $body = @"
+# Module
+
+Prose au-dessus de l'annotation.
+
+> **Vérifié le $d** — source : centre d'aide Anthropic, article 15520349
+> (« Use Claude Cowork on web, desktop, and mobile »). Prose de continuation
+> que la vérification ne lit jamais.
+
+Prose en dessous.
+"@
+  }
+  Write-Lf $full $body
+}
+
 # Build a minimal but valid repo in a temp dir: real build.ps1, real shared
 # texts, one two-locale skill with differing localized names, and its scenarios.
 function New-FixtureRepo {
@@ -138,6 +177,12 @@ Version 0.1.0 <!-- x-release-please-version -->
 
 **English** — First release.
 "@
+
+  # 2026-09-19/AC10b makes an absent anchor list fatal, so the clean fixture
+  # carries one, pointing at one anchored module with a valid annotation.
+  New-Item -ItemType Directory -Force -Path (Join-Path $dir 'skills/atelier-ventes/en/references/tutorial') | Out-Null
+  Write-Lf (Join-Path $dir 'skills/dated-claims.tsv') "skills/atelier-ventes/en/references/tutorial/03.md`n"
+  Write-Annotation -Dir $dir -Locale 'en' -Rel 'skills/atelier-ventes/en/references/tutorial/03.md' -Days 10
 
   return $dir
 }
@@ -417,6 +462,78 @@ foreach ($zip in $zips) {
   } finally { $archive.Dispose() }
 }
 if (-not $bad) { Add-Pass 'AC57 packaged archives carry a clean version line and no annotation' }
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC4: an English lead-in under /fr/ fails, naming file and line
+$d = New-FixtureRepo
+Write-Annotation -Dir $d -Locale 'en' -Rel 'skills/atelier-ventes/fr/references/tutorial/03.md' -Days 10
+Expect-CheckFail $d 'skills/atelier-ventes/fr/references/tutorial/03.md:5' `
+  '2026-09-19/AC4 rejects an English lead-in under /fr/'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC6: a date that is not a real calendar day fails
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') {
+  param($t) $t -replace '\*\*Last verified \d{4}-\d{2}-\d{2}\*\*', '**Last verified 2026-02-30**' }
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md:5' `
+  '2026-09-19/AC6 rejects 2026-02-30'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC7: a future date fails
+$d = New-FixtureRepo
+Write-Annotation -Dir $d -Locale 'en' -Rel 'skills/atelier-ventes/en/references/tutorial/03.md' -Days -30
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md:5' `
+  '2026-09-19/AC7 rejects a future date'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC8: an absent source segment fails
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') {
+  param($t) $t -replace '\*\* — source:.*', '** no source segment here' }
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md:5' `
+  '2026-09-19/AC8 rejects an absent source segment'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC9: an anchored file carrying no annotation fails
+$d = New-FixtureRepo
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') "# Module`n`nNo dated claim here.`n"
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/03.md' `
+  '2026-09-19/AC9 rejects an anchored file with no dated claim'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC10: an anchored path that does not exist fails
+$d = New-FixtureRepo
+Add-Content -LiteralPath (Join-Path $d 'skills/dated-claims.tsv') `
+  -Value 'skills/atelier-ventes/en/references/tutorial/99-renamed.md'
+Expect-CheckFail $d 'skills/atelier-ventes/en/references/tutorial/99-renamed.md' `
+  '2026-09-19/AC10 rejects an anchored path that does not exist'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC10b: an absent anchor list is fatal
+$d = New-FixtureRepo
+Remove-Item -Force -LiteralPath (Join-Path $d 'skills/dated-claims.tsv')
+Expect-CheckFail $d 'skills/dated-claims.tsv' `
+  '2026-09-19/AC10b rejects an absent anchor list'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19/AC24: the summary line matches bash's, in both its forms
+$d = New-FixtureRepo
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0 -and $r.Output -match 'dated claims: 1 annotations across 1 files, oldest \d{4}-\d{2}-\d{2} \(10 days\)') {
+  Add-Pass '2026-09-19/AC24 -Check prints the populated summary line'
+} else {
+  Add-Failure "2026-09-19/AC24 summary line wrong (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+$d = New-FixtureRepo
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') "# Module`n`nNo dated claim here.`n"
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -ne 0 -and $r.Output.Contains('dated claims: 0 annotations across 0 files, no dated claim found')) {
+  Add-Pass '2026-09-19/AC24 -Check prints the zero summary line on a failing run'
+} else {
+  Add-Failure "2026-09-19/AC24 zero summary line wrong (exit=$($r.ExitCode), out=$($r.Output))"
+}
 Remove-Item -Recurse -Force -LiteralPath $d
 
 Write-Host ''
