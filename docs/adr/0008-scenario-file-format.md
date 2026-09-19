@@ -70,6 +70,9 @@ conventions, including what a re-run may update in place.
 underscore-prefixed deliberately: the AC15 coverage scan iterates `skills/*/`,
 so it never looks for a matching skill and never counts these files.
 
+What a run leaves on disk is a separate question from the file's shape: see
+[ADR-0014](0014-scenario-run-transcripts.md).
+
 ## Consequences
 
 - Trigger drift becomes a build failure naming the offending file, instead of a
