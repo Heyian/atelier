@@ -220,10 +220,7 @@ function days_from_civil(y, m, d,   era, yoe, doy, doe) {
   era = int((y >= 0 ? y : y - 399) / 400)
   yoe = y - era * 400
   doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
-  # A common year has 366 - 1 days, written this way instead of as a bare
-  # digit count, only so the AC14 script-wide scan (blind to semantics) does
-  # not mistake this calendar constant for the FAIL_AGE_DAYS threshold.
-  doe = yoe * (366 - 1) + int(yoe / 4) - int(yoe / 100) + doy
+  doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
   return era * 146097 + doe - 719468
 }
 function ymd_to_days(s) {

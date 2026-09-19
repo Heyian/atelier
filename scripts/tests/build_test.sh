@@ -924,10 +924,19 @@ fi
 rm -rf "$d"
 
 # --- 2026-09-19/AC14: neither threshold appears as a bare literal outside its
-# constant definition
+# constant definition. DATED_CLAIMS_AWK_LIB is excluded from the scan: the two
+# named constants are REPORT_AGE_DAYS and FAIL_AGE_DAYS, but the 365 inside
+# that awk block is Howard Hinnant's civil-calendar library computing the
+# length of a common year — date arithmetic, not a threshold — and is not the
+# duplication AC14 is guarding against.
 for pair in "REPORT_AGE_DAYS 180" "FAIL_AGE_DAYS 365"; do
   set -- $pair
-  hits="$(grep -nE "(^|[^A-Za-z0-9_])$2([^0-9]|$)" "$REPO_ROOT/scripts/build.sh" \
+  hits="$(awk '
+            /^DATED_CLAIMS_AWK_LIB=./ { skip = 1; next }
+            skip && /^'"'"'$/ { skip = 0; next }
+            !skip
+          ' "$REPO_ROOT/scripts/build.sh" \
+          | grep -nE "(^|[^A-Za-z0-9_])$2([^0-9]|$)" \
           | grep -vE "^[0-9]+:$1=" | wc -l)"
   if [[ "$hits" -eq 0 ]]; then
     pass "2026-09-19/AC14 $2 appears only as $1"
