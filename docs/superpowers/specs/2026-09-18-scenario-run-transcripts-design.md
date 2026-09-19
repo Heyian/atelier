@@ -61,7 +61,10 @@ scenario file is edited.
 
 ### 1. The transcript file
 
-**Path:** `tests/<skill>/<locale>/runs/<scenario-basename>/<date>-<kind>.md`.
+**Path:** `tests/<skill>/<locale>/runs/<scenario-basename>/<date>-<kind>.md` for a
+per-skill scenario, and `tests/_cross-skill/runs/<scenario-basename>/<date>-<kind>.md`
+for a cross-skill one — `tests/_cross-skill/` holds its scenario files directly, with
+no locale directories, so its transcripts follow the same shape one level shallower.
 
 ```
 tests/atelier/en/runs/accueil-offre-tutoriel/2026-08-10-baseline.md
@@ -79,14 +82,19 @@ naming there sorts badly and gets long.
 coverage checks are non-recursive — `scripts/build.sh:522` and `:545` use
 `find … -maxdepth 1`, and `scripts/build.ps1:305` and `:319` use `Get-ChildItem`
 without `-Recurse`. A transcript saved as a sibling `.md` inside a scenario directory
-would be counted by AC15's `check_scenarios`, so a directory could pass "has a
-scenario" on transcripts alone. Inside `runs/`, transcripts are invisible to both
-checks and to the AC6 trigger parser.
+would be counted by the build script's AC15 check (`check_scenarios`), so a directory
+could pass "has a scenario" on transcripts alone. Inside `runs/`, transcripts are
+invisible to both checks and to the build script's AC6 trigger parser. (`AC6` and
+`AC15` here name the repo's own build checks, not this spec's criteria of the same
+number.)
 
-**Granularity:** one file per run section — per `## Baseline notes`, and per
-`## Verification notes` or `## Verification notes — <date> <reason>` sibling. This
-matches the unit `## Recording a run` already governs, so the rule that a prior
-record is never rewritten extends to transcripts without new wording.
+**Granularity:** one file per run — per `## Verification notes` or
+`## Verification notes — <date> <reason>` sibling, and per baseline run. A baseline
+re-run is the one case where a run is not a section of its own: `## Recording a run`
+puts it in a dated paragraph inside the single `## Baseline notes`, which does not
+repeat. That paragraph gets its own `<date>-baseline.md` file alongside the earlier
+baseline transcript rather than editing it, so the rule that a prior record is never
+rewritten extends to transcripts without new wording.
 
 **Contents:**
 
@@ -100,9 +108,9 @@ record is never rewritten extends to transcripts without new wording.
   - **the reply, verbatim and complete** — not excerpted.
   - **the sandbox after the run** — the `find` listing, or an explicit "no sandbox"
     for a Desktop-chat dispatch.
-  - **every file the dispatch created or modified**, pasted in full when under
-    16 KB. Larger files get their path, byte count, `md5sum`, and the excerpt the
-    verdict rests on.
+  - **every file the dispatch created or modified**, pasted in full when smaller
+    than 16384 bytes. A file of 16384 bytes or more gets its path, byte count,
+    `md5sum`, and the excerpt the verdict rests on.
 - Both attempts of a re-attempted dispatch, each labeled `attempt 1 of 2` /
   `attempt 2 of 2`, per the existing cap.
 
@@ -126,8 +134,11 @@ edited; the sandbox-seed rule; and — plainly — that the transcript is saved 
 same author who writes the verdict, so it does not prove the run happened, and what
 it does buy instead.
 
-**b. The linking rule.** Each run section's first line either links its transcript
-or states `no transcript — <reason>`. A run whose output was lost is recorded
+**b. The linking rule.** Each run's record opens by either linking its transcript or
+stating `no transcript — <reason>` — on the first line of the section for a
+`## Verification notes` sibling, and on the first line of the dated paragraph for a
+baseline re-run inside an existing `## Baseline notes`, so no earlier record is
+relabeled. A run whose output was lost is recorded
 honestly rather than discarded: making the transcript a hard validity requirement
 would create pressure to re-roll a dispatch until the paperwork was clean, which is
 precisely the failure the two-attempts cap exists to resist.
@@ -141,14 +152,19 @@ run no longer exist anywhere.
 
 **d. Step 4 of the four-step cycle** gains a clause — save the transcript before
 judging, so the record is written from the file rather than from a memory of the
-reply.
+reply. Where the output was lost, the run is recorded under the `no transcript —
+<reason>` line of rule b rather than discarded.
 
 **e. `## Dispatching the subagents`** gains a closing paragraph: a dispatch is not
-finished when it returns, it is finished when its transcript is on disk. It also
+finished when it returns, it is finished when its transcript is on disk — or, where
+the output was lost, when its `no transcript — <reason>` line is recorded. It also
 notes that the baseline contamination scan becomes re-checkable by someone other
 than the author.
 
-**f. `## Scenario file format`** shows `runs/` in its layout block.
+**f. `## Layout`** shows the transcript directories in its directory listing, for
+both the per-skill and the `tests/_cross-skill/` path shapes. The listing under
+`## Layout` is the block that names directories; `## Scenario file format` is a
+Markdown template of a scenario file's headings and is left alone.
 
 **g. Quoting is unchanged.** Ticked boxes still name the line that earned them. With
 a transcript alongside, a quote stops being the evidence and becomes a citation into
@@ -201,27 +217,33 @@ argument does not transfer.
 **AC1** — `tests/README.md`'s `## Recording a run` section contains a rule stating
 that every dispatch leaves a transcript file committed to the repo.
 
-**AC2** — That rule gives the transcript path shape as
-`tests/<skill>/<locale>/runs/<scenario-basename>/<date>-<kind>.md`, where `<kind>`
-is `baseline` or `verification` with an optional reason slug, and shows at least one
-concrete example path.
+**AC2** — That rule gives both transcript path shapes —
+`tests/<skill>/<locale>/runs/<scenario-basename>/<date>-<kind>.md` for a per-skill
+scenario and `tests/_cross-skill/runs/<scenario-basename>/<date>-<kind>.md` for a
+cross-skill one (`tests/_cross-skill/` has no locale directories) — where `<kind>` is
+`baseline` or `verification` with an optional reason slug, and shows at least one
+concrete example path of each shape.
 
 **AC3** — That rule states that `runs/` is a subdirectory because the coverage and
 trigger scans are non-recursive, so a transcript placed as a sibling `.md` would be
-counted as a scenario by AC15's `check_scenarios`.
+counted as a scenario by the build script's AC15 check (`check_scenarios` in
+`scripts/build.sh`), which is a check name in this repo and not this spec's AC15.
 
-**AC4** — That rule states that the transcript unit is the run section: one file per
-`## Baseline notes`, and one per `## Verification notes` or
-`## Verification notes — <date> <reason>` sibling.
+**AC4** — That rule states that the transcript unit is one run, not one section: one
+file per `## Verification notes` or `## Verification notes — <date> <reason>`
+sibling, and one file per baseline run — including each dated re-run paragraph
+appended inside the single `## Baseline notes`, which gets its own
+`<date>-baseline.md` alongside the earlier baseline transcript rather than editing
+it.
 
 **AC5** — That rule enumerates all four required per-dispatch contents: the prompt
 verbatim (including the isolation preamble for a baseline), the reply verbatim and
 complete, the sandbox listing after the run (or an explicit "no sandbox"), and the
 contents of every file the dispatch created or modified.
 
-**AC6** — That rule states the file-capture ceiling: files under 16 KB are pasted in
-full; larger ones are recorded by path, byte count, `md5sum`, and the excerpt the
-verdict rests on.
+**AC6** — That rule states the file-capture ceiling as an exact byte count: a file
+smaller than 16384 bytes is pasted in full; a file of 16384 bytes or more is recorded
+by path, byte count, `md5sum`, and the excerpt the verdict rests on.
 
 **AC7** — That rule states that both attempts of a re-attempted dispatch appear in
 the transcript, each labeled, consistent with the existing two-attempts cap.
@@ -237,25 +259,33 @@ writes the verdict and therefore does not prove the run happened, and names what
 does provide instead: full context around a quoted excerpt, and something for a
 later review to re-judge against.
 
-**AC11** — Given a run section recorded on or after the cutoff, `tests/README.md`
-requires its first line to either link its transcript file or state
-`no transcript — <reason>`; and it states why a missing transcript is recorded rather
-than invalidating the run (re-rolling for clean paperwork is the failure the
-two-attempts cap exists to resist).
+**AC11** — Given a run recorded on or after the cutoff, `tests/README.md` requires its
+record to open by either linking its transcript file or stating
+`no transcript — <reason>` — on the first line of the section for a
+`## Verification notes` sibling, and on the first line of the dated paragraph for a
+baseline re-run appended inside an existing `## Baseline notes`, so that no earlier
+record is relabeled; and it states why a missing transcript is recorded rather than
+invalidating the run (re-rolling for clean paperwork is the failure the two-attempts
+cap exists to resist).
 
 **AC12** — `tests/README.md` names **2026-09-18** as the literal cutoff date, states
 that runs recorded before it carry no transcript and that their quoted excerpts are
 their only record, and states that no existing scenario file is relabeled.
 
 **AC13** — Step 4 of `## The four-step baseline/with-skill cycle` instructs the
-author to save the transcript before judging.
+author to save the transcript before judging when the output is available, and states
+that a run whose output was lost is recorded under AC11's `no transcript — <reason>`
+line rather than discarded.
 
 **AC14** — `## Dispatching the subagents` states that a dispatch is finished when its
-transcript is on disk, and notes that the baseline contamination scan becomes
-re-checkable by a reader other than the author.
+transcript is on disk — or, where the output was lost, when its
+`no transcript — <reason>` line is recorded — and notes that the baseline
+contamination scan becomes re-checkable by a reader other than the author.
 
-**AC15** — The `## Scenario file format` layout block in `tests/README.md` shows the
-`runs/` directory.
+**AC15** — The directory listing under `## Layout` in `tests/README.md` shows the
+transcript directories, for both the per-skill and the `tests/_cross-skill/` path
+shapes. `## Scenario file format` is a Markdown template of a scenario file's
+headings and is not modified.
 
 **AC16** — `tests/README.md` states that ticked boxes still quote the line that
 earned them, and that a quote is now a citation into the transcript rather than the
@@ -287,6 +317,20 @@ and no file marked "None" in Config & Infrastructure Impact is edited.
 **AC23** — `bash scripts/build.sh --lang all` completes successfully and writes the
 per-locale ZIPs into `dist/`.
 
+**AC24** — That rule states the transcript header's required fields: the scenario
+file's path, the date, the kind, the isolation-preamble version (baselines only, per
+ADR 0013), and the agent type and model dispatched.
+
+**AC25** — That rule states that a transcript carries one block per dispatch, each
+labeled exactly as the run section labels that dispatch (e.g. `## Dispatch A —
+"full"`).
+
+**AC26** — That rule states that a transcript filename's optional reason slug matches
+the run section's own reason.
+
+**AC27** — `docs/adr/0014-scenario-run-transcripts.md` states the retention decision:
+transcripts are committed to the repo, written once, and never pruned.
+
 ## Deferred Items
 
 - [#34](https://github.com/Heyian/atelier/issues/34) — Build check: scenario run
@@ -298,8 +342,9 @@ No glossary — this repo has no `CONTEXT.md`. Three terms carry fixed meanings 
 `## Recording a run` and must be used consistently in the new prose: **dispatch**
 (one self-contained subagent run), **attempt** (one execution of a dispatch, capped
 at two), **sample** (N independent dispatches each held to one attempt). This work
-adds a fourth: **transcript** (the committed file holding one run section's prompts,
-replies, sandbox listings, and written-file contents).
+adds a fourth: **transcript** (the committed file holding one run's prompts, replies,
+sandbox listings, and written-file contents — one per verification section, and one
+per baseline run including each dated re-run paragraph).
 
 **New ADR:** `0014-scenario-run-transcripts.md`, under the three-criteria gate — see
 Decision §3.
@@ -333,7 +378,7 @@ None — every change lands in the diff.
 
 | Doc | Change |
 | --- | --- |
-| `tests/README.md` | Fifth rule under `## Recording a run`; the linking rule and cutoff; step 4 of the cycle; the `## Dispatching the subagents` closing paragraph; `runs/` in the format block; the quoting sentence. |
+| `tests/README.md` | Fifth rule under `## Recording a run`; the linking rule and cutoff; step 4 of the cycle; the `## Dispatching the subagents` closing paragraph; the transcript directories in the `## Layout` listing; the quoting sentence. |
 | `docs/adr/0014-scenario-run-transcripts.md` | New ADR — the retention decision and the rejected alternative. |
 | `docs/adr/0008-scenario-file-format.md` | One pointer line under **Decision**. |
 
