@@ -132,10 +132,10 @@ and instead need **multiple** with-skill dispatches — see below.
 Step 4 above says "judge and record." These five rules say what *record*
 means — the fifth, **Every dispatch leaves a transcript**, runs long enough
 to carry its own subsection at the end. They exist for one reason: a run
-record is evidence. It is the only
-trace of what an agent actually did on a given day, and a rewritten record is
-evidence destroyed — `git` is the only witness, and only a reviewer acts on
-it.
+record is evidence. Together with the transcript it points to, it is the
+trace of what an agent actually did on a given day, and a rewritten record
+is evidence destroyed — `git` is the only witness, and only a reviewer acts
+on it.
 
 **Re-runs append.** When a scenario is re-run — after a fix, for a larger
 sample, for any reason — the new results go in a new
@@ -255,7 +255,8 @@ each pass `-maxdepth 1` to `find`, and their PowerShell twins call
 next to a scenario file would therefore be counted as a scenario, and a
 directory could pass "has a scenario" on transcripts alone. Inside `runs/`,
 transcripts are invisible to both. (`AC15` and `AC6` here are the build
-script's own check names, not an acceptance criterion of any spec.)
+script's own check names — after the design spec's criteria of the same
+numbers they enforce — not this transcript convention's own numbering.)
 
 **The unit is one run, not one section.** One file per `## Verification
 notes` and one per `## Verification notes — <date> <reason>` sibling, and one
