@@ -184,6 +184,40 @@ Version 0.1.0 <!-- x-release-please-version -->
   Write-Lf (Join-Path $dir 'skills/dated-claims.tsv') "skills/atelier-ventes/en/references/tutorial/03.md`n"
   Write-Annotation -Dir $dir -Locale 'en' -Rel 'skills/atelier-ventes/en/references/tutorial/03.md' -Days 10
 
+  # 2026-09-19-headings/AC22 — the fixture carries the registry and the two
+  # parallel templates it points at; an absent registry is fatal.
+  foreach ($sub in @('skills/atelier-ventes/fr/references', 'skills/atelier-ventes/en/references')) {
+    New-Item -ItemType Directory -Force -Path (Join-Path $dir $sub) | Out-Null
+  }
+  Write-Lf (Join-Path $dir 'skills/atelier-ventes/fr/references/modele.md') @"
+# Modèle de revue de pipeline
+
+``````markdown
+# Revue de pipeline — <entreprise>
+
+## Où en est le pipeline
+
+## Ce qui bloque
+
+## Prochaines relances
+``````
+"@
+  Write-Lf (Join-Path $dir 'skills/atelier-ventes/en/references/template.md') @"
+# Pipeline review template
+
+``````markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+``````
+"@
+  Write-Lf (Join-Path $dir 'skills/exec-documents.tsv') `
+    ("pipeline-doc`t{root}/docs/ventes/pipeline.md`tskills/atelier-ventes/fr/references/modele.md`t1`tskills/atelier-ventes/en/references/template.md`t1`n")
+
   return $dir
 }
 
@@ -742,6 +776,103 @@ if ($r.ExitCode -ne 0 -and $r.Output.Contains('dated claims: 0 annotations acros
   Add-Pass '2026-09-19/AC24 -Check prints the zero summary line on a failing run'
 } else {
   Add-Failure "2026-09-19/AC24 zero summary line wrong (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22: the clean fixture passes
+$d = New-FixtureRepo
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) { Add-Pass '2026-09-19-headings/AC22 clean fixture passes the exec-document rule' }
+else { Add-Failure "2026-09-19-headings/AC22 clean fixture failed (out=$($r.Output))" }
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC17: a reference file that is gone
+$d = New-FixtureRepo
+Remove-Item -LiteralPath (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md')
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md' `
+  '2026-09-19-headings/AC22 missing reference file reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC18: a block index the file lacks
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/exec-documents.tsv') {
+  param($t) $t -replace "modele\.md`t1", "modele.md`t4" }
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md has no markdown template block 4' `
+  '2026-09-19-headings/AC22 missing block index reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC23 over AC19: a dropped section
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md') {
+  param($t) $t -replace "`n## Ce qui bloque`n", "`n" }
+Expect-CheckFail $d 'pipeline-doc — heading counts differ' `
+  '2026-09-19-headings/AC23 a dropped section reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC20: a changed heading depth
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/template.md') {
+  param($t) $t -replace "`n## What is stuck`n", "`n### What is stuck`n" }
+Expect-CheckFail $d 'pipeline-doc — heading levels differ' `
+  '2026-09-19-headings/AC22 a changed depth reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC21: a '-' row is skipped, not failed
+$d = New-FixtureRepo
+Add-Content -LiteralPath (Join-Path $d 'skills/exec-documents.tsv') `
+  -Value "prose-doc`t{root}/docs/atelier/decisions.md`t-`t-`t-`t-"
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0 -and -not $r.Output.Contains('prose-doc')) {
+  Add-Pass "2026-09-19-headings/AC22 a '-' row is skipped on Windows too"
+} else {
+  Add-Failure "2026-09-19-headings/AC22 '-' row not skipped (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- Review Focus 3b: a CRLF template file is read the same as an LF one
+$d = New-FixtureRepo
+$mdPath = Join-Path $d 'skills/atelier-ventes/fr/references/modele.md'
+$crlfText = ([System.IO.File]::ReadAllText($mdPath)) -replace "`n", "`r`n"
+[System.IO.File]::WriteAllText($mdPath, $crlfText)
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) {
+  Add-Pass 'Review Focus 3b a CRLF template file is read the same as an LF one'
+} else {
+  Add-Failure "Review Focus 3b CRLF template file failed (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- Review Focus 6: a bash block quoting a markdown opener is not counted
+# as a template block. The quoted opener uses four backticks (the bash fence
+# itself uses three) so that, were the "enter every fence, target or not"
+# behaviour broken, the resulting phantom block would run unclosed to EOF
+# (nothing later in the file has a four-backtick bare closer) rather than
+# just silently swallowing the wrong content — a difference this check's
+# MISSING/UNCLOSED reporting can actually observe.
+$d = New-FixtureRepo
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/template.md') @"
+# Pipeline review template
+
+``````bash
+# quoting a template fence opener as an example, not a real block:
+````````markdown
+``````
+
+``````markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+``````
+"@
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) {
+  Add-Pass 'Review Focus 6 a bash block quoting a markdown opener is not counted as a template block'
+} else {
+  Add-Failure "Review Focus 6 bash-quoted opener miscounted (out=$($r.Output))"
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
