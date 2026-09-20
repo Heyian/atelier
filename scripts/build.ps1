@@ -1185,7 +1185,7 @@ if ($Check) {
 }
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
-$script:FatalError = $null
+$script:Failed = $false
 try {
   foreach ($locale in $selected) { Build-Locale -Locale $locale -OutDir $outDir }
 
@@ -1193,13 +1193,16 @@ try {
     Invoke-Checks -Locales $selected
   }
 } catch {
-  # 2026-09-20-heading-pairs — mirrors bash's die(): a single line on stderr,
-  # then exit 1. Left to PowerShell's default terminating-error formatter,
-  # an uncaught throw prints a multi-line "Exception: ... Line | ..." block
-  # that word-wraps the message itself at the host's width, splitting a long
-  # die() message across lines and breaking any caller that greps for the
-  # exact text (as scripts/tests/build_test.ps1's Expect-CheckFail does).
-  $script:FatalError = $_.Exception.Message
+  # Mirrors bash's die(): a single line on STDERR, then exit 1. Left to
+  # PowerShell's default terminating-error formatter, an uncaught throw
+  # prints a multi-line "Exception: ... Line | ..." block that word-wraps the
+  # message itself at the host's width, splitting a long die() message
+  # across lines and breaking any caller that greps for the exact text (as
+  # scripts/tests/build_test.ps1's Expect-CheckFail does). $script:Failed is
+  # a separate boolean, not "if the message is truthy": an empty
+  # .Exception.Message is still a failure, and an empty string is falsy.
+  [Console]::Error.WriteLine($_.Exception.Message)
+  $script:Failed = $true
 } finally {
   Remove-ManagedTempDirs
 }
@@ -1207,8 +1210,7 @@ try {
 # Deferred until after cleanup: calling `exit` inside the try block above
 # would still need the temp dirs removed first, so the failure decision (and
 # the process exit) happens only once Remove-ManagedTempDirs has already run.
-if ($script:FatalError) {
-  Write-Host $script:FatalError
+if ($script:Failed) {
   exit 1
 }
 if ($Check -and $script:CheckFailures -gt 0) {
