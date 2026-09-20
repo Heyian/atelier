@@ -463,14 +463,15 @@ emit_exec_heading_group() {
   local lvl marker
   for i in "${!fr_all[@]}"; do
     lvl="${fr_all[$i]%% *}"
-    [[ "$lvl" -ge 2 ]] || continue        # AC6 — level-1 titles never appear
+    [[ "$lvl" -ge 2 ]] || continue        # 2026-09-20-heading-pairs/AC6 — level-1 titles never appear
     marker="$(printf '%*s' "$lvl" '' | tr ' ' '#')"
     rows+=("$(printf '| %s %s | %s %s |' \
       "$marker" "$(esc_table_cell "${fr_all[$i]#* }")" \
       "$marker" "$(esc_table_cell "${en_all[$i]#* }")")")
   done
 
-  # AC3 / AC7 — a block whose only heading is its title contributes no group.
+  # 2026-09-20-heading-pairs/AC3 / AC7 — a block whose only heading is its
+  # title contributes no group.
   [[ "${#rows[@]}" -gt 0 ]] || return 0
 
   printf '\n## %s\n\n`%s`\n\n| Français | English |\n| --- | --- |\n' "$doc_id" "$path"
@@ -512,7 +513,8 @@ generate_exec_heading_pairs() {
     for v in "$fr_ref" "$fr_block" "$en_ref" "$en_block"; do
       [[ "$v" == "-" ]] && dashes=$((dashes + 1))
     done
-    # AC10 — a document described in prose carries '-' in all four columns.
+    # 2026-09-20-heading-pairs/AC10 — a document described in prose carries
+    # '-' in all four columns.
     if [[ "$dashes" -eq 4 ]]; then continue; fi
     [[ "$dashes" -eq 0 ]] \
       || die "$doc_id — template columns are partly '-': a document described in prose carries '-' in all four"

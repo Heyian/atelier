@@ -1541,7 +1541,7 @@ rm -rf "$d"
 #
 # expect_build_fail is the build-time twin of expect_check_fail above: these
 # paths die() on a plain `--lang all`, not only under --check, which is the
-# whole point of validating inside the generator (AC20).
+# whole point of validating inside the generator (2026-09-20-heading-pairs/AC20).
 expect_build_fail() {
   local dir="$1" needle="$2" label="$3" out rc
   out="$( cd "$dir" && bash scripts/build.sh --lang fr 2>&1 )" && rc=0 || rc=1
@@ -1561,6 +1561,10 @@ staged_pairs() {
 # AC1 — the file is in every ZIP, both locales, both build scripts.
 d="$(make_fixture_repo)"
 ( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
+build_rc=$?
+[[ "$build_rc" -eq 0 ]] \
+  && pass "AC1 the clean fixture build itself succeeds" \
+  || fail "AC1 the clean fixture build failed (rc=$build_rc) — downstream assertions in this section would pass vacuously"
 for z in atelier-ventes-fr.zip atelier-sales-en.zip; do
   if unzip -l "$d/dist/$z" 2>/dev/null | grep -qE ' references/exec-document-headings\.md$'; then
     pass "AC1 $z carries references/exec-document-headings.md"
@@ -1598,9 +1602,11 @@ if grep -qF -- "| ## Où en est le pipeline | ## Where the pipeline stands |" <<
 else
   fail "AC5 rows wrong: $(grep '^| ## ' <<<"$body")"
 fi
-grep -qF 'Revue de pipeline' <<<"$body" \
-  && fail "AC6 a level-1 title leaked into the generated file" \
-  || pass "AC6 no level-1 heading appears in the generated file"
+if grep -qxF '## pipeline-doc' <<<"$body" && ! grep -qF 'Revue de pipeline' <<<"$body"; then
+  pass "AC6 no level-1 heading appears in the generated file, which does hold the group"
+else
+  fail "AC6 a level-1 title leaked into the generated file, or the group itself is missing"
+fi
 rm -rf "$d"
 
 # AC7 — a row whose template block holds only a level-1 title yields no group.
@@ -1618,10 +1624,14 @@ EOF
 printf 'title-only\t{root}/docs/atelier/roles.md\tskills/atelier-ventes/fr/titre.md\t1\tskills/atelier-ventes/en/title.md\t1\n' \
   >> "$d/skills/exec-documents.tsv"
 ( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+rc=$?
 body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
-grep -qxF '## title-only' <<<"$body" \
-  && fail "AC7 a title-only row produced a group" \
-  || pass "AC7 a title-only row produces no group"
+if [[ "$rc" -eq 0 ]] && grep -qxF '## pipeline-doc' <<<"$body" \
+   && ! grep -qxF '## title-only' <<<"$body"; then
+  pass "AC7 a title-only row produces no group, while the build still succeeds and the other group survives"
+else
+  fail "AC7 a title-only row produced a group, or the build did not actually succeed (rc=$rc)"
+fi
 rm -rf "$d"
 
 # AC8 — two rows sharing one reference file and one canonical path stay two
@@ -1677,10 +1687,14 @@ rm -rf "$d"
 d="$(make_fixture_repo)"
 printf 'prose-doc\t{root}/docs/atelier/decisions.md\t-\t-\t-\t-\n' >> "$d/skills/exec-documents.tsv"
 ( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+rc=$?
 body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
-grep -qxF '## prose-doc' <<<"$body" \
-  && fail "AC10 a prose-described row produced a group" \
-  || pass "AC10 a prose-described row produces no group"
+if [[ "$rc" -eq 0 ]] && grep -qxF '## pipeline-doc' <<<"$body" \
+   && ! grep -qxF '## prose-doc' <<<"$body"; then
+  pass "AC10 a prose-described row produces no group, while the build still succeeds and the other group survives"
+else
+  fail "AC10 a prose-described row produced a group, or the build did not actually succeed (rc=$rc)"
+fi
 rm -rf "$d"
 
 # AC15 — an absent registry fails the build, not only --check.
@@ -1740,7 +1754,8 @@ rm -rf "$d"
 # alignment; the build dies naming both level sequences.
 d="$(make_fixture_repo)"
 sed -i 's|^## Ce qui bloque$|### Ce qui bloque|' "$d/skills/atelier-ventes/fr/references/modele.md"
-expect_build_fail "$d" 'pipeline-doc — heading levels differ' \
+expect_build_fail "$d" \
+  'pipeline-doc — heading levels differ: skills/atelier-ventes/fr/references/modele.md [1 2 3 2], skills/atelier-ventes/en/references/template.md [1 2 2 2]' \
   "equal totals at different depths fail the build naming both sequences"
 rm -rf "$d"
 
@@ -1756,21 +1771,35 @@ else
 fi
 rm -rf "$d"
 
-# Review Focus 4 — a blank line mid-registry is skipped, not read as a row.
+# Review Focus 4 — a blank line mid-registry is skipped, not read as a row,
+# and the real row survives (a blank line that silently swallowed the next
+# row would still exit 0).
 d="$(make_fixture_repo)"
 printf '\n' >> "$d/skills/exec-documents.tsv"
-( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 ) \
-  && pass "a blank registry line is skipped" \
-  || fail "a blank registry line failed the build"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+rc=$?
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+if [[ "$rc" -eq 0 ]] && grep -qxF '## pipeline-doc' <<<"$body"; then
+  pass "a blank registry line is skipped, and the row after it still generates its group"
+else
+  fail "a blank registry line failed the build, or silently dropped the row after it (rc=$rc)"
+fi
 rm -rf "$d"
 
-# Review Focus 5 — a CRLF registry checkout builds clean.
+# Review Focus 5 — a CRLF registry checkout builds clean, and the row itself
+# still generates its group (a CRLF read as part of a column would silently
+# fail file/index lookups without necessarily failing the build).
 d="$(make_fixture_repo)"
 awk '{ printf "%s\r\n", $0 }' "$d/skills/exec-documents.tsv" > "$d/tmp.tsv"
 mv "$d/tmp.tsv" "$d/skills/exec-documents.tsv"
-( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 ) \
-  && pass "a CRLF registry checkout builds clean" \
-  || fail "a CRLF registry checkout failed the build"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+rc=$?
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+if [[ "$rc" -eq 0 ]] && grep -qxF '## pipeline-doc' <<<"$body"; then
+  pass "a CRLF registry checkout builds clean, and its row still generates its group"
+else
+  fail "a CRLF registry checkout failed the build, or its row did not generate a group (rc=$rc)"
+fi
 rm -rf "$d"
 
 echo
