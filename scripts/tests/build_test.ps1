@@ -793,6 +793,18 @@ Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references/modele
   '2026-09-19-headings/AC22 missing reference file reaches the same verdict'
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# --- 2026-09-19-headings/AC22 over AC17: a ref column naming a directory
+# fails the same way as a genuinely missing file (Windows Test-Path with no
+# -PathType Leaf returns true for a directory, so this would otherwise throw
+# an unhandled ReadAllLines access-denied error instead of a CHECK FAIL line).
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/exec-documents.tsv') {
+  param($t) $t -replace [regex]::Escape('skills/atelier-ventes/fr/references/modele.md'), `
+    'skills/atelier-ventes/fr/references' }
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references listed in skills/exec-documents.tsv but no such file (renamed?)' `
+  '2026-09-19-headings/AC22 a directory in the ref column reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
 # --- 2026-09-19-headings/AC22 over AC18: a block index the file lacks
 $d = New-FixtureRepo
 Edit-File (Join-Path $d 'skills/exec-documents.tsv') {

@@ -215,6 +215,7 @@ Nothing here judges whether the date is *correct* — only that it is present,
 well formed, not in the future, and not old. Re-verifying a claim is a human
 act; `bash scripts/build.sh --check` reports the oldest claim's age on every
 run, and a monthly job files an issue once one passes a year.
+
 ## Exec-facing document headings
 
 Paths are canonical; **section headings are not**. A document the skill writes

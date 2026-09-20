@@ -75,8 +75,8 @@ same seeded starting state (accepted, declined, and — for A only — a
 same-locale control). Dispatch B's accepted branch needed two attempts; both
 are in its transcript, labelled `attempt 1 of 2` and `attempt 2 of 2`.
 
-Seven of the ten boxes above are ticked on `diff`/`md5sum` evidence checked
-against the sandboxes on disk, not against either agent's self-report. Three
+Eight of the ten boxes above are ticked on `diff`/`md5sum` evidence checked
+against the sandboxes on disk, not against either agent's self-report. Two
 are left unticked:
 
 **"A section the executive added themselves survives an accepted rewrite —
@@ -107,9 +107,10 @@ session-2 run. There is no appended line in either direction to check the
 language of. This needs a scripted conversation that carries session 2 through
 a module's application question to get evidence either way.
 
-**"A second session on the *same* locale as the document makes no disclosure
-and no rewrite offer."** Established in both directions. The FR-reads-FR
-control (`sandbox-A-samelocale`, transcript
+Of the eight ticked boxes, one is worth calling out beyond the `diff`/`md5sum`
+check: **"A second session on the *same* locale as the document makes no
+disclosure and no rewrite offer."** Established in both directions. The
+FR-reads-FR control (`sandbox-A-samelocale`, transcript
 `runs/changement-de-langue/2026-09-19-verification.md`) shows no disclosure
 and no rewrite offer, file unchanged (md5 `36235b296e7d82007eba45094aa2538c`
 before and after). The EN-reads-EN control (`sandbox-B-samelocale`,

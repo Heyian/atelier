@@ -187,7 +187,7 @@ function Test-ExecDocuments {
     $ok = $true
     foreach ($side in @('fr', 'en')) {
       $full = Join-Path $RepoRoot $refs[$side]
-      if (-not (Test-Path -LiteralPath $full)) {
+      if (-not (Test-Path -LiteralPath $full -PathType Leaf)) {
         Add-CheckFailure "$docId — $($refs[$side]) listed in skills/exec-documents.tsv but no such file (renamed?)"
         $ok = $false; continue
       }
