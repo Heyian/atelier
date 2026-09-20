@@ -83,5 +83,28 @@ grep -q "company-profile.md" "$REPO_ROOT/skills/shared/en/profile-pointer.md" \
   && pass "EN profile pointer names the canonical path" \
   || fail "EN profile pointer missing canonical path"
 
+# --- the memory-protocol rule on renamed exec-document headings must still
+# carry its load-bearing parts (2026-09-20-heading-pairs/AC22-AC25): the
+# pointer to the generated heading-pair reference, the both-lists
+# requirement, and the no-template rule.
+grep -qF "references/exec-document-headings.md" "$REPO_ROOT/skills/shared/fr/memory-protocol.md" \
+  && pass "FR memory protocol points to references/exec-document-headings.md" \
+  || fail "FR memory protocol missing the pointer to references/exec-document-headings.md"
+grep -qF "references/exec-document-headings.md" "$REPO_ROOT/skills/shared/en/memory-protocol.md" \
+  && pass "EN memory protocol points to references/exec-document-headings.md" \
+  || fail "EN memory protocol missing the pointer to references/exec-document-headings.md"
+grep -qi "nomme les deux listes" "$REPO_ROOT/skills/shared/fr/memory-protocol.md" \
+  && pass "FR memory protocol requires naming both lists" \
+  || fail "FR memory protocol missing the both-lists requirement"
+grep -qi "names both lists" "$REPO_ROOT/skills/shared/en/memory-protocol.md" \
+  && pass "EN memory protocol requires naming both lists" \
+  || fail "EN memory protocol missing the both-lists requirement"
+grep -qi "aucun modèle" "$REPO_ROOT/skills/shared/fr/memory-protocol.md" \
+  && pass "FR memory protocol states the no-template rule" \
+  || fail "FR memory protocol missing the no-template rule"
+grep -qi "no template" "$REPO_ROOT/skills/shared/en/memory-protocol.md" \
+  && pass "EN memory protocol states the no-template rule" \
+  || fail "EN memory protocol missing the no-template rule"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
