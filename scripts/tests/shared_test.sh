@@ -14,7 +14,7 @@ check_nonempty_file() {
 
 # --- canonical texts exist in both locales
 for locale in fr en; do
-  for name in profile-pointer glossary memory-protocol; do
+  for name in profile-pointer glossary memory-protocol exec-document-headings; do
     check_nonempty_file "$REPO_ROOT/skills/shared/$locale/$name.md"
   done
 done
