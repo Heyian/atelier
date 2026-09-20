@@ -147,6 +147,163 @@ function Get-TemplateBlockHeadings([string]$Path, [int]$Want) {
   return ($levels -join ' ')
 }
 
+# The heading levels AND text of the Want-th ```markdown block, one heading
+# per line as "<level> <text>". Same MISSING / UNCLOSED sentinels as
+# Get-TemplateBlockHeadings. Mirrors build.sh's exec_doc_heading_text.
+function Get-TemplateBlockHeadingText([string]$Path, [int]$Want) {
+  $seen = 0; $inFence = $false; $target = $false; $found = $false; $closed = $false
+  $rows = New-Object System.Collections.Generic.List[string]
+
+  foreach ($raw in [System.IO.File]::ReadAllLines($Path)) {
+    $line = $raw -replace "`r$", ''
+
+    if ($inFence) {
+      if (Test-FenceCloses $line $fenceChar $fenceLen) {
+        if ($target) { $closed = $true; $target = $false }
+        $inFence = $false
+        continue
+      }
+      if ($target) {
+        $lvl = Get-AtxLevel $line
+        if ($lvl -gt 0) {
+          # Mirror atx_text(): up to three leading spaces, then the marker,
+          # then whatever whitespace separates marker from text.
+          $lead = 0
+          while ($lead -lt 3 -and $lead -lt $line.Length -and $line[$lead] -eq ' ') { $lead++ }
+          $rest = $line.Substring($lead + $lvl)
+          $rest = $rest -replace '^[ \t]+', ''
+          $rows.Add("$lvl $rest")
+        }
+      }
+      continue
+    }
+
+    $marker = Get-FenceMarker $line
+    if ($marker -eq '') { continue }
+    $markerChar = $marker[0]
+    $markerLen = Get-FenceRunLength $marker $markerChar
+    if ($markerLen -lt 3) { continue }
+    $info = ($marker.Substring($markerLen)) -replace '[ \t]', ''
+    $inFence = $true; $fenceChar = $markerChar; $fenceLen = $markerLen; $target = $false
+    if ($info -ceq 'markdown') {
+      $seen++
+      if ($seen -eq $Want -and -not $found) { $target = $true; $found = $true }
+    }
+  }
+
+  # Unary comma: without it, PowerShell enumerates the returned array onto
+  # the output stream, and a single-element or single-heading result would
+  # collapse to a bare string in the caller ($raw[$side][0] then indexes a
+  # CHARACTER of that string, not the sentinel) instead of staying an array.
+  if (-not $found) { return , @('MISSING') }
+  if (-not $closed) { return , @('UNCLOSED') }
+  return , $rows.ToArray()
+}
+
+function ConvertTo-TableCell([string]$Text) { return ($Text -replace '\|', '\|') }
+
+# One templated registry row's group. Throws on every condition build.sh's
+# emit_exec_heading_group die()s on, with the same message text.
+function Write-ExecHeadingGroup {
+  param([string]$DocId, [string]$Path, [string]$FrRef, [string]$FrBlock,
+        [string]$EnRef, [string]$EnBlock)
+
+  $refs   = @{ fr = $FrRef;   en = $EnRef }
+  $blocks = @{ fr = $FrBlock; en = $EnBlock }
+
+  foreach ($side in @('fr', 'en')) {
+    $full = Join-Path $RepoRoot $refs[$side]
+    # -PathType Leaf, not a bare Test-Path: mirrors bash's `[[ -f ]]`, which a
+    # directory fails. A bare Test-Path would call the directory present and
+    # let ReadAllLines below crash on it instead of raising this message.
+    if (-not (Test-Path -LiteralPath $full -PathType Leaf)) {
+      throw "ERROR: $DocId — $($refs[$side]) listed in skills/exec-documents.tsv but no such file (renamed?)"
+    }
+    if ($blocks[$side] -notmatch '^[1-9][0-9]*$') {
+      throw "ERROR: $DocId — $($refs[$side]) template block index '$($blocks[$side])' is not a positive integer"
+    }
+  }
+
+  $raw = @{}
+  foreach ($side in @('fr', 'en')) {
+    $raw[$side] = Get-TemplateBlockHeadingText (Join-Path $RepoRoot $refs[$side]) ([int]$blocks[$side])
+    if ($raw[$side].Count -eq 1 -and $raw[$side][0] -ceq 'MISSING') {
+      throw "ERROR: $DocId — $($refs[$side]) has no markdown template block $($blocks[$side])"
+    }
+    if ($raw[$side].Count -eq 1 -and $raw[$side][0] -ceq 'UNCLOSED') {
+      throw "ERROR: $DocId — $($refs[$side]) template block $($blocks[$side]) is never closed"
+    }
+  }
+
+  $fr = $raw['fr']; $en = $raw['en']
+  if ($fr.Count -ne $en.Count) {
+    throw "ERROR: $DocId — heading counts differ: $FrRef has $($fr.Count), $EnRef has $($en.Count)"
+  }
+
+  $frLevels = (@($fr | ForEach-Object { $_.Split(' ', 2)[0] }) -join ' ')
+  $enLevels = (@($en | ForEach-Object { $_.Split(' ', 2)[0] }) -join ' ')
+  if ($frLevels -cne $enLevels) {
+    throw "ERROR: $DocId — heading levels differ: $FrRef [$frLevels], $EnRef [$enLevels]"
+  }
+
+  $rows = New-Object System.Collections.Generic.List[string]
+  for ($i = 0; $i -lt $fr.Count; $i++) {
+    $parts = $fr[$i].Split(' ', 2)
+    $lvl = [int]$parts[0]
+    if ($lvl -lt 2) { continue }
+    $marker = '#' * $lvl
+    $frText = ConvertTo-TableCell $parts[1]
+    $enText = ConvertTo-TableCell $en[$i].Split(' ', 2)[1]
+    $rows.Add("| $marker $frText | $marker $enText |")
+  }
+  if ($rows.Count -eq 0) { return '' }
+
+  $sb = "`n## $DocId`n`n``$Path```n`n| Français | English |`n| --- | --- |`n"
+  foreach ($r in $rows) { $sb += "$r`n" }
+  return $sb
+}
+
+# Mirrors build.sh's generate_exec_heading_pairs. WriteAllText with explicit
+# "`n" joins, never Set-Content: the latter would rewrite every line ending
+# as CRLF and break AC21's byte-identity.
+function New-ExecHeadingPairs {
+  param([string]$Locale, [string]$OutPath)
+
+  if (-not (Test-Path -LiteralPath $ExecDocsTsv)) {
+    throw 'ERROR: skills/exec-documents.tsv — exec-facing document registry not found'
+  }
+  $preamble = Join-Path (Join-Path $SharedDir $Locale) 'exec-document-headings.md'
+  if (-not (Test-Path -LiteralPath $preamble)) {
+    throw "ERROR: skills/shared/$Locale/exec-document-headings.md not found"
+  }
+
+  $text = [System.IO.File]::ReadAllText($preamble)
+
+  $lineNo = 0
+  foreach ($rawLine in [System.IO.File]::ReadAllLines($ExecDocsTsv)) {
+    $lineNo++
+    $raw = $rawLine -replace "`r$", ''
+    if ($raw -eq '') { continue }
+
+    $cols = $raw.Split("`t")
+    if ($cols.Count -ne 6) {
+      throw "ERROR: skills/exec-documents.tsv:$lineNo — expected 6 tab-separated columns, found $($cols.Count)"
+    }
+
+    $docId = $cols[0]; $path = $cols[1]
+    $dashes = @($cols[2], $cols[3], $cols[4], $cols[5] | Where-Object { $_ -ceq '-' }).Count
+    if ($dashes -eq 4) { continue }
+    if ($dashes -ne 0) {
+      throw "ERROR: $docId — template columns are partly '-': a document described in prose carries '-' in all four"
+    }
+
+    $text += Write-ExecHeadingGroup -DocId $docId -Path $path `
+      -FrRef $cols[2] -FrBlock $cols[3] -EnRef $cols[4] -EnBlock $cols[5]
+  }
+
+  [System.IO.File]::WriteAllText($OutPath, $text)
+}
+
 # 2026-09-19-headings/AC22 — the same verdicts as build.sh's
 # check_exec_documents, from the same registry.
 function Test-ExecDocuments {
@@ -553,6 +710,10 @@ function New-SkillStage {
                    -Destination (Join-Path $Stage 'references/glossary.md')
   Copy-Item -Force -Path (Join-Path (Join-Path $SharedDir $Locale) 'memory-protocol.md') `
                    -Destination (Join-Path $Stage 'references/memory-protocol.md')
+
+  # 2026-09-20-heading-pairs/AC1 — generated per stage, never checked in.
+  New-ExecHeadingPairs -Locale $Locale `
+    -OutPath (Join-Path $Stage 'references/exec-document-headings.md')
 
   # AC57 — the annotation is a release-please marker, not skill metadata.
   # Strip it so the packaged SKILL.md carries a clean `version: X.Y.Z`, and a
@@ -997,12 +1158,21 @@ if ($Check) {
 }
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
+$script:FatalError = $null
 try {
   foreach ($locale in $selected) { Build-Locale -Locale $locale -OutDir $outDir }
 
   if ($Check) {
     Invoke-Checks -Locales $selected
   }
+} catch {
+  # 2026-09-20-heading-pairs — mirrors bash's die(): a single line on stderr,
+  # then exit 1. Left to PowerShell's default terminating-error formatter,
+  # an uncaught throw prints a multi-line "Exception: ... Line | ..." block
+  # that word-wraps the message itself at the host's width, splitting a long
+  # die() message across lines and breaking any caller that greps for the
+  # exact text (as scripts/tests/build_test.ps1's Expect-CheckFail does).
+  $script:FatalError = $_.Exception.Message
 } finally {
   Remove-ManagedTempDirs
 }
@@ -1010,6 +1180,10 @@ try {
 # Deferred until after cleanup: calling `exit` inside the try block above
 # would still need the temp dirs removed first, so the failure decision (and
 # the process exit) happens only once Remove-ManagedTempDirs has already run.
+if ($script:FatalError) {
+  Write-Host $script:FatalError
+  exit 1
+}
 if ($Check -and $script:CheckFailures -gt 0) {
   exit 1
 }

@@ -888,6 +888,44 @@ if ($r.ExitCode -eq 0) {
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# --- 2026-09-20-heading-pairs/AC1, AC21: the generated reference, and its
+# byte-identity with the bash twin's output on this repository.
+$d = New-FixtureRepo
+Invoke-FixturePwsh $d '-Lang all' | Out-Null
+
+foreach ($z in @('atelier-ventes-fr.zip', 'atelier-sales-en.zip')) {
+  $names = & unzip -l (Join-Path $d "dist/$z")
+  if ($names -match 'references/exec-document-headings\.md') {
+    Add-Pass "AC1 $z carries references/exec-document-headings.md (ps1)"
+  } else {
+    Add-Failure "AC1 $z missing references/exec-document-headings.md (ps1)"
+  }
+}
+Remove-Item -Recurse -Force $d
+
+# AC21 — same bytes from both scripts, for each locale, on the real repo.
+$shOut = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid())
+$psOut = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid())
+New-Item -ItemType Directory -Force -Path $shOut, $psOut | Out-Null
+Push-Location $RepoRoot
+& bash scripts/build.sh --lang all *> $null
+Copy-Item dist/atelier-mentor-fr.zip (Join-Path $shOut 'fr.zip')
+Copy-Item dist/atelier-mentor-en.zip (Join-Path $shOut 'en.zip')
+& pwsh -File scripts/build.ps1 -Lang all *> $null
+Copy-Item dist/atelier-mentor-fr.zip (Join-Path $psOut 'fr.zip')
+Copy-Item dist/atelier-mentor-en.zip (Join-Path $psOut 'en.zip')
+Pop-Location
+foreach ($loc in @('fr', 'en')) {
+  $a = & unzip -p (Join-Path $shOut "$loc.zip") references/exec-document-headings.md
+  $b = & unzip -p (Join-Path $psOut "$loc.zip") references/exec-document-headings.md
+  if (($a -join "`n") -ceq ($b -join "`n")) {
+    Add-Pass "AC21 $loc heading-pair reference is byte-identical across build scripts"
+  } else {
+    Add-Failure "AC21 $loc heading-pair reference differs between build.sh and build.ps1"
+  }
+}
+Remove-Item -Recurse -Force $shOut, $psOut
+
 Write-Host ''
 if ($script:Failures -eq 0) { Write-Host 'STATUS: PASS'; exit 0 }
 Write-Host "STATUS: FAIL ($script:Failures)"
