@@ -246,3 +246,12 @@ block index that hold its template in each locale. `bash scripts/build.sh
 carrying the same sequence of heading levels. A document whose structure is
 described in prose rather than a template carries `-` in all four template
 columns — in all four, never some.
+
+The build also **generates** `references/exec-document-headings.md` from that
+same registry and stages it into every ZIP, giving both locales' spelling of
+every section. That is what lets a reader evaluate ADR-0016's "spelled the way
+your template spells it, in one locale or the other" test at all. A new
+exec-facing document therefore needs only its registry row — nothing is
+hand-written per document, and nothing can rot on one side. The framing prose
+around the table is a shared text, `skills/shared/<locale>/exec-document-headings.md`;
+the table itself is appended at stage time and never checked in.

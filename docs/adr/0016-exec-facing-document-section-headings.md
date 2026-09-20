@@ -1,6 +1,6 @@
 # 0016 — Exec-facing document section headings stay localized
 
-**Status:** Accepted — 2026-09-19
+**Status:** Accepted — 2026-09-19; §4 amended 2026-09-20
 
 ## Context
 
@@ -67,6 +67,22 @@ What changes is how a document is read:
    section, and leaving a heading alone is not a write. Where a document
    carries such a heading, the offer says so, so an accepted rewrite that
    leaves one heading standing does not read as a failure.
+
+   *Amended 2026-09-20.* The "in one locale or the other" test could not be
+   evaluated: a shipped ZIP carries one locale's templates, so a reader had no
+   second spelling to compare against. Every ZIP now carries a generated
+   `references/exec-document-headings.md` giving both locales' spelling of
+   every section of every exec-facing document with a template. The reader
+   consults the entry for the document in hand before offering, and the offer
+   names both the headings it will rewrite and the headings it will leave —
+   both lists, every time, so a skipped comparison is visible in the offer
+   rather than only in the file.
+
+   *Also amended 2026-09-20.* Where the reader has no template for a document
+   at all, every heading stays as written. There is no "the way its template
+   spells it" to test, and leaving a heading alone is not a write. Level-1
+   titles are outside the generated reference — most carry a placeholder — so
+   a document's title is likewise left alone.
 5. **Cowork only.** The offer is a write, and writes happen only where the
    files can be read and rewritten. In a Desktop chat session the disclosure
    still happens; the offer does not, and the session says plainly that
@@ -125,3 +141,8 @@ every document already on disk.
 - An accepted rewrite can still leave a heading in the other language, when it
   is one the executive wrote or renamed. That is the intended outcome, and the
   offer says so in advance so it does not read as a half-finished rewrite.
+- Every ZIP carries a generated `references/exec-document-headings.md`, built
+  from `skills/exec-documents.tsv` at stage time and never checked in. A new
+  exec-facing document therefore needs only its registry row; the pairs follow.
+  The build fails — not only `--check` — when the registry, a named reference
+  file, or a template block cannot produce that table.

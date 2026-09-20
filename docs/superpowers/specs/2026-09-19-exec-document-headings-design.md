@@ -411,6 +411,13 @@ one language only, so the comparison AC32 asks for is unanswerable — is #42.
 These criteria state the decided behaviour and are left in place rather than
 weakened to match what currently happens.
 
+Both halves are resolved by
+[`2026-09-20-exec-heading-pairs-design.md`](2026-09-20-exec-heading-pairs-design.md):
+the structural half by generating `references/exec-document-headings.md` into
+every ZIP, the behavioural half by rewriting the worked example to the
+cross-language case and requiring the offer to name both lists. The AC numbers
+in that spec are its own — cite them as `2026-09-20-heading-pairs/ACn`.
+
 ### The repository's own docs
 
 - **AC31** — `docs/AUTHORING.md` carries a `## Exec-facing document headings`
