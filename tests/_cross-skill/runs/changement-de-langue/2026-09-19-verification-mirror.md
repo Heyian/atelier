@@ -177,12 +177,10 @@ sandbox-B/docs/atelier/progression.md
 # AI progression — Cedarline Outfitters
 
 ## Current practice
-I mostly use Claude to rough out supplier emails. I still rewrite most of it, so the time saving is thin.
 
 ## Practices adopted
 
 ## Stated struggles
-- It keeps switching our words — says "bundle" when we say "trip kit" — 2026-09-19
 
 ## Agreed next step
 
@@ -192,10 +190,15 @@ I mostly use Claude to rough out supplier emails. I still rewrite most of it, so
 - 2026-09-19 — module 3 — Surfaces
 - 2026-09-19 — module 4 — Skills, connectors, plugins
 - 2026-09-19 — module 5 — Organizing features
-
-## My own notes
-Ask Dana whether the spring order deadline moved before I lean on any of this.
 ```
+
+**Erratum, 2026-09-19.** This block originally pasted `progression.md` as it
+stood *after* the controller seeded executive-authored prose and a
+self-added `## My own notes` section between session 1 and session 2. That
+content was not written by session 1. The body above is now the file exactly
+as session 1's `Write` call created it, taken from the run's own tool-call
+payload (agentId `a753ade087b75ab3b`). The seeding is described in the
+"Dispatch B — session 2, accepted, attempt 2 of 2" block below.
 
 ## Dispatch B — session 2, declined
 

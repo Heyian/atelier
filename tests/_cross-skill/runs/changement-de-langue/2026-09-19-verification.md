@@ -235,12 +235,10 @@ sandbox-A/docs/atelier/progression.md
 # Progression IA — Lanternes Boréales
 
 ## Pratique actuelle
-Je me sers de Claude surtout pour dégrossir les réponses aux appels d'offres. Je relis tout, ça me prend encore trop de temps.
 
 ## Pratiques adoptées
 
 ## Difficultés exprimées
-- Je n'arrive pas à lui faire garder notre vocabulaire (« soumission », « borne ») — 2026-09-19
 
 ## Prochaine étape convenue
 
@@ -250,10 +248,15 @@ Je me sers de Claude surtout pour dégrossir les réponses aux appels d'offres. 
 - 2026-09-19 — module 3 — Les surfaces
 - 2026-09-19 — module 4 — Compétences, connecteurs, plugiciels
 - 2026-09-19 — module 5 — Les fonctions d'organisation
-
-## Mes notes à moi
-Penser à montrer ça à Marc-André aux soumissions avant la prochaine ronde.
 ```
+
+**Erratum, 2026-09-19.** This block originally pasted `progression.md` as it
+stood *after* the controller seeded executive-authored prose and a
+self-added « Mes notes à moi » section between session 1 and session 2. That
+content was not written by session 1. The body above is now the file exactly
+as session 1's `Write` call created it, taken from the run's own tool-call
+payload (agentId `a7b2f02fbdfe95094`). The seeding is described in the
+"Dispatch A — session 2, accepted" block below.
 
 ## Dispatch A — session 2, accepted
 
