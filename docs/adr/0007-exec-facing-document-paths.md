@@ -25,9 +25,20 @@ directories — just not yet stated as a rule for role-skill output.
 ## Decision
 
 Every exec-facing document path a role skill writes — folder **and**
-filename — uses **one canonical French spelling in both locales**, the same
-reasoning already applied to the memory key and to `relais/`/`competences/`:
-a locale switch must never orphan a document the executive already has.
+filename — uses **one spelling in both locales**, French being the tiebreaker
+where the concept has a French name: the same reasoning already applied to
+the memory key and to `relais/`/`competences/`. A locale switch must never
+orphan a document the executive already has.
+
+> **Wording corrected by [ADR 0016](0016-exec-facing-document-section-headings.md).**
+> This ADR originally said "one canonical **French** spelling in both
+> locales." The repository's own paths are not all French —
+> `company-profile.md`, `decisions.md`, `roles.md`, `map.md`, `research/`,
+> `tickets/` and `maquettes/` are English or locale-neutral spellings used
+> unchanged in both locales. The property they all hold is one spelling in
+> both locales. The decision stands as made; no path moves. ADR-0016 also
+> settles what the *section headings inside* these documents do, which this
+> ADR does not address.
 
 This governs the skill's own output paths, not the shipped `references/`
 files the skill loads for its own use — those stay per-locale, matching the

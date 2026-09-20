@@ -26,6 +26,7 @@ require_heading "## Memory protocol adherence"
 require_heading "## Shared glossary"
 require_heading "## One excellent example per skill"
 require_heading "## Dated capability claims"
+require_heading "## Exec-facing document headings"
 
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
