@@ -200,6 +200,40 @@ EOF
   printf 'skills/atelier-ventes/en/references/tutorial/03.md\n' > "$dir/skills/dated-claims.tsv"
   write_annotation "$dir" en "skills/atelier-ventes/en/references/tutorial/03.md" 10
 
+  # 2026-09-19-headings/AC16 — an absent registry is fatal (the dated-claims
+  # anchor list behaves the same way), so the clean fixture carries one row
+  # and the two parallel templates it points at.
+  mkdir -p "$dir/skills/atelier-ventes/fr/references" \
+           "$dir/skills/atelier-ventes/en/references"
+  cat > "$dir/skills/atelier-ventes/fr/references/modele.md" <<'EOF'
+# Modèle de revue de pipeline
+
+```markdown
+# Revue de pipeline — <entreprise>
+
+## Où en est le pipeline
+
+## Ce qui bloque
+
+## Prochaines relances
+```
+EOF
+  cat > "$dir/skills/atelier-ventes/en/references/template.md" <<'EOF'
+# Pipeline review template
+
+```markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+```
+EOF
+  printf 'pipeline-doc\t{root}/docs/ventes/pipeline.md\tskills/atelier-ventes/fr/references/modele.md\t1\tskills/atelier-ventes/en/references/template.md\t1\n' \
+    > "$dir/skills/exec-documents.tsv"
+
   echo "$dir"
 }
 
@@ -1238,6 +1272,72 @@ d="$(make_fixture_repo)"
 ( cd "$d" && bash scripts/build.sh --check-freshness >/dev/null 2>&1 )
 [[ ! -d "$d/dist" ]] && pass "2026-09-19/AC19 --check-freshness leaves dist/ untouched" \
                      || fail "2026-09-19/AC19 --check-freshness created dist/"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC16: the clean fixture passes the new rule
+d="$(make_fixture_repo)"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "2026-09-19-headings/AC16 clean fixture passes the exec-document rule"
+else
+  fail "2026-09-19-headings/AC16 clean fixture failed (out=$out)"
+fi
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC17: a row naming a reference file that is gone
+d="$(make_fixture_repo)"
+rm -f "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_check_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md' \
+  "2026-09-19-headings/AC17 missing reference file names doc-id and path"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC18: a block index the file does not have
+d="$(make_fixture_repo)"
+sed -i "s|modele.md$(printf '\t')1|modele.md$(printf '\t')4|" "$d/skills/exec-documents.tsv"
+expect_check_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md has no markdown template block 4' \
+  "2026-09-19-headings/AC18 missing block index names doc-id, file and index"
+rm -rf "$d"
+
+# --- Review Focus 1: '-' in some template columns but not all four
+d="$(make_fixture_repo)"
+sed -i "s|skills/atelier-ventes/fr/references/modele.md$(printf '\t')1|-$(printf '\t')-|" \
+  "$d/skills/exec-documents.tsv"
+expect_check_fail "$d" "pipeline-doc — template columns are partly '-'" \
+  "Review Focus 1 half-prose row is rejected"
+rm -rf "$d"
+
+# --- Review Focus 2: a row with the wrong number of columns
+d="$(make_fixture_repo)"
+printf 'stray\t{root}/docs/stray.md\t-\t-\t-\n' >> "$d/skills/exec-documents.tsv"
+expect_check_fail "$d" 'expected 6 tab-separated columns, found 5' \
+  "Review Focus 2 wrong column count is rejected by line"
+rm -rf "$d"
+
+# --- Review Focus 3: a CRLF checkout of the registry still passes
+d="$(make_fixture_repo)"
+awk '{ printf "%s\r\n", $0 }' "$d/skills/exec-documents.tsv" > "$d/tmp.tsv"
+mv "$d/tmp.tsv" "$d/skills/exec-documents.tsv"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "Review Focus 3 a CRLF registry is read the same as an LF one"
+else
+  fail "Review Focus 3 CRLF registry failed (out=$out)"
+fi
+rm -rf "$d"
+
+# --- Review Focus 4: the same reference file named for both locales
+d="$(make_fixture_repo)"
+sed -i 's|skills/atelier-ventes/en/references/template.md|skills/atelier-ventes/fr/references/modele.md|' \
+  "$d/skills/exec-documents.tsv"
+expect_check_fail "$d" 'pipeline-doc — names the same reference file for both locales' \
+  "Review Focus 4 one file for both locales is rejected"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC17: an absent registry is fatal, as for dated-claims
+d="$(make_fixture_repo)"
+rm -f "$d/skills/exec-documents.tsv"
+expect_check_fail "$d" 'skills/exec-documents.tsv — exec-facing document registry not found' \
+  "2026-09-19-headings/AC17 an absent registry fails by name"
 rm -rf "$d"
 
 echo
