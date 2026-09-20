@@ -48,9 +48,14 @@ the executive writing: *« On peut reprendre le tutoriel où on était rendu ? �
 - [x] A section the executive added themselves survives an accepted rewrite —
   heading and body both — and is not reordered
 - [ ] A template section the executive renamed survives an accepted rewrite the
-  same way — heading and body both
-- [ ] The rewrite offer names the exception, on a document that carries a
-  heading the executive wrote or renamed
+  same way — heading and body both — with `references/exec-document-headings.md`
+  present in the ZIP and the renamed heading matching neither locale's spelling
+  of that section
+- [ ] The rewrite offer names both lists: the headings it will rewrite and the
+  headings it will leave, on every offer, not only where it noticed an
+  exception
+- [ ] The document's level-1 title survives an accepted rewrite unchanged, on a
+  document that does have a template
 - [x] Lines appended in session 2 are written in the language the executive is
   speaking, not the document's heading language
 - [x] Session 1, which creates `progression.md` from nothing, writes it in its
