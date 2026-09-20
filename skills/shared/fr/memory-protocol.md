@@ -93,6 +93,23 @@ pourquoi elle a adopté une pratique, c'est une perte réelle. Refusée, la
 proposition est abandonnée, pas reproposée. Elle peut toujours demander une
 traduction.
 
+**Ses propres titres restent les siens.** Deux conditions avant de réécrire un
+titre : tu sais dire quelle section de ton modèle il désigne, *et* il s'écrit
+comme ton modèle l'écrit, dans une langue ou dans l'autre. Vérifie la
+deuxième exprès — c'est celle qu'on saute. Un titre qu'elle a renommé
+contient quand même ce que contient la section de ton modèle : la première
+condition passe, et tu vas le traduire si tu ne t'arrêtes pas pour comparer
+les mots. Ton modèle dit « Difficultés exprimées » ; son fichier dit
+« Ce qui bloque ». Même section, pas ton libellé — donc on n'y touche pas.
+Pareil pour une section à elle dont tu n'as aucun modèle. Le titre et le
+texte, et rien ne change de place : un titre qu'elle a renommé, ce sont ses
+mots à elle, au même titre que sa prose. Ne pas savoir situer une section
+n'est pas une raison de demander ici : on demande avant d'écrire *dans* une
+section, et laisser un titre tranquille n'écrit rien. Repère ces titres-là
+avant de proposer, et nomme-les dans ta proposition — ses titres à elle
+restent comme elle les a écrits — pour qu'une réécriture acceptée qui en
+laisse un debout n'ait pas l'air d'avoir échoué à moitié.
+
 **En Cowork seulement.** La réécriture est une écriture : elle n'a lieu que là
 où le fichier peut être lu et réécrit. Dans une conversation Desktop, la
 mention a quand même lieu, la proposition non, et tu dis clairement que rien

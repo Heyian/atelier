@@ -45,9 +45,13 @@ the executive writing: *« On peut reprendre le tutoriel où on était rendu ? �
 - [x] An accepted rewrite changes heading lines only: the executive's own
   prose is byte-identical before and after, and no section is reordered
 - [x] A declined rewrite leaves the whole file byte-identical
-- [ ] A section the executive added themselves survives an accepted rewrite —
+- [x] A section the executive added themselves survives an accepted rewrite —
   heading and body both — and is not reordered
-- [ ] Lines appended in session 2 are written in the language the executive is
+- [ ] A template section the executive renamed survives an accepted rewrite the
+  same way — heading and body both
+- [ ] The rewrite offer names the exception, on a document that carries a
+  heading the executive wrote or renamed
+- [x] Lines appended in session 2 are written in the language the executive is
   speaking, not the document's heading language
 - [x] Session 1, which creates `progression.md` from nothing, writes it in its
   own locale's headings and makes no disclosure and no rewrite offer
@@ -118,3 +122,68 @@ transcript
 `runs/changement-de-langue/2026-09-19-verification-same-locale-en.md`) shows
 the same: no disclosure, no rewrite offer, file unchanged (md5
 `96ef6ca9b62355b648579c4bfbe7611b` before and after).
+
+## Verification notes — 2026-09-20 executive-added and renamed headings
+
+Transcript:
+`runs/changement-de-langue/2026-09-20-verification-executive-added-sections.md`
+
+This run settles the AC30 box the 2026-09-19 run left open, and tests the two
+boxes added with it. The rule it tests is ADR-0016 *Decision §4* as amended:
+a heading is rewritten only when the reader placed that section as one of its
+own **and** it is spelled the way its template spells it.
+
+Every sandbox was seeded with the same shape — the five template sections,
+with "Current practice" **renamed** by the executive and a section of their
+own appended. Six dispatches ran, five of which performed a rewrite; all
+verdicts are from `diff` against the seeded file, checked on disk, not from
+any agent's self-report.
+
+| Dispatch | Rule text | Direction | Added section | Renamed heading | Offer names it |
+|---|---|---|---|---|---|
+| A attempt 1 | v1 | EN reads FR | — no rewrite | — | offered, not accepted |
+| A attempt 2 | v1 | EN reads FR | survived | survived | both named |
+| B attempt 1 | v1 | FR reads EN | survived | **translated** | none named |
+| B attempt 2 | v1 | FR reads EN | survived | **translated** | added section only |
+| A v2 | v2 | EN reads FR | survived | survived | both named |
+| B v2 | v2 | FR reads EN | survived | **translated** | added section only |
+
+**"A section the executive added themselves survives an accepted rewrite."**
+Ticked. Five for five across both directions and both rule texts:
+« Mes notes à moi » and `## My own notes` came through every accepted rewrite
+with heading and body byte-identical, still last in the file, nothing
+reordered. This is the box the 2026-09-19 run left open because its two
+directions disagreed; with the rule stated, they agree.
+
+**"A template section the executive renamed survives an accepted rewrite the
+same way."** Not ticked. Two for five, and the split is entirely by direction:
+English-reading-French held it twice out of two, French-reading-English missed
+it three times out of three, translating "Where I'm at right now" to
+« Pratique actuelle » each time. Sharpening the rule text between the v1 and
+v2 rounds changed nothing — A passed under both, B failed under both — so the
+wording is not what is failing. Both ZIPs carry this heading pair
+symmetrically (`references/progression.md:35` in the English skill, `:38` in
+the French), so it is not missing information either. What is left is a model
+asymmetry: a French-speaking reader facing an English document translates the
+English it sees, and the spelling comparison does not survive that pull. Three
+attempts in the failing direction is past the two-attempt cap, so this stops
+here rather than being re-rolled. The structural half — that four of five
+heading pairs are not shipped at all, so the comparison is unanswerable for
+them in either direction — is filed as #42.
+
+**"The rewrite offer names the exception."** Not ticked, and it tracks the box
+above exactly: the two dispatches that spotted the renamed heading named both
+exceptions before writing, and the three that did not named only the added
+section. Nothing suggests a separate cause.
+
+**"Lines appended in session 2 are written in the language the executive is
+speaking."** Ticked, and newly reachable. The 2026-09-19 run could not test
+this because no dispatch completed a tutorial module inside its scripted
+turns. This run's script carries the conversation through module 6's
+application question to a completed write, and Dispatch A does it in the
+direction that discriminates: with the document's headings still French,
+A attempt 1 appended `- 2026-09-20 — module 6 — Skill hygiene` in English,
+and A attempt 2 appended modules 6 and 7 the same way. In Dispatch B the
+rewrite had already made the headings French, so heading language and speaker
+language coincide and that direction proves nothing on its own. #41, filed for
+this box, is closed by A's evidence.

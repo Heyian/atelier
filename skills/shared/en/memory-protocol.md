@@ -87,6 +87,22 @@ it is their record, and a paraphrase of why they adopted a practice is a real
 loss. Declined, it is dropped, not proposed again. They can always ask for a
 translation.
 
+**Their own headings stay theirs.** Two things have to be true before you
+rewrite a heading: you could say which section of your own template it is,
+*and* it is spelled the way your template spells it, in one language or the
+other. Check the second one on purpose — it is the one that is easy to skip.
+A heading they renamed still holds what your template's section holds, so the
+first test passes and you will translate it unless you stop and compare the
+words. Your template says "Stated struggles"; their file says "What keeps
+going wrong". Same section, not your spelling — so it stays. So does a
+section of their own you have no template for at all. Heading and text both,
+and nothing changes place: a heading they renamed is words they chose, just
+like their prose. Not being able to place a section is no reason to ask here
+— you ask before writing *into* a section, and leaving a heading alone writes
+nothing. Look for headings like these before you offer, and name them in the
+offer — their own headings stay as they wrote them — so an accepted rewrite
+that leaves one standing does not look like it half-worked.
+
 **Cowork only.** The rewrite is a write, so it happens only where the file can
 be read and rewritten. In a Desktop chat the disclosure still happens, the
 offer does not, and you say plainly that nothing was written.

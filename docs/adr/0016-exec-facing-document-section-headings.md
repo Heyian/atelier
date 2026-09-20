@@ -56,6 +56,17 @@ What changes is how a document is read:
    only, on the one document just read. The executive's own prose is never
    translated: it is their record, and a paraphrase of why they adopted a
    practice is a real loss. They can always ask for a translation.
+
+   The same holds for the headings they wrote. A heading is rewritten only
+   when the reader placed that section as one of its own and the heading is
+   spelled the way its template spells it, in one locale or the other. A
+   section the executive added, and a template section they renamed, keep
+   their heading and their body, and nothing is reordered — a heading they
+   renamed is words they chose, exactly like their prose. Being unable to
+   place a section is not a reason to ask here: §2 governs writing *into* a
+   section, and leaving a heading alone is not a write. Where a document
+   carries such a heading, the offer says so, so an accepted rewrite that
+   leaves one heading standing does not read as a failure.
 5. **Cowork only.** The offer is a write, and writes happen only where the
    files can be read and rewritten. In a Desktop chat session the disclosure
    still happens; the offer does not, and the session says plainly that
@@ -111,3 +122,6 @@ every document already on disk.
   Nothing detects a document that is missing from it — filed as #39.
 - A document can hold French headings and English content at once. That is a
   correct intermediate state and no check rejects it.
+- An accepted rewrite can still leave a heading in the other language, when it
+  is one the executive wrote or renamed. That is the intended outcome, and the
+  offer says so in advance so it does not read as a half-finished rewrite.

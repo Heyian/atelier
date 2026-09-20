@@ -249,7 +249,8 @@ boxes are ticked.
   *Decision §1* together with all six of its numbered behaviours: read in
   full and identify by content, no positional fallback, disclose once,
   heading-only offer, offer in Cowork only, appended content in the
-  executive's language.
+  executive's language. *Decision §4* further states that a heading the
+  executive wrote or renamed is not rewritten, and that the offer says so.
 - **AC2** — ADR-0016 states the path invariant as one spelling in both locales
   with French as the tiebreaker, and names at least three of the English or
   locale-neutral canonical paths in use today.
@@ -281,7 +282,10 @@ boxes are ticked.
   written in the other language, has been read, and still counts; and that a
   heading-only rewrite of that one document — not a sweep of every document —
   is offered as an ordinary proposed write, with the executive's own prose
-  left untouched.
+  left untouched. Each also states that a heading the executive wrote or
+  renamed is left untouched for the same reason, that being unable to place a
+  section is not itself a reason to ask, and that the offer names the
+  exception on a document that has one.
 - **AC8** — Each states that the offer happens in Cowork only, and that a
   Desktop chat session discloses without offering and says nothing was written.
 - **AC9** — Each states that content appended to a document whose headings are
@@ -351,7 +355,10 @@ boxes are ticked.
   the already-covered ones carrying their dates, and the recommendation names
   only the uncovered ones; the mismatch is disclosed once, in the executive's language; an
   accepted rewrite changes heading lines only, leaving the executive's prose
-  byte-identical; a declined rewrite leaves the whole file byte-identical.
+  byte-identical; a declined rewrite leaves the whole file byte-identical; a
+  section the executive added survives an accepted rewrite; a template section
+  they renamed survives it the same way; and the offer names the exception on
+  a document that carries such a heading.
 - **AC26** — Two dispatches are run — French writes / English reads, and the
   mirror — and each leaves a transcript committed under
   `tests/_cross-skill/runs/changement-de-langue/<date>-<kind>.md`, saved before
@@ -371,6 +378,28 @@ boxes are ticked.
 - **AC30** — Given an accepted heading rewrite on a document carrying a section
   the executive added themselves, that section's heading and body survive
   unchanged and no section is reordered.
+- **AC32** — Given an accepted heading rewrite on a document where the executive
+  renamed one of the template's own sections, that section's heading and body
+  survive unchanged too: a heading is rewritten only when the reader placed
+  that section as one of its own *and* the heading is spelled the way its
+  template spells it, in one locale or the other.
+- **AC33** — Given a rewrite offer on a document carrying such a heading, the
+  offer states that the executive's own headings stay as they wrote them; on a
+  document carrying none, it does not.
+
+**Status of AC32 and AC33 as of 2026-09-20.** AC30 is met: five accepted
+rewrites across both directions left the executive's added section untouched,
+heading and body. AC32 and AC33 are **not met**, in one direction only — a
+French-install reader translated the renamed heading in three of three runs,
+while an English-install reader preserved it in two of two. The run section
+`## Verification notes — 2026-09-20 executive-added and renamed headings` in
+`tests/_cross-skill/changement-de-langue.md` carries the evidence and rules
+out both the obvious causes: sharpening the rule text changed no outcome, and
+this heading pair is shipped symmetrically in both locales' ZIPs. The
+structural cause for the *other* four heading pairs — that they are shipped in
+one language only, so the comparison AC32 asks for is unanswerable — is #42.
+These criteria state the decided behaviour and are left in place rather than
+weakened to match what currently happens.
 
 ### The repository's own docs
 
@@ -386,6 +415,10 @@ boxes are ticked.
 - #38 — Shared EN memory protocol calls the compass map a "deck"
 - #39 — Build check: nothing detects an exec-facing document missing from
   `exec-documents.tsv`
+- #41 — Locale-switch scenario cannot reach its session-2 append-language box
+  (closed by the 2026-09-20 run)
+- #42 — A skill cannot check a renamed heading: it ships only one of the two
+  locales' template spellings
 
 ## Glossary Updates & ADRs
 
