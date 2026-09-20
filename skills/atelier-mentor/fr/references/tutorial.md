@@ -17,8 +17,14 @@ Sept modules qui expliquent comment Claude fonctionne. Deux modes : **complet**
 
 ## À chaque entrée
 
-1. **Lis `{racine}/docs/atelier/progression.md`** et repère la section
-   « Modules du tutoriel couverts ».
+1. **Lis `{racine}/docs/atelier/progression.md` au complet** et repère la
+   section qui liste les modules du tutoriel déjà couverts — celle dont les
+   lignes sont des modules datés. Sur une installation française elle
+   s'intitule « Modules du tutoriel couverts » ; un document écrit sur une
+   installation anglaise l'a intitulée "Tutorial modules covered". Repère-la à
+   ce qu'elle liste, pas à son titre, et vois `references/memory-protocol.md`,
+   « Un document écrit dans l'autre langue », pour ce qu'il faut dire et
+   proposer quand elles diffèrent.
 2. **Dis la règle de sortie avant le contenu du premier module** : « tu peux
    arrêter n'importe quand, on note où tu es rendu, pis on reprend plus tard ».
 3. **Offre les deux modes** — complet ou révision — même quand la personne
@@ -80,14 +86,17 @@ jamais une par module, jamais en silence. Suis
   prochaine session.
 - **Pas de réponse = rien d'écrit.** C'est la règle de pression de temps du
   relais, telle quelle.
-- Si `progression.md` existe déjà, ajoute une ligne par module terminé sous
-  « Modules du tutoriel couverts », datée du jour, format
-  `- AAAA-MM-JJ — module <n> — <titre du module>` — le reste du fichier ne
-  bouge pas.
+- Si `progression.md` existe déjà, ajoute une ligne par module terminé à la
+  section qui liste les modules couverts — intitulée « Modules du tutoriel
+  couverts » sur une installation française — datée du jour, format
+  `- AAAA-MM-JJ — module <n> — <titre du module>`. Écris la ligne dans la
+  langue que la personne parle, et le reste du fichier ne bouge pas, titres
+  compris.
 - Si `progression.md` n'existe pas encore et que la personne accepte, crée-le
   avec les titres de section du format documenté dans
-  `references/progression.md`, section « Modules du tutoriel couverts »
-  comprise.
+  `references/progression.md`, dans ta langue, section des modules couverts
+  comprise. Un fichier que tu viens de créer n'appelle ni mention ni
+  proposition de réécriture.
 
 ## Sans accès aux dossiers
 

@@ -146,6 +146,10 @@ dans un fichier qui sera copié-collé ailleurs.
 **En Cowork :** écris le document à
 `{racine}/docs/atelier/relais/AAAA-MM-JJ-<sujet>.md` et donne son chemin.
 
+Un relais antérieur trouvé sous `relais/` avec les titres de l'autre langue se
+lit et s'utilise tel quel — c'est la même série. Ne démarre jamais une série
+parallèle dans ta langue à côté.
+
 **Sur Desktop, sans accès aux dossiers :** livre-le comme fichier
 téléchargeable ; si la création de fichier n'est pas disponible, affiche-le
 **en entier** dans la conversation, prêt à copier. Ne dis pas que tu l'as

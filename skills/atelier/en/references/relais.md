@@ -144,6 +144,10 @@ gets pasted somewhere else.
 **In Cowork:** write the document to
 `{root}/docs/atelier/relais/YYYY-MM-DD-<subject>.md` and give its path.
 
+An earlier relay found under `relais/` with the other language's headings is
+read and used as-is — it is the same series. Never start a parallel set of
+relays in your own language beside it.
+
 **On Desktop chat, with no folder access:** deliver it as a downloadable file;
 if file creation isn't available, show it **in full** in the conversation,
 ready to copy. Don't say you saved it — you didn't.

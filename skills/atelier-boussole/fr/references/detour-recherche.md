@@ -65,9 +65,12 @@ décision qu'elle a débloquée :
   `{racine}/docs/research/2026-03-04-cout-impression.md`
 ```
 
-**Chemin léger :** il n'y a pas de carte. La note se cite dans la section
-« Documents » du mémo de décision, et la décision qu'elle a débloquée est
-écrite dans « Ce qui est décidé » du même mémo.
+**Chemin léger :** il n'y a pas de carte. La note se cite dans la section du
+mémo qui liste les documents derrière la décision — intitulée « Documents »
+sur une installation française — et la décision qu'elle a débloquée s'écrit
+dans la section qui consigne ce qui est décidé. Repère chacune à ce qu'elle
+contient : un mémo écrit sur une installation anglaise les a intitulées
+"Documents" et "What was decided".
 
 Dans les deux cas la note est citée **par son chemin**, jamais recopiée : un
 document qui contient tout ne se relit pas.

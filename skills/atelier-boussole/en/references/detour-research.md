@@ -62,9 +62,11 @@ unblocked:
   `{root}/docs/research/2026-03-04-printing-cost.md`
 ```
 
-**Light path:** there is no map. The note is cited in the "Documents" section
-of the decision brief, and the decision it unblocked is written in that same
-brief's "What was decided."
+**Light path:** there is no map. The note is cited in the brief's section
+listing the documents behind the decision — headed "Documents" on an English
+install — and the decision it unblocked is written in the section recording
+what was decided. Find each by what it holds: a brief written on a French
+install headed them « Documents » and « Ce qui est décidé ».
 
 Either way the note is cited **by its path**, never copied in: a document that
 contains everything gets reread by no one.

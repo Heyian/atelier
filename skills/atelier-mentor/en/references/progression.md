@@ -30,8 +30,10 @@ but the concrete recommendation always stays a single practice at a time.
 
 ## Establish the current practice first
 
-If `progression.md` is missing, or its "Current practice" is blank, establish
-it in conversation before recommending anything — "how are you handling [the
+If `progression.md` is missing, or the section saying where the executive
+stands today is blank — headed "Current practice" on an English install, «
+Pratique actuelle » on a French one — establish it in conversation before
+recommending anything — "how are you handling [the
 task] today?" Never skip this to jump straight to a recommendation.
 
 ## Practice reference files
