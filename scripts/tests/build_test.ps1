@@ -888,43 +888,41 @@ if ($r.ExitCode -eq 0) {
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
-# --- 2026-09-20-heading-pairs/AC1, AC21: the generated reference, and its
-# byte-identity with the bash twin's output on this repository.
+# --- 2026-09-20-heading-pairs/AC1: the generated reference ships in every
+# ZIP. The AC21 byte-identity check against build.sh's output does NOT live
+# here (2026-09-20-heading-pairs/B-1): this suite's only CI home is
+# windows-latest, which has neither `unzip` nor the coreutils toolchain
+# build.sh needs, so a two-script comparison cannot run in this job at all.
+# It lives in scripts/tests/build_test.sh instead, the one job where both
+# bash and pwsh exist. [System.IO.Compression.ZipFile], not `unzip`, reads
+# the ZIP entry here for the same reason.
 $d = New-FixtureRepo
-Invoke-FixturePwsh $d '-Lang all' | Out-Null
+$buildResult = Invoke-FixturePwsh $d '-Lang all'
+if ($buildResult.ExitCode -eq 0) {
+  Add-Pass '2026-09-20-heading-pairs/AC1 the fixture build itself succeeds (ps1)'
+} else {
+  Add-Failure "2026-09-20-heading-pairs/AC1 the fixture build failed (ps1) (exit=$($buildResult.ExitCode), out=$($buildResult.Output))"
+}
 
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 foreach ($z in @('atelier-ventes-fr.zip', 'atelier-sales-en.zip')) {
-  $names = & unzip -l (Join-Path $d "dist/$z")
-  if ($names -match 'references/exec-document-headings\.md') {
-    Add-Pass "AC1 $z carries references/exec-document-headings.md (ps1)"
+  $zipPath = Join-Path $d "dist/$z"
+  $hasEntry = $false
+  if (Test-Path -LiteralPath $zipPath -PathType Leaf) {
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+    try {
+      $hasEntry = $null -ne ($archive.Entries | Where-Object { $_.FullName -eq 'references/exec-document-headings.md' })
+    } finally {
+      $archive.Dispose()
+    }
+  }
+  if ($hasEntry) {
+    Add-Pass "2026-09-20-heading-pairs/AC1 $z carries references/exec-document-headings.md (ps1)"
   } else {
-    Add-Failure "AC1 $z missing references/exec-document-headings.md (ps1)"
+    Add-Failure "2026-09-20-heading-pairs/AC1 $z missing references/exec-document-headings.md (ps1)"
   }
 }
-Remove-Item -Recurse -Force $d
-
-# AC21 — same bytes from both scripts, for each locale, on the real repo.
-$shOut = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid())
-$psOut = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid())
-New-Item -ItemType Directory -Force -Path $shOut, $psOut | Out-Null
-Push-Location $RepoRoot
-& bash scripts/build.sh --lang all *> $null
-Copy-Item dist/atelier-mentor-fr.zip (Join-Path $shOut 'fr.zip')
-Copy-Item dist/atelier-mentor-en.zip (Join-Path $shOut 'en.zip')
-& pwsh -File scripts/build.ps1 -Lang all *> $null
-Copy-Item dist/atelier-mentor-fr.zip (Join-Path $psOut 'fr.zip')
-Copy-Item dist/atelier-mentor-en.zip (Join-Path $psOut 'en.zip')
-Pop-Location
-foreach ($loc in @('fr', 'en')) {
-  $a = & unzip -p (Join-Path $shOut "$loc.zip") references/exec-document-headings.md
-  $b = & unzip -p (Join-Path $psOut "$loc.zip") references/exec-document-headings.md
-  if (($a -join "`n") -ceq ($b -join "`n")) {
-    Add-Pass "AC21 $loc heading-pair reference is byte-identical across build scripts"
-  } else {
-    Add-Failure "AC21 $loc heading-pair reference differs between build.sh and build.ps1"
-  }
-}
-Remove-Item -Recurse -Force $shOut, $psOut
+Remove-Item -Recurse -Force -LiteralPath $d
 
 Write-Host ''
 if ($script:Failures -eq 0) { Write-Host 'STATUS: PASS'; exit 0 }

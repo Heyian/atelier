@@ -150,6 +150,11 @@ function Get-TemplateBlockHeadings([string]$Path, [int]$Want) {
 # The heading levels AND text of the Want-th ```markdown block, one heading
 # per line as "<level> <text>". Same MISSING / UNCLOSED sentinels as
 # Get-TemplateBlockHeadings. Mirrors build.sh's exec_doc_heading_text.
+#
+# 2026-09-20-heading-pairs/AC11 — Get-AtxLevel already accepts three shapes a
+# naive "strip '# '" would get wrong: up to three leading spaces, a tab
+# separator, and a marker with nothing after it. Extraction has to define all
+# three rather than assume one space, or recognition and extraction disagree.
 function Get-TemplateBlockHeadingText([string]$Path, [int]$Want) {
   $seen = 0; $inFence = $false; $target = $false; $found = $false; $closed = $false
   $rows = New-Object System.Collections.Generic.List[string]
@@ -236,10 +241,16 @@ function Write-ExecHeadingGroup {
   }
 
   $fr = $raw['fr']; $en = $raw['en']
+  # 2026-09-20-heading-pairs/AC19 — every heading, level-1 title included,
+  # counted before any level-2 filtering.
   if ($fr.Count -ne $en.Count) {
     throw "ERROR: $DocId — heading counts differ: $FrRef has $($fr.Count), $EnRef has $($en.Count)"
   }
 
+  # Equal totals at different depths would pair a French heading with the
+  # wrong English one once the level-1 titles are filtered out. Same verdict
+  # Test-ExecDocuments makes under -Check, made here too because a plain
+  # build never calls it.
   $frLevels = (@($fr | ForEach-Object { $_.Split(' ', 2)[0] }) -join ' ')
   $enLevels = (@($en | ForEach-Object { $_.Split(' ', 2)[0] }) -join ' ')
   if ($frLevels -cne $enLevels) {
@@ -250,12 +261,14 @@ function Write-ExecHeadingGroup {
   for ($i = 0; $i -lt $fr.Count; $i++) {
     $parts = $fr[$i].Split(' ', 2)
     $lvl = [int]$parts[0]
-    if ($lvl -lt 2) { continue }
+    if ($lvl -lt 2) { continue }        # 2026-09-20-heading-pairs/AC6 — level-1 titles never appear
     $marker = '#' * $lvl
     $frText = ConvertTo-TableCell $parts[1]
     $enText = ConvertTo-TableCell $en[$i].Split(' ', 2)[1]
     $rows.Add("| $marker $frText | $marker $enText |")
   }
+  # 2026-09-20-heading-pairs/AC3 / AC7 — a block whose only heading is its
+  # title contributes no group.
   if ($rows.Count -eq 0) { return '' }
 
   $sb = "`n## $DocId`n`n``$Path```n`n| Français | English |`n| --- | --- |`n"
@@ -263,21 +276,29 @@ function Write-ExecHeadingGroup {
   return $sb
 }
 
-# Mirrors build.sh's generate_exec_heading_pairs. WriteAllText with explicit
-# "`n" joins, never Set-Content: the latter would rewrite every line ending
-# as CRLF and break AC21's byte-identity.
+# 2026-09-20-heading-pairs/AC1-AC10, AC15-AC20. Mirrors build.sh's
+# generate_exec_heading_pairs: reads the registry once per staged skill and
+# writes the locale's preamble followed by the generated table. Called from
+# New-SkillStage, so every ZIP carries the result.
 function New-ExecHeadingPairs {
   param([string]$Locale, [string]$OutPath)
 
-  if (-not (Test-Path -LiteralPath $ExecDocsTsv)) {
+  if (-not (Test-Path -LiteralPath $ExecDocsTsv -PathType Leaf)) {
     throw 'ERROR: skills/exec-documents.tsv — exec-facing document registry not found'
   }
   $preamble = Join-Path (Join-Path $SharedDir $Locale) 'exec-document-headings.md'
-  if (-not (Test-Path -LiteralPath $preamble)) {
+  if (-not (Test-Path -LiteralPath $preamble -PathType Leaf)) {
     throw "ERROR: skills/shared/$Locale/exec-document-headings.md not found"
   }
 
-  $text = [System.IO.File]::ReadAllText($preamble)
+  # ReadAllBytes, not ReadAllText: the latter auto-detects and strips a BOM,
+  # and there would be nothing downstream to restore it — WriteAllText always
+  # emits BOM-less UTF-8. Mirrors bash's `cp "$preamble" "$out"`, which
+  # preserves the preamble's bytes exactly, BOM included, as its starting
+  # point. The generated groups are appended as their own UTF-8 (no BOM)
+  # bytes, then both byte arrays are written out together.
+  $preambleBytes = [System.IO.File]::ReadAllBytes($preamble)
+  $generated = ''
 
   $lineNo = 0
   foreach ($rawLine in [System.IO.File]::ReadAllLines($ExecDocsTsv)) {
@@ -292,16 +313,22 @@ function New-ExecHeadingPairs {
 
     $docId = $cols[0]; $path = $cols[1]
     $dashes = @($cols[2], $cols[3], $cols[4], $cols[5] | Where-Object { $_ -ceq '-' }).Count
+    # 2026-09-20-heading-pairs/AC10 — a document described in prose carries
+    # '-' in all four columns.
     if ($dashes -eq 4) { continue }
     if ($dashes -ne 0) {
       throw "ERROR: $docId — template columns are partly '-': a document described in prose carries '-' in all four"
     }
 
-    $text += Write-ExecHeadingGroup -DocId $docId -Path $path `
+    $generated += Write-ExecHeadingGroup -DocId $docId -Path $path `
       -FrRef $cols[2] -FrBlock $cols[3] -EnRef $cols[4] -EnBlock $cols[5]
   }
 
-  [System.IO.File]::WriteAllText($OutPath, $text)
+  $generatedBytes = [System.Text.Encoding]::UTF8.GetBytes($generated)
+  $allBytes = New-Object byte[] ($preambleBytes.Length + $generatedBytes.Length)
+  [Array]::Copy($preambleBytes, 0, $allBytes, 0, $preambleBytes.Length)
+  [Array]::Copy($generatedBytes, 0, $allBytes, $preambleBytes.Length, $generatedBytes.Length)
+  [System.IO.File]::WriteAllBytes($OutPath, $allBytes)
 }
 
 # 2026-09-19-headings/AC22 — the same verdicts as build.sh's

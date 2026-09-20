@@ -1609,6 +1609,54 @@ else
 fi
 rm -rf "$d"
 
+# --- 2026-09-20-heading-pairs/AC21: build.sh and build.ps1 emit
+# byte-identical generated references from the same fixture. This is the
+# only CI job where both interpreters exist — scripts/tests/build_test.ps1's
+# only home is windows-latest, which has neither `unzip` nor the coreutils
+# toolchain build.sh needs (2026-09-20-heading-pairs/B-1) — so it is the only
+# place this comparison can run at all. cmp -s is a byte comparison, not a
+# line comparison (2026-09-20-heading-pairs/B-2): a stripped trailing
+# newline, a CRLF conversion, or a stray BOM must all fail it. Runs entirely
+# inside its own fixture directory, never the real repo's dist/
+# (2026-09-20-heading-pairs/B-7) — two sequential builds of the same fixture,
+# never concurrent, so there is no race either.
+d="$(make_fixture_repo)"
+cp "$REPO_ROOT/scripts/build.ps1" "$d/scripts/build.ps1"
+
+( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
+sh_rc=$?
+mkdir -p "$d/sh-out"
+if [[ "$sh_rc" -eq 0 ]]; then
+  for z in atelier-ventes-fr.zip atelier-sales-en.zip; do
+    unzip -p "$d/dist/$z" references/exec-document-headings.md > "$d/sh-out/$z.md" 2>/dev/null
+  done
+fi
+rm -rf "$d/dist"
+
+( cd "$d" && pwsh -File scripts/build.ps1 -Lang all >/dev/null 2>&1 )
+ps_rc=$?
+mkdir -p "$d/ps-out"
+if [[ "$ps_rc" -eq 0 ]]; then
+  for z in atelier-ventes-fr.zip atelier-sales-en.zip; do
+    unzip -p "$d/dist/$z" references/exec-document-headings.md > "$d/ps-out/$z.md" 2>/dev/null
+  done
+fi
+
+if [[ "$sh_rc" -eq 0 && "$ps_rc" -eq 0 ]]; then
+  pass "2026-09-20-heading-pairs/AC21 both build scripts build the fixture cleanly"
+else
+  fail "2026-09-20-heading-pairs/AC21 a build script failed on the fixture (sh_rc=$sh_rc, ps_rc=$ps_rc)"
+fi
+
+for z in atelier-ventes-fr.zip atelier-sales-en.zip; do
+  if cmp -s "$d/sh-out/$z.md" "$d/ps-out/$z.md"; then
+    pass "2026-09-20-heading-pairs/AC21 $z heading-pair reference is byte-identical across build scripts"
+  else
+    fail "2026-09-20-heading-pairs/AC21 $z heading-pair reference differs between build.sh and build.ps1"
+  fi
+done
+rm -rf "$d"
+
 # AC7 — a row whose template block holds only a level-1 title yields no group.
 d="$(make_fixture_repo)"
 cat > "$d/skills/atelier-ventes/fr/titre.md" <<'EOF'
