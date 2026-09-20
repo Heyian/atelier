@@ -242,7 +242,11 @@ modules covered*. / Je laisserais tels quels : *Where I'm at right now*
 l'écrit, donc j'y touche pas) et *What I want to try next* (une section à
 toi, je n'ai pas de modèle pour ça). » Both offers name both lists before
 the write, and both distinguish the renamed section from the
-executive-authored one by reason.
+executive-authored one by reason. What the tick rests on is narrower than
+the box's "on every offer": two offers, both over documents that carried a
+renamed section and an executive-added section, so both had an exception to
+name — no offer over a document with no exception in it was observed in this
+run.
 
 **"The document's level-1 title survives an accepted rewrite unchanged."**
 Ticked, both directions. `# Progression IA — Solutions FVR` and `# AI
