@@ -1386,5 +1386,56 @@ else
 fi
 rm -rf "$d"
 
+# --- 2026-09-19-headings/AC19: one locale's template drops a section
+d="$(make_fixture_repo)"
+sed -i '/^## Ce qui bloque$/d' "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_check_fail "$d" 'pipeline-doc — heading counts differ' \
+  "2026-09-19-headings/AC19 a dropped section fails, naming doc-id and both files"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC20: same count, one heading at a different depth
+d="$(make_fixture_repo)"
+sed -i 's/^## What is stuck$/### What is stuck/' "$d/skills/atelier-ventes/en/references/template.md"
+expect_check_fail "$d" 'pipeline-doc — heading levels differ' \
+  "2026-09-19-headings/AC20 a changed depth fails"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC20: same count and depths, different order
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/en/references/template.md" <<'EOF'
+# Pipeline review template
+
+```markdown
+## Where the pipeline stands
+
+# Pipeline review — <company>
+
+## What is stuck
+
+## Next follow-ups
+```
+EOF
+expect_check_fail "$d" 'pipeline-doc — heading levels differ' \
+  "2026-09-19-headings/AC20 a reordered depth sequence fails"
+rm -rf "$d"
+
+# --- 2026-09-19-headings/AC21: a '-' row is neither compared nor failed
+d="$(make_fixture_repo)"
+printf 'prose-doc\t{root}/docs/atelier/decisions.md\t-\t-\t-\t-\n' >> "$d/skills/exec-documents.tsv"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]] && ! grep -qF 'prose-doc' <<<"$out"; then
+  pass "2026-09-19-headings/AC21 a '-' row produces neither failure nor comparison"
+else
+  fail "2026-09-19-headings/AC21 '-' row was not skipped (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
+# --- Review Focus 5: a template block left open at EOF
+d="$(make_fixture_repo)"
+sed -i '$ d' "$d/skills/atelier-ventes/fr/references/modele.md"   # drop the closing fence
+expect_check_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md template block 1 is never closed' \
+  "Review Focus 5 an unclosed template block fails rather than comparing a truncated list"
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi

@@ -419,8 +419,23 @@ check_exec_document_row() {
     esac
   done
 
-  # --- Task 5 replaces the two lines below with the parity comparison.
   [[ "$ok" -eq 1 ]] || return 0
+
+  # 2026-09-19-headings/AC19, AC20 — identical sequence of heading levels:
+  # same number of headings, at the same depths, in the same order. No script
+  # can compare a French heading to an English one for meaning; this proves
+  # the two templates are structurally the same document, which is the
+  # property reading-by-meaning depends on.
+  if [[ "$fr_levels" != "$en_levels" ]]; then
+    local fr_n en_n
+    fr_n="$(wc -w <<<"$fr_levels")"
+    en_n="$(wc -w <<<"$en_levels")"
+    if [[ "$fr_n" -ne "$en_n" ]]; then
+      check_fail "$doc_id — heading counts differ: $fr_ref has $fr_n, $en_ref has $en_n"
+    else
+      check_fail "$doc_id — heading levels differ: $fr_ref [$fr_levels], $en_ref [$en_levels]"
+    fi
+  fi
 }
 
 # --- 2026-09-19/AC12, AC13 — every *.md at any depth under
