@@ -150,7 +150,11 @@ reusing the same `FENCE_AWK_LIB` helpers. It walks to the requested 1-based
 fenced `markdown` block by the same rule — entering every fence so a ```bash
 block quoting a ```markdown opener is not miscounted — strips a trailing `\r`
 so a CRLF checkout behaves like an LF one, and emits each ATX heading's level
-and text rather than its level alone. It returns the same `MISSING` and
+and text rather than its level alone. The text is what remains after the
+heading's leading indentation, its marker, and the whitespace between them are
+removed — `atx_level()` already accepts up to three leading spaces, a tab
+separator and a marker with nothing after it, so extraction has to define all
+three rather than assume one space. It returns the same `MISSING` and
 `UNCLOSED` sentinels on the same conditions.
 
 `generate_exec_heading_pairs()` reads `skills/exec-documents.tsv` once per
@@ -165,7 +169,8 @@ It **`die`s**, failing the build rather than only `--check`, when:
 - a named reference file does not exist;
 - a block index is not a positive integer, or the block is `MISSING` or
   `UNCLOSED`;
-- the two sides of a row yield different heading counts.
+- the two sides of a row yield different total heading counts, level-1 titles
+  included — the same basis `exec_doc_headings()` already compares on.
 
 This matches what `stage_skill()` already does for a missing `SKILL.md` or a
 frontmatter name that disagrees with `names.tsv`. `check_exec_documents()`
@@ -219,6 +224,11 @@ it is a decision already made rather than one taken under pressure mid-run.
 
 ## Acceptance Criteria
 
+AC36 and AC37 were added after the 2026-09-20 cross-model critique and
+carry the next free ids rather than renumbering the criteria they sit
+beside, so every id already written here stays stable. AC11, AC19, AC27,
+AC30 and AC31 were sharpened in the same pass.
+
 ### The generated file
 
 - **AC1** — Every ZIP produced by `bash scripts/build.sh --lang all` and by
@@ -248,8 +258,12 @@ it is a decision already made rather than one taken under pressure mid-run.
 ### Extraction
 
 - **AC11** — Given a reference file whose target `markdown` block contains
-  headings, text extraction returns each heading's level and its text with the
-  ATX marker and its following space removed.
+  headings, text extraction returns each heading's level and the text remaining
+  once its leading indentation, its ATX marker, and the whitespace separating
+  marker from text are removed. A heading whose marker is followed by a tab
+  rather than a space, or by up to three leading spaces before the marker,
+  yields the same text as its unindented space-separated form; a heading with
+  nothing after its marker yields empty text.
 - **AC12** — Given a reference file checked out with CRLF line endings,
   extraction returns the same heading text as the LF checkout, with no trailing
   carriage return.
@@ -273,8 +287,9 @@ it is a decision already made rather than one taken under pressure mid-run.
   `UNCLOSED` on either side, a build exits non-zero naming the document id and
   the file.
 - **AC19** — Given a registry row whose two locales' template blocks yield
-  different heading counts, a build exits non-zero naming the document id and
-  both counts.
+  different total heading counts — every heading the block holds, level-1 title
+  included, counted before any level-2-and-deeper filtering — a build exits
+  non-zero naming the document id and both totals.
 - **AC20** — Every failure in AC15–AC19 occurs on `bash scripts/build.sh --lang
   all` and on `./scripts/build.ps1 -Lang all`, not only under `--check`.
 
@@ -299,6 +314,11 @@ it is a decision already made rather than one taken under pressure mid-run.
   rewrite and the headings it will leave.
 - **AC25** — Both files state that where the reader has no template for a
   document, every heading is left as written.
+- **AC37** — `tests/_cross-skill/changement-de-langue.md` carries an
+  expected-behaviour box for the rewrite offer naming both the headings it will
+  rewrite and the headings it will leave, and a box for a renamed heading
+  surviving an accepted rewrite with the heading-pair reference present, each
+  in both directions.
 - **AC26** — `scripts/tests/shared_test.sh` asserts that
   `skills/shared/<locale>/exec-document-headings.md` exists and is non-empty in
   both locales, and passes.
@@ -306,20 +326,29 @@ it is a decision already made rather than one taken under pressure mid-run.
 ### Behaviour, verified by dispatch
 
 - **AC27** — Given an accepted heading rewrite on a document where the executive
-  renamed one of the template's own sections, that section's heading and body
+  renamed one of the template's own sections to a heading matching neither
+  locale's template spelling for that section, that section's heading and body
   survive unchanged, in both directions of the locale switch.
 - **AC28** — Given a rewrite offer on such a document, the offer names both the
   headings it will rewrite and the headings it will leave, in both directions.
 - **AC29** — Given an accepted heading rewrite on a document carrying a section
   the executive added themselves, that section's heading and body survive
   unchanged and no section is reordered, in both directions.
+- **AC36** — Given an accepted heading rewrite on a document that does have a
+  template, the document's level-1 title survives unchanged, in both
+  directions. AC6 keeps level-1 headings out of the heading-pair reference, so
+  a title never has a comparable template spelling to be rewritten toward.
 - **AC30** — Each direction is dispatched at most twice after the fix lands.
-  Every verdict comes from `diff` against the seeded file checked on disk, never
+  AC27, AC29 and AC36 are verdicted from `diff` against the seeded file checked
+  on disk; AC28 is verdicted from the offer as recorded in the dispatch
+  transcript, because offer wording never appears in a diff. No verdict comes
   from an agent's self-report, and each dispatch leaves a transcript committed
   under `tests/_cross-skill/runs/changement-de-langue/<date>-<kind>.md` before
   any box is ticked.
-- **AC31** — If AC27 or AC28 is still unmet when the budget in AC30 is spent,
-  the box carries its stated reason in the run's `## Verification notes`, a
+- **AC31** — A direction counts as passing only when one single dispatch
+  satisfies both AC27 and AC28; satisfying them across two separate attempts
+  does not count. If either direction has no such dispatch when the budget in
+  AC30 is spent, the box carries its stated reason in the run's `## Verification notes`, a
   successor issue is filed with all four body sections recording what the pair
   table and the rewritten example changed, and no acceptance criterion in this
   spec or in `2026-09-19-exec-document-headings-design.md` is weakened to match
@@ -454,7 +483,7 @@ console.
 >
 > ### Before finishing the branch (advisory cross-model review)
 >
-> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC35) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
+> After the final build passes — and before wrapping up via `superpowers:finishing-a-development-branch` — if a cross-model review helper is available (e.g. the Codex plugin's adversarial review), run it with focus: *"Judge correctness against the spec's acceptance criteria (AC1–AC37) only. Do not flag anything outside the stated criteria — no design alternatives, hardening, or scope the spec did not claim."*
 >
 > This **never gates a merge** — the gate stays `bash scripts/build.sh --check` plus the four test scripts and `bash scripts/build.sh --lang all`; the review only flags what deserves a second look. If no helper is available, finish the branch without it.
 
