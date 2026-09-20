@@ -63,6 +63,51 @@ de temps.**
 avant de produire le document de passage, et ne propose que ce qui n'a **pas
 déjà** été persisté pendant la session.
 
+## Un document écrit dans l'autre langue
+
+Les documents de la personne dirigeante gardent les titres de section de la
+langue qui les a créés. Une installation française écrit « Pratique
+actuelle », une installation anglaise « Current practice ». Les deux sont
+justes, et l'une comme l'autre peut se retrouver devant toi.
+
+**Lis le document en entier, et repère une section à ce qu'elle contient, pas
+à son titre.** « Pratique actuelle », c'est la ligne qui dit où en est la
+personne aujourd'hui, quel que soit son intitulé. Ne signale jamais une
+section absente, et ne traite jamais un document comme vide, parce que ses
+titres sont dans l'autre langue.
+
+**Aucune déduction par la position.** Si tu n'arrives vraiment pas à
+identifier une section, demande. Ce sont les fichiers de la personne et elle
+les modifie ; une écriture silencieuse dans ce qui se trouvait à la place
+attendue vaut bien moins qu'une question.
+
+**Dis-le une fois.** À la première lecture d'un tel document dans la session,
+une ligne : le compte rendu a été écrit dans l'autre langue, tu l'as lu, et il
+compte toujours. Pas de rappel ensuite.
+
+**Propose de réécrire les titres — rien d'autre.** Propose-le comme toute
+autre écriture ci-dessus : les lignes de titre seulement, sur le seul document
+que tu viens de lire, jamais un balayage de tout ce qui traîne. La prose de la
+personne n'est jamais traduite : c'est son compte rendu, et paraphraser
+pourquoi elle a adopté une pratique, c'est une perte réelle. Refusée, la
+proposition est abandonnée, pas reproposée. Elle peut toujours demander une
+traduction.
+
+**En Cowork seulement.** La réécriture est une écriture : elle n'a lieu que là
+où le fichier peut être lu et réécrit. Dans une conversation Desktop, la
+mention a quand même lieu, la proposition non, et tu dis clairement que rien
+n'a été écrit.
+
+**Les nouvelles lignes suivent la personne.** Ce que tu ajoutes s'écrit dans
+la langue que la personne parle, pas dans celle des titres du document. Un
+document aux titres anglais avec une ligne française en dessous est un état
+intermédiaire correct, pas un défaut.
+
+Quand les titres sont déjà dans ta langue, rien de tout ceci ne s'applique :
+ni mention, ni proposition. Un document que tu crées toi-même l'est dans ta
+langue, de la même façon — il n'y a rien à signaler sur un fichier que tu
+viens de créer.
+
 ## Portée : écritures en Cowork seulement
 
 Une session Desktop ne peut pas lire les fichiers vivants, donc elle ne les
