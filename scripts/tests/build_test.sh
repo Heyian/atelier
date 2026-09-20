@@ -1325,6 +1325,18 @@ else
 fi
 rm -rf "$d"
 
+# --- Review Focus 3b: a CRLF template file is read the same as an LF one
+d="$(make_fixture_repo)"
+awk '{ printf "%s\r\n", $0 }' "$d/skills/atelier-ventes/fr/references/modele.md" > "$d/tmp.md"
+mv "$d/tmp.md" "$d/skills/atelier-ventes/fr/references/modele.md"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "Review Focus 3b a CRLF template file is read the same as an LF one"
+else
+  fail "Review Focus 3b CRLF template file failed (out=$out)"
+fi
+rm -rf "$d"
+
 # --- Review Focus 4: the same reference file named for both locales
 d="$(make_fixture_repo)"
 sed -i 's|skills/atelier-ventes/en/references/template.md|skills/atelier-ventes/fr/references/modele.md|' \
@@ -1338,6 +1350,40 @@ d="$(make_fixture_repo)"
 rm -f "$d/skills/exec-documents.tsv"
 expect_check_fail "$d" 'skills/exec-documents.tsv — exec-facing document registry not found' \
   "2026-09-19-headings/AC17 an absent registry fails by name"
+rm -rf "$d"
+
+# --- Review Focus 6: a bash block quoting a markdown opener is not counted
+# as a template block. The quoted opener uses four backticks (the bash fence
+# itself uses three) so that, were the "enter every fence, target or not"
+# behaviour broken, the resulting phantom block would run unclosed to EOF
+# (nothing later in the file has a four-backtick bare closer) rather than
+# just silently swallowing the wrong content — a difference this check's
+# MISSING/UNCLOSED reporting can actually observe.
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/en/references/template.md" <<'EOF'
+# Pipeline review template
+
+```bash
+# quoting a template fence opener as an example, not a real block:
+````markdown
+```
+
+```markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+```
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "Review Focus 6 a bash block quoting a markdown opener is not counted as a template block"
+else
+  fail "Review Focus 6 bash-quoted opener miscounted (rc=$rc, out=$out)"
+fi
 rm -rf "$d"
 
 echo
