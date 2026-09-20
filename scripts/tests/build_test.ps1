@@ -924,6 +924,52 @@ foreach ($z in @('atelier-ventes-fr.zip', 'atelier-sales-en.zip')) {
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# --- 2026-09-20-heading-pairs/AC20: a registry defect fails a plain
+# `-Lang all` build, not only `-Check`.
+#
+# Every other failure case in this suite goes through Expect-CheckFail, which
+# runs `-Check`. AC20 names `./scripts/build.ps1 -Lang all` explicitly, and a
+# plain build never calls Test-ExecDocuments — the validation it relies on
+# lives inside Write-ExecHeadingGroup, reached through New-SkillStage. Nothing
+# asserted that until now. The byte-identity constraint that pushed AC21 over
+# to build_test.sh (2026-09-20-heading-pairs/B-1) does not apply here: this
+# assertion needs neither `unzip` nor bash, so it belongs in this suite.
+#
+# One representative case is enough — the mismatched-heading-counts path,
+# which is the generator's own check rather than a file-system precondition,
+# so it can only be reached by the generator actually running during a build.
+#
+# Expect-BuildFail is the build-time twin of Expect-CheckFail: same two-part
+# assertion (non-zero exit AND the exact message), so a fixture that dies for
+# an unrelated reason cannot pass by accident.
+function Expect-BuildFail([string]$Dir, [string]$Needle, [string]$Label) {
+  $r = Invoke-FixturePwsh $Dir '-Lang all'
+  if ($r.ExitCode -ne 0 -and $r.Output.Contains($Needle)) { Add-Pass $Label }
+  else { Add-Failure "$Label (exit=$($r.ExitCode), out=$($r.Output))" }
+}
+
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md') {
+  param($t) $t -replace "(?m)^## Prochaines relances\r?\n", ''
+}
+Expect-BuildFail $d `
+  'pipeline-doc — heading counts differ: skills/atelier-ventes/fr/references/modele.md has 3, skills/atelier-ventes/en/references/template.md has 4' `
+  '2026-09-20-heading-pairs/AC20 a registry defect fails a plain -Lang all build, naming both totals (ps1)'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# The discriminating half: the same `-Lang all` build over an UNBROKEN fixture
+# must exit 0 and must NOT carry that message. Without this, an
+# Expect-BuildFail that passed because the fixture cannot build at all would
+# look identical to one that passed for the stated reason.
+$d = New-FixtureRepo
+$r = Invoke-FixturePwsh $d '-Lang all'
+if ($r.ExitCode -eq 0 -and -not $r.Output.Contains('heading counts differ')) {
+  Add-Pass '2026-09-20-heading-pairs/AC20 the unbroken fixture builds clean, so the failure above is the defect and not the fixture (ps1)'
+} else {
+  Add-Failure "2026-09-20-heading-pairs/AC20 the unbroken fixture did not build clean (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
 Write-Host ''
 if ($script:Failures -eq 0) { Write-Host 'STATUS: PASS'; exit 0 }
 Write-Host "STATUS: FAIL ($script:Failures)"
