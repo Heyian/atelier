@@ -233,8 +233,9 @@ to carry it:
   heading as an *example* is fine — as the thing to grep for, it is a bug.
 - Never tell a reader a section is missing, or a document empty, on the
   strength of a title it did not recognize.
-- The general rule — disclose once, offer a heading-only rewrite, Cowork only,
-  new lines in the executive's language — lives in
+- The general rule — disclose once, offer a heading-only rewrite, leave the
+  headings the executive wrote or renamed alone, Cowork only, new lines in the
+  executive's language — lives in
   `skills/shared/<locale>/memory-protocol.md`. Don't restate it in a skill
   body; the build copies it into every ZIP.
 

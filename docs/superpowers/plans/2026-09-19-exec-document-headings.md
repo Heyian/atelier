@@ -1,5 +1,17 @@
 # Exec-facing document section headings Implementation Plan
 
+> **Superseded in part, 2026-09-20.** This plan was executed on branch
+> `locale-exec-headings`; its checkboxes were never ticked and do not reflect
+> what shipped. Afterwards the rewrite rule gained a carve-out this plan does
+> not describe: a heading is rewritten only when the reader placed that
+> section as one of its own **and** it is spelled the way its template spells
+> it, so a section the executive added and a template section they renamed
+> both survive untouched. The quoted rule text below — notably the ADR
+> *Decision §4* block and the `memory-protocol.md` block — predates that
+> change and is kept as the record of what was planned. For the current rule
+> read `docs/adr/0016-exec-facing-document-section-headings.md` and
+> `skills/shared/{fr,en}/memory-protocol.md`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Let a skill read an exec-facing document whose section headings are in

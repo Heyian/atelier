@@ -83,6 +83,15 @@ What changes is how a document is read:
    only. The executive's own prose is never translated: it is their record, and
    a paraphrase of why they adopted a practice is a real loss. They can always
    ask for a translation.
+
+   Their headings are theirs on the same grounds. A heading is rewritten only
+   when the reader placed that section as one of its own **and** it is spelled
+   the way its template spells it, in one locale or the other. A section they
+   added and a template section they renamed both keep heading and body,
+   nothing is reordered, and the offer names the exception on a document that
+   carries one. Being unable to place a section is not a reason to ask here:
+   §2 governs writing *into* a section, and leaving a heading alone is not a
+   write.
 5. **Cowork only.** The offer is a write, and writes happen only where the
    files can be read and rewritten. In a Desktop chat session the disclosure
    still happens; the offer does not, and the session says plainly that nothing
@@ -231,7 +240,8 @@ boxes are ticked.
 ## Non-goals
 
 - **Translating the executive's own content.** The offer rewrites heading lines
-  only (*Decision §1.4*).
+  only (*Decision §1.4*) — and not every heading line either: the ones the
+  executive wrote or renamed stay as they wrote them.
 - **Sweeping every document in one offer.** One document per offer, proposed by
   whichever skill read it.
 - **Renaming any path.** ADR-0016 corrects ADR-0007's wording; no file moves.
