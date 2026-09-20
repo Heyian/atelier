@@ -47,14 +47,14 @@ the executive writing: *« On peut reprendre le tutoriel où on était rendu ? �
 - [x] A declined rewrite leaves the whole file byte-identical
 - [x] A section the executive added themselves survives an accepted rewrite —
   heading and body both — and is not reordered
-- [ ] A template section the executive renamed survives an accepted rewrite the
+- [x] A template section the executive renamed survives an accepted rewrite the
   same way — heading and body both — with `references/exec-document-headings.md`
   present in the ZIP and the renamed heading matching neither locale's spelling
   of that section
-- [ ] The rewrite offer names both lists: the headings it will rewrite and the
+- [x] The rewrite offer names both lists: the headings it will rewrite and the
   headings it will leave, on every offer, not only where it noticed an
   exception
-- [ ] The document's level-1 title survives an accepted rewrite unchanged, on a
+- [x] The document's level-1 title survives an accepted rewrite unchanged, on a
   document that does have a template
 - [x] Lines appended in session 2 are written in the language the executive is
   speaking, not the document's heading language
@@ -192,3 +192,71 @@ and A attempt 2 appended modules 6 and 7 the same way. In Dispatch B the
 rewrite had already made the headings French, so heading language and speaker
 language coincide and that direction proves nothing on its own. #41, filed for
 this box, is closed by A's evidence.
+
+## Verification notes — 2026-09-20 heading pairs
+
+Transcripts:
+`runs/changement-de-langue/2026-09-20-verification-heading-pairs-en-reads-fr.md`
+(English install reads a French document) and
+`runs/changement-de-langue/2026-09-20-verification-heading-pairs-fr-reads-en.md`
+(French install reads an English document).
+
+This run tests the three boxes the 2026-09-20 executive-added-and-renamed
+run left unticked, against the first ZIPs to carry the generated
+`references/exec-document-headings.md` — the both-spellings table for every
+templated document — and the rewrite rule rewritten to point at it. One
+dispatch per direction, against a budget fixed in advance at two
+(`2026-09-20-heading-pairs/AC30`); neither direction used its second.
+
+Each sandbox held one file, `docs/atelier/progression.md`, seeded with the
+five `progression` template sections in one locale's spellings **except**
+"Current practice" / « Pratique actuelle », renamed by the executive to a
+spelling in neither column of the pair table (`## Où j'en suis vraiment` in
+the French seed, `## Where I'm at right now` in the English one), plus a
+section of the executive's own (`## Ce que je veux tester ensuite` /
+`## What I want to try next`) and the level-1 title as the template writes
+it. The executive accepted the rewrite in both directions. Every verdict
+below is from `diff -u` against the seed on disk, or from the offer text in
+the transcript — not from either dispatch's self-report.
+
+**"A template section the executive renamed survives an accepted rewrite the
+same way."** Ticked, both directions, one dispatch each. Neither diff
+contains the renamed heading or its body: the English-install rewrite
+changed four heading lines (`## Pratiques adoptées` → `## Practices
+adopted`, `## Difficultés exprimées` → `## Stated struggles`, `## Prochaine
+étape convenue` → `## Agreed next step`, `## Modules du tutoriel couverts` →
+`## Tutorial modules covered`) and nothing else; the French-install rewrite
+changed the same four lines in the other direction. This is the direction
+that failed three attempts out of three before the pair table shipped, and
+its dispatch named the table by path as what it compared against.
+
+**"The rewrite offer names both lists."** Ticked, both directions, on the
+offer text quoted in each transcript. English install: "**Would rewrite:**
+"Pratiques adoptées," "Difficultés exprimées," "Prochaine étape convenue,"
+"Modules du tutoriel couverts" / **Would leave alone:** "Où j'en suis
+vraiment" and "Ce que je veux tester ensuite" — these don't match my
+template's wording in either language". French install: « Je réécrirais :
+*Practices adopted*, *Stated struggles*, *Agreed next step*, *Tutorial
+modules covered*. / Je laisserais tels quels : *Where I'm at right now*
+(c'est ta pratique actuelle, mais tu ne l'as pas écrit comme mon modèle
+l'écrit, donc j'y touche pas) et *What I want to try next* (une section à
+toi, je n'ai pas de modèle pour ça). » Both offers name both lists before
+the write, and both distinguish the renamed section from the
+executive-authored one by reason.
+
+**"The document's level-1 title survives an accepted rewrite unchanged."**
+Ticked, both directions. `# Progression IA — Solutions FVR` and `# AI
+progression — Solutions FVR` are absent from their diffs; the pair table
+states in its own preamble that level-1 titles are not listed and stay as
+written.
+
+Also re-confirmed in passing, not re-ticked: the executive's own added
+section survived both rewrites, heading and body, and neither diff reorders
+a section — both diffs are four one-line heading substitutions inside a
+single hunk, with the surrounding prose as context.
+
+One deviation from `tests/README.md` worth recording: its "sandbox seeds are
+invented" rule asks for fictional companies, and these two seeds name
+Solutions FVR. They were seeded verbatim from the task brief, which fixed
+both documents' text in advance so the renamed heading and the added section
+would be identical across directions.
