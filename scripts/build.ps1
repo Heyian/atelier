@@ -178,7 +178,13 @@ function Get-DatedClaimRecords {
             $verdict = 'future-date'
           } elseif (-not $tail.StartsWith($sep, [System.StringComparison]::Ordinal)) {
             $verdict = 'no-source'
-          } elseif ($tail.Substring($sep.Length).Trim() -eq '') {
+          } elseif (($tail.Substring($sep.Length) -replace '[ \t]', '') -eq '') {
+            # Same class as the fence closer above: only spaces/tabs count as
+            # blank here, matching build.sh:353's `gsub(/[ \t]/, "", src)`. A
+            # plain .Trim() also strips U+00A0 and other Unicode whitespace,
+            # so a source segment that is only a stray NBSP reads as present
+            # in bash (verdict "ok") but empty in PowerShell (verdict
+            # "no-source") — a false CI failure on a valid file.
             $verdict = 'no-source'
           }
         }

@@ -942,6 +942,25 @@ else
 fi
 rm -rf "$d"
 
+# Case I (regression: same root cause as Case D, found sweeping build.ps1 for
+# every other place it mirrors awk's `[ \t]` class, in the *opposite,
+# more dangerous* direction — a valid file failing CI instead of a stale
+# claim staying hidden). CommonMark 4.5's blank test recognizes only literal
+# spaces or tabs. A source segment that is only U+00A0 (NBSP) is therefore
+# NOT blank, so the annotation is valid and the check must pass.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references/tutorial"
+day="$(days_ago 10)"
+printf '# Module\n\n> **Last verified %s** — source: \xc2\xa0\n' "$day" \
+  > "$d/skills/atelier-ventes/en/references/tutorial/03.md"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
+if [[ "$rc" -eq 0 ]]; then
+  pass "Case I: a source segment of only U+00A0 is not blank, the check passes"
+else
+  fail "Case I: a source segment of only U+00A0 wrongly failed as no-source (rc=$rc, out=$out)"
+fi
+rm -rf "$d"
+
 # --- AC55: the clean fixture passes, with the exact PASS line
 d="$(make_fixture_repo)"
 out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1

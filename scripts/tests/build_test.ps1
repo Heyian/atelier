@@ -706,6 +706,25 @@ if ($r.Output.Contains('dated claims: 2 annotations across 2 files')) {
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# Case I (regression: same root cause as Case D, found sweeping build.ps1 for
+# every other place it mirrors awk's `[ \t]` class, in the *opposite, more
+# dangerous* direction — a valid file failing CI instead of a stale claim
+# staying hidden). CommonMark 4.5's blank test recognizes only literal spaces
+# or tabs. A source segment that is only U+00A0 (NBSP) is therefore NOT
+# blank, so the annotation is valid and the check must pass.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references/tutorial') | Out-Null
+$day = Get-DaysAgo 10
+$content = "# Module`n`n> **Last verified $day** $emdash source: $nbsp`n"
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/tutorial/03.md') $content
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) {
+  Add-Pass 'Case I: a source segment of only U+00A0 is not blank, the check passes'
+} else {
+  Add-Failure "Case I: a source segment of only U+00A0 wrongly failed as no-source (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
 # --- 2026-09-19/AC24: the summary line matches bash's, in both its forms
 $d = New-FixtureRepo
 $r = Invoke-FixtureCheck $d
