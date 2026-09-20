@@ -245,33 +245,43 @@ boxes are ticked.
 ### The rule as recorded
 
 - **AC1** — `docs/adr/0016-exec-facing-document-section-headings.md` exists,
-  Status `Accepted — 2026-09-19`, and states all six behaviours of
-  *Decision §1*: headings localized, identify by content, no positional
-  fallback, disclose once, heading-only offer, appended content in the
+  Status `Accepted — 2026-09-19`, and states the localization rule of
+  *Decision §1* together with all six of its numbered behaviours: read in
+  full and identify by content, no positional fallback, disclose once,
+  heading-only offer, offer in Cowork only, appended content in the
   executive's language.
 - **AC2** — ADR-0016 states the path invariant as one spelling in both locales
   with French as the tiebreaker, and names at least three of the English or
   locale-neutral canonical paths in use today.
 - **AC3** — `docs/adr/0007-exec-facing-document-paths.md` keeps Status
-  `Accepted` and carries a pointer to ADR-0016.
-- **AC4** — No exec-facing document path changes: `git diff` on the branch
-  contains no change to a `{root}/docs/...` or `{racine}/docs/...` token in
-  `skills/`.
+  `Accepted`, carries a pointer to ADR-0016, and restates its own invariant
+  as one spelling in both locales.
+- **AC4** — No exec-facing document path changes: apart from the new
+  `skills/exec-documents.tsv`, whose rows repeat paths that already exist,
+  `git diff` on the branch adds, removes or respells no `{root}/docs/...` or
+  `{racine}/docs/...` token in `skills/`.
 
 ### The shared rule text
 
 - **AC5** — `skills/shared/fr/memory-protocol.md` carries a section headed
   `## Un document écrit dans l'autre langue`, and
   `skills/shared/en/memory-protocol.md` one headed
-  `## A document written in the other language`, each authored in its own
-  locale's language rather than translated word for word.
-- **AC6** — Each of those sections states, in its own words: a section is
-  identified by what it holds rather than by its title; a section is never
+  `## A document written in the other language`, each written wholly in its
+  own locale's language. (That each locale's file is *authored* in that
+  language rather than translated from the other is an authoring rule, held
+  under "Repo-specific notes for the plan author"; it is not machine-checkable
+  and so is not asserted here.)
+- **AC6** — Each of those sections states, in its own words: the document is
+  read in full; a section is identified by what it holds rather than by its
+  title; a section is never
   reported missing because its title is in the other language; when a section
   cannot be identified the reader asks instead of guessing by position.
-- **AC7** — Each states that the mismatch is disclosed once and that a
-  heading-only rewrite is offered as an ordinary proposed write, with the
-  executive's own prose left untouched.
+- **AC7** — Each states that the mismatch is disclosed once, the first time
+  the document is read in the session, in one line saying the record was
+  written in the other language, has been read, and still counts; and that a
+  heading-only rewrite of that one document — not a sweep of every document —
+  is offered as an ordinary proposed write, with the executive's own prose
+  left untouched.
 - **AC8** — Each states that the offer happens in Cowork only, and that a
   Desktop chat session discloses without offering and says nothing was written.
 - **AC9** — Each states that content appended to a document whose headings are
@@ -324,8 +334,10 @@ boxes are ticked.
 - **AC22** — For each mutation in AC17–AC21, `./scripts/build.ps1 -Check`
   reaches the same pass/fail verdict as `bash scripts/build.sh --check`.
 - **AC23** — `scripts/tests/build_test.sh` and `scripts/tests/build_test.ps1`
-  each gain a case that drops a section from one locale's template and expects
-  the failure, and both suites pass.
+  each gain a mutation case for every one of AC17–AC21 — a missing reference
+  file, a missing block index, a differing heading count, the same headings at
+  differing depths or in a differing order, and a `-` row — each expecting the
+  stated outcome, and both suites pass.
 
 ### The scenario
 
@@ -335,8 +347,9 @@ boxes are ticked.
   `## Verification notes`), and its `## Baseline notes` states why no baseline
   applies rather than omitting the section.
 - **AC25** — Its `## Expected behaviors` carries a box for each of: the record
-  written in the other locale is read back; no already-covered module is
-  re-offered; the mismatch is disclosed once, in the executive's language; an
+  written in the other locale is read back; all seven modules are listed with
+  the already-covered ones carrying their dates, and the recommendation names
+  only the uncovered ones; the mismatch is disclosed once, in the executive's language; an
   accepted rewrite changes heading lines only, leaving the executive's prose
   byte-identical; a declined rewrite leaves the whole file byte-identical.
 - **AC26** — Two dispatches are run — French writes / English reads, and the
@@ -348,14 +361,25 @@ boxes are ticked.
 
 ### Edge cases
 
-- **AC28** — Given no `{root}/docs/atelier/progression.md` on disk, the skill
-  creates it lazily in the current locale's headings and makes no disclosure
-  and no rewrite offer.
+- **AC28** — Given no `{root}/docs/atelier/progression.md` on disk, folder
+  access, and a first confirmed practice whose write the executive accepted,
+  the skill creates the file at that moment — never pre-created empty — with
+  the current locale's headings, and makes no disclosure and no rewrite offer.
+  Without folder access nothing is written and the session says so plainly.
 - **AC29** — Given a document whose headings are already in the current
   locale, no disclosure is made and no rewrite is offered.
 - **AC30** — Given an accepted heading rewrite on a document carrying a section
   the executive added themselves, that section's heading and body survive
   unchanged and no section is reordered.
+
+### The repository's own docs
+
+- **AC31** — `docs/AUTHORING.md` carries a `## Exec-facing document headings`
+  section stating that headings are localized, that documents are read by
+  meaning rather than by title, and that every new exec-facing document gets a
+  row in `skills/exec-documents.tsv`; `scripts/tests/authoring_test.sh`
+  requires that heading and passes; and `CLAUDE.md` carries the date-plus-slug
+  AC-citation form.
 
 ## Deferred Items
 
