@@ -126,6 +126,9 @@ stage_skill() {
   cp "$SHARED_DIR/$locale/glossary.md" "$stage/references/glossary.md"
   cp "$SHARED_DIR/$locale/memory-protocol.md" "$stage/references/memory-protocol.md"
 
+  # 2026-09-20-heading-pairs/AC1 — generated per stage, never checked in.
+  generate_exec_heading_pairs "$locale" "$stage/references/exec-document-headings.md"
+
   # AC57 — the annotation is a release-please marker, not skill metadata.
   # Strip it so the packaged SKILL.md carries a clean `version: X.Y.Z`, and
   # a naive frontmatter parser in the skill loader cannot read the version as
@@ -396,6 +399,127 @@ exec_doc_heading_text() {
       printf "%s", out       # printf, not print: an empty block emits nothing
     }
   ' "$file"
+}
+
+# Escape the one character a two-column markdown row cannot hold raw.
+esc_table_cell() { printf '%s' "${1//|/\\|}"; }
+
+# One templated registry row's group, appended to the generated file. Every
+# failure here die()s: check_exec_documents() runs only under --check, so a
+# plain `--lang all` would otherwise ship a table with a document silently
+# missing — the class of failure this file exists to close.
+emit_exec_heading_group() {
+  local doc_id="$1" path="$2" fr_ref="$3" fr_block="$4" en_ref="$5" en_block="$6"
+  local side ref block v
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"
+    else ref="$en_ref"; block="$en_block"; fi
+    [[ -f "$REPO_ROOT/$ref" ]] \
+      || die "$doc_id — $ref listed in skills/exec-documents.tsv but no such file (renamed?)"
+    [[ "$block" =~ ^[1-9][0-9]*$ ]] \
+      || die "$doc_id — $ref template block index '$block' is not a positive integer"
+  done
+
+  local fr_raw en_raw
+  fr_raw="$(exec_doc_heading_text "$REPO_ROOT/$fr_ref" "$fr_block")"
+  en_raw="$(exec_doc_heading_text "$REPO_ROOT/$en_ref" "$en_block")"
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"; v="$fr_raw"
+    else ref="$en_ref"; block="$en_block"; v="$en_raw"; fi
+    case "$v" in
+      MISSING)  die "$doc_id — $ref has no markdown template block $block" ;;
+      UNCLOSED) die "$doc_id — $ref template block $block is never closed" ;;
+    esac
+  done
+
+  # mapfile on an empty string yields a one-element array holding "", so an
+  # empty block would count as one heading. Guard both sides explicitly.
+  local -a fr_all=() en_all=()
+  [[ -n "$fr_raw" ]] && mapfile -t fr_all <<<"$fr_raw"
+  [[ -n "$en_raw" ]] && mapfile -t en_all <<<"$en_raw"
+
+  # 2026-09-20-heading-pairs/AC19 — every heading, level-1 title included,
+  # counted before any level-2 filtering.
+  if [[ "${#fr_all[@]}" -ne "${#en_all[@]}" ]]; then
+    die "$doc_id — heading counts differ: $fr_ref has ${#fr_all[@]}, $en_ref has ${#en_all[@]}"
+  fi
+
+  # Equal totals at different depths would pair a French heading with the
+  # wrong English one once the level-1 titles are filtered out. Same verdict
+  # check_exec_document_row() makes under --check, made here too because a
+  # plain build never calls it.
+  local i fr_levels="" en_levels=""
+  for i in "${!fr_all[@]}"; do
+    fr_levels+="${fr_all[$i]%% *} "
+    en_levels+="${en_all[$i]%% *} "
+  done
+  if [[ "$fr_levels" != "$en_levels" ]]; then
+    die "$doc_id — heading levels differ: $fr_ref [${fr_levels% }], $en_ref [${en_levels% }]"
+  fi
+
+  local -a rows=()
+  local lvl marker
+  for i in "${!fr_all[@]}"; do
+    lvl="${fr_all[$i]%% *}"
+    [[ "$lvl" -ge 2 ]] || continue        # AC6 — level-1 titles never appear
+    marker="$(printf '%*s' "$lvl" '' | tr ' ' '#')"
+    rows+=("$(printf '| %s %s | %s %s |' \
+      "$marker" "$(esc_table_cell "${fr_all[$i]#* }")" \
+      "$marker" "$(esc_table_cell "${en_all[$i]#* }")")")
+  done
+
+  # AC3 / AC7 — a block whose only heading is its title contributes no group.
+  [[ "${#rows[@]}" -gt 0 ]] || return 0
+
+  printf '\n## %s\n\n`%s`\n\n| Français | English |\n| --- | --- |\n' "$doc_id" "$path"
+  printf '%s\n' "${rows[@]}"
+}
+
+# 2026-09-20-heading-pairs/AC1-AC10, AC15-AC20. Reads the registry once per
+# staged skill and writes the locale's preamble followed by the generated
+# table. Called from stage_skill(), so every ZIP carries the result.
+generate_exec_heading_pairs() {
+  local locale="$1" out="$2"
+  local preamble="$SHARED_DIR/$locale/exec-document-headings.md"
+
+  [[ -f "$EXEC_DOCS_TSV" ]] \
+    || die "skills/exec-documents.tsv — exec-facing document registry not found"
+  [[ -f "$preamble" ]] \
+    || die "skills/shared/$locale/exec-document-headings.md not found"
+
+  cp "$preamble" "$out"
+
+  local raw line_no=0 doc_id path fr_ref fr_block en_ref en_block v dashes
+  local -a cols
+  while IFS= read -r raw || [[ -n "$raw" ]]; do
+    line_no=$((line_no + 1))
+    raw="${raw%$'\r'}"          # strip CR before any column is compared
+    [[ -z "$raw" ]] && continue
+
+    # awk, not `IFS=$'\t' read -a`: tab is IFS whitespace, so read would
+    # collapse two adjacent tabs into one and hide an empty column.
+    mapfile -t cols < <(awk -F'\t' '{ for (i = 1; i <= NF; i++) print $i }' <<<"$raw")
+    [[ "${#cols[@]}" -eq 6 ]] \
+      || die "skills/exec-documents.tsv:$line_no — expected 6 tab-separated columns, found ${#cols[@]}"
+
+    doc_id="${cols[0]}"; path="${cols[1]}"
+    fr_ref="${cols[2]}"; fr_block="${cols[3]}"
+    en_ref="${cols[4]}"; en_block="${cols[5]}"
+
+    dashes=0
+    for v in "$fr_ref" "$fr_block" "$en_ref" "$en_block"; do
+      [[ "$v" == "-" ]] && dashes=$((dashes + 1))
+    done
+    # AC10 — a document described in prose carries '-' in all four columns.
+    if [[ "$dashes" -eq 4 ]]; then continue; fi
+    [[ "$dashes" -eq 0 ]] \
+      || die "$doc_id — template columns are partly '-': a document described in prose carries '-' in all four"
+
+    emit_exec_heading_group "$doc_id" "$path" \
+      "$fr_ref" "$fr_block" "$en_ref" "$en_block" >> "$out"
+  done < "$EXEC_DOCS_TSV"
 }
 
 # 2026-09-19-headings/AC17-AC21. Reads the registry once, per row.

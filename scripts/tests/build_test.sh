@@ -1537,5 +1537,241 @@ out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
   || fail "empty block should extract to nothing, got $(printf '%q' "$out")"
 rm -rf "$d"
 
+# --- 2026-09-20-heading-pairs/AC1-AC10, AC15-AC20: the generated reference.
+#
+# expect_build_fail is the build-time twin of expect_check_fail above: these
+# paths die() on a plain `--lang all`, not only under --check, which is the
+# whole point of validating inside the generator (AC20).
+expect_build_fail() {
+  local dir="$1" needle="$2" label="$3" out rc
+  out="$( cd "$dir" && bash scripts/build.sh --lang fr 2>&1 )" && rc=0 || rc=1
+  if [[ "$rc" -ne 0 ]] && grep -qF -- "$needle" <<<"$out"; then
+    pass "$label"
+  else
+    fail "$label (rc=$rc, out=$out)"
+  fi
+}
+
+# Extract the generated reference out of a built ZIP.
+staged_pairs() {
+  local dir="$1" zip="$2" locale="$3"
+  unzip -p "$dir/dist/$zip" references/exec-document-headings.md 2>/dev/null
+}
+
+# AC1 — the file is in every ZIP, both locales, both build scripts.
+d="$(make_fixture_repo)"
+( cd "$d" && bash scripts/build.sh --lang all >/dev/null 2>&1 )
+for z in atelier-ventes-fr.zip atelier-sales-en.zip; do
+  if unzip -l "$d/dist/$z" 2>/dev/null | grep -qE ' references/exec-document-headings\.md$'; then
+    pass "AC1 $z carries references/exec-document-headings.md"
+  else
+    fail "AC1 $z missing references/exec-document-headings.md"
+  fi
+done
+
+# AC2 — the file begins with the locale's preamble, byte-identical.
+for pair in "atelier-ventes-fr.zip fr" "atelier-sales-en.zip en"; do
+  set -- $pair
+  pre="$(cat "$d/skills/shared/$2/exec-document-headings.md")"
+  body="$(staged_pairs "$d" "$1" "$2")"
+  if [[ "$body" == "$pre"* ]]; then
+    pass "AC2 $1 begins with the $2 preamble byte-identical"
+  else
+    fail "AC2 $1 does not begin with the $2 preamble"
+  fi
+done
+
+# AC3, AC4, AC5, AC6 — one group, named by doc-id, path verbatim, level-2
+# headings paired in document order, no level-1 title.
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+grep -qxF '## pipeline-doc' <<<"$body" \
+  && pass "AC3 the templated row produces a group named by doc-id" \
+  || fail "AC3 no '## pipeline-doc' group"
+grep -qxF '`{root}/docs/ventes/pipeline.md`' <<<"$body" \
+  && pass "AC4 the group carries the registry's canonical path verbatim" \
+  || fail "AC4 canonical path missing or altered"
+expected_rows=$'| ## Où en est le pipeline | ## Where the pipeline stands |\n| ## Ce qui bloque | ## What is stuck |\n| ## Prochaines relances | ## Next follow-ups |'
+if grep -qF -- "| ## Où en est le pipeline | ## Where the pipeline stands |" <<<"$body" \
+   && [[ "$(grep -c '^| ## ' <<<"$body")" -eq 3 ]] \
+   && [[ "$(grep '^| ## ' <<<"$body")" == "$expected_rows" ]]; then
+  pass "AC5 both spellings pair on one line, in document order"
+else
+  fail "AC5 rows wrong: $(grep '^| ## ' <<<"$body")"
+fi
+grep -qF 'Revue de pipeline' <<<"$body" \
+  && fail "AC6 a level-1 title leaked into the generated file" \
+  || pass "AC6 no level-1 heading appears in the generated file"
+rm -rf "$d"
+
+# AC7 — a row whose template block holds only a level-1 title yields no group.
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/fr/titre.md" <<'EOF'
+```markdown
+# Registre des rôles
+```
+EOF
+cat > "$d/skills/atelier-ventes/en/title.md" <<'EOF'
+```markdown
+# Role registry
+```
+EOF
+printf 'title-only\t{root}/docs/atelier/roles.md\tskills/atelier-ventes/fr/titre.md\t1\tskills/atelier-ventes/en/title.md\t1\n' \
+  >> "$d/skills/exec-documents.tsv"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+grep -qxF '## title-only' <<<"$body" \
+  && fail "AC7 a title-only row produced a group" \
+  || pass "AC7 a title-only row produces no group"
+rm -rf "$d"
+
+# AC8 — two rows sharing one reference file and one canonical path stay two
+# separate groups, each carrying its own block's headings.
+d="$(make_fixture_repo)"
+cat > "$d/skills/atelier-ventes/fr/deux.md" <<'EOF'
+```markdown
+# Relais
+## Ce qui a été fait
+```
+
+```markdown
+# Relais tutoriel
+## Ce qui a été couvert
+```
+EOF
+cat > "$d/skills/atelier-ventes/en/two.md" <<'EOF'
+```markdown
+# Relay
+## What was done
+```
+
+```markdown
+# Tutorial relay
+## What was covered
+```
+EOF
+printf 'relay-a\t{root}/docs/atelier/relais/x.md\tskills/atelier-ventes/fr/deux.md\t1\tskills/atelier-ventes/en/two.md\t1\n' >> "$d/skills/exec-documents.tsv"
+printf 'relay-b\t{root}/docs/atelier/relais/x.md\tskills/atelier-ventes/fr/deux.md\t2\tskills/atelier-ventes/en/two.md\t2\n' >> "$d/skills/exec-documents.tsv"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+if grep -qxF '## relay-a' <<<"$body" && grep -qxF '## relay-b' <<<"$body" \
+   && grep -qF '| ## Ce qui a été fait | ## What was done |' <<<"$body" \
+   && grep -qF '| ## Ce qui a été couvert | ## What was covered |' <<<"$body"; then
+  pass "AC8 two blocks in one file stay two groups with their own headings"
+else
+  fail "AC8 shared-file rows did not produce two distinct groups"
+fi
+rm -rf "$d"
+
+# AC9 — a pair whose two spellings are identical is kept, not omitted.
+d="$(make_fixture_repo)"
+sed -i 's|^## Ce qui bloque$|## Documents|' "$d/skills/atelier-ventes/fr/references/modele.md"
+sed -i 's|^## What is stuck$|## Documents|' "$d/skills/atelier-ventes/en/references/template.md"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+grep -qF '| ## Documents | ## Documents |' <<<"$body" \
+  && pass "AC9 an identical pair is kept like any other" \
+  || fail "AC9 identical pair omitted"
+rm -rf "$d"
+
+# AC10 — a row with all four template columns '-' produces no group.
+d="$(make_fixture_repo)"
+printf 'prose-doc\t{root}/docs/atelier/decisions.md\t-\t-\t-\t-\n' >> "$d/skills/exec-documents.tsv"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+grep -qxF '## prose-doc' <<<"$body" \
+  && fail "AC10 a prose-described row produced a group" \
+  || pass "AC10 a prose-described row produces no group"
+rm -rf "$d"
+
+# AC15 — an absent registry fails the build, not only --check.
+d="$(make_fixture_repo)"
+rm -f "$d/skills/exec-documents.tsv"
+expect_build_fail "$d" 'skills/exec-documents.tsv — exec-facing document registry not found' \
+  "AC15/AC20 absent registry fails a plain build"
+rm -rf "$d"
+
+# AC16 — wrong column count, and partly-'-' template columns.
+d="$(make_fixture_repo)"
+printf 'stray\t{root}/docs/stray.md\t-\t-\t-\n' >> "$d/skills/exec-documents.tsv"
+expect_build_fail "$d" 'expected 6 tab-separated columns, found 5' \
+  "AC16/AC20 a five-column row fails a plain build"
+rm -rf "$d"
+
+d="$(make_fixture_repo)"
+printf 'half\t{root}/docs/half.md\tskills/atelier-ventes/fr/references/modele.md\t1\t-\t-\n' >> "$d/skills/exec-documents.tsv"
+expect_build_fail "$d" "half — template columns are partly '-'" \
+  "AC16/AC20 a partly-dashed row fails a plain build"
+rm -rf "$d"
+
+# AC17 — a missing reference file, and a non-positive-integer block index.
+d="$(make_fixture_repo)"
+rm -f "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_build_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md listed in skills/exec-documents.tsv but no such file' \
+  "AC17/AC20 a renamed reference file fails a plain build"
+rm -rf "$d"
+
+d="$(make_fixture_repo)"
+sed -i "s|modele.md$(printf '\t')1|modele.md$(printf '\t')0|" "$d/skills/exec-documents.tsv"
+expect_build_fail "$d" "pipeline-doc — skills/atelier-ventes/fr/references/modele.md template block index '0' is not a positive integer" \
+  "AC17/AC20 a zero block index fails a plain build"
+rm -rf "$d"
+
+# AC18 — MISSING and UNCLOSED both fail the build, naming doc-id and file.
+d="$(make_fixture_repo)"
+sed -i "s|modele.md$(printf '\t')1|modele.md$(printf '\t')4|" "$d/skills/exec-documents.tsv"
+expect_build_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md has no markdown template block 4' \
+  "AC18/AC20 a MISSING block fails a plain build"
+rm -rf "$d"
+
+d="$(make_fixture_repo)"
+printf '# Modèle\n\n```markdown\n# Titre\n## Une section\n' > "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_build_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md template block 1 is never closed' \
+  "AC18/AC20 an UNCLOSED block fails a plain build"
+rm -rf "$d"
+
+# AC19 — different TOTAL counts, level-1 title included, name both totals.
+d="$(make_fixture_repo)"
+sed -i '/^## Prochaines relances$/d' "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_build_fail "$d" 'pipeline-doc — heading counts differ: skills/atelier-ventes/fr/references/modele.md has 3, skills/atelier-ventes/en/references/template.md has 4' \
+  "AC19/AC20 differing total heading counts fail a plain build, naming both totals"
+rm -rf "$d"
+
+# Review Focus 2 — equal totals at different depths must not zip out of
+# alignment; the build dies naming both level sequences.
+d="$(make_fixture_repo)"
+sed -i 's|^## Ce qui bloque$|### Ce qui bloque|' "$d/skills/atelier-ventes/fr/references/modele.md"
+expect_build_fail "$d" 'pipeline-doc — heading levels differ' \
+  "equal totals at different depths fail the build naming both sequences"
+rm -rf "$d"
+
+# Review Focus 1 — a heading holding '|' is escaped, not allowed to split the row.
+d="$(make_fixture_repo)"
+sed -i 's|^## Ce qui bloque$|## Bloqué \| en attente|' "$d/skills/atelier-ventes/fr/references/modele.md"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 )
+body="$(staged_pairs "$d" atelier-ventes-fr.zip fr)"
+if grep -qF '| ## Bloqué \| en attente | ## What is stuck |' <<<"$body"; then
+  pass "a pipe in heading text is escaped, keeping the row two cells wide"
+else
+  fail "unescaped pipe split the table row: $(grep 'Bloqué' <<<"$body")"
+fi
+rm -rf "$d"
+
+# Review Focus 4 — a blank line mid-registry is skipped, not read as a row.
+d="$(make_fixture_repo)"
+printf '\n' >> "$d/skills/exec-documents.tsv"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 ) \
+  && pass "a blank registry line is skipped" \
+  || fail "a blank registry line failed the build"
+rm -rf "$d"
+
+# Review Focus 5 — a CRLF registry checkout builds clean.
+d="$(make_fixture_repo)"
+awk '{ printf "%s\r\n", $0 }' "$d/skills/exec-documents.tsv" > "$d/tmp.tsv"
+mv "$d/tmp.tsv" "$d/skills/exec-documents.tsv"
+( cd "$d" && bash scripts/build.sh --lang fr >/dev/null 2>&1 ) \
+  && pass "a CRLF registry checkout builds clean" \
+  || fail "a CRLF registry checkout failed the build"
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi
