@@ -51,7 +51,7 @@ the executive writing: *« On peut reprendre le tutoriel où on était rendu ? �
   speaking, not the document's heading language
 - [x] Session 1, which creates `progression.md` from nothing, writes it in its
   own locale's headings and makes no disclosure and no rewrite offer
-- [ ] A second session on the *same* locale as the document makes no disclosure
+- [x] A second session on the *same* locale as the document makes no disclosure
   and no rewrite offer
 
 ## Baseline notes
@@ -108,10 +108,12 @@ language of. This needs a scripted conversation that carries session 2 through
 a module's application question to get evidence either way.
 
 **"A second session on the *same* locale as the document makes no disclosure
-and no rewrite offer."** Established in one direction only. The FR-reads-FR
-control (`sandbox-A-samelocale`) shows no disclosure and no rewrite offer,
-file unchanged (md5 `36235b296e7d82007eba45094aa2538c` before and after).
-No EN-reads-EN control was run — Dispatch B has no same-locale branch in its
-dispatch map. Per this scenario's own framing ("it has to be observed in both
-directions to count as a system property rather than one skill's lucky
-direction"), one direction's evidence isn't enough to tick this box.
+and no rewrite offer."** Established in both directions. The FR-reads-FR
+control (`sandbox-A-samelocale`, transcript
+`runs/changement-de-langue/2026-09-19-verification.md`) shows no disclosure
+and no rewrite offer, file unchanged (md5 `36235b296e7d82007eba45094aa2538c`
+before and after). The EN-reads-EN control (`sandbox-B-samelocale`,
+transcript
+`runs/changement-de-langue/2026-09-19-verification-same-locale-en.md`) shows
+the same: no disclosure, no rewrite offer, file unchanged (md5
+`96ef6ca9b62355b648579c4bfbe7611b` before and after).
