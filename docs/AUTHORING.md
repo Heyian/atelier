@@ -178,3 +178,40 @@ The protocol covers:
   read and rewrite the live files. Desktop chat cannot, so a decision made
   there lands in that session's deliverable and is folded into the journal
   and state files by the next Cowork session.
+
+## Dated capability claims
+
+A claim about what Claude can do today is capability-sensitive: which surfaces
+run plugins, which reach local folders, what an interface labels a thing.
+Capabilities shift month to month, so a claim that ships without a date reads
+as authoritative forever. ADR-0011 lets such a claim ship on one condition —
+it carries a last-verified date and a named source in the same file.
+
+Write the annotation as a blockquote directly under the claim. The lead-in is
+exact; `bash scripts/build.sh --check` validates it and names the file and line
+when it does not match.
+
+English:
+
+    > **Last verified 2026-08-10** — source: Anthropic help center, article
+    > 15520349 ("Use Claude Cowork on web, desktop, and mobile").
+
+French:
+
+    > **Vérifié le 2026-08-10** — source : centre d'aide Anthropic, article
+    > 15520349 (« Use Claude Cowork on web, desktop, and mobile »).
+
+The dash is an em dash (—, U+2014) with one space either side. French keeps the
+space before the colon that its typography requires; English does not. Only the
+first line is validated — everything after it is free prose the check never
+reads, so put the article title and the "show the executive this date"
+instruction there.
+
+A module that carries such claims belongs in `skills/dated-claims.tsv`. Every
+file listed there must keep at least one annotation, which is what catches a
+translation pass or a bad merge that drops the last one.
+
+Nothing here judges whether the date is *correct* — only that it is present,
+well formed, not in the future, and not old. Re-verifying a claim is a human
+act; `bash scripts/build.sh --check` reports the oldest claim's age on every
+run, and a monthly job files an issue once one passes a year.

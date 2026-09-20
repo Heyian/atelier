@@ -1,0 +1,64 @@
+# 2026-09-19/AC28–AC32 — monthly freshness sweep for dated capability claims.
+#
+# The job always exits 0. Green means the sweep ran; the finding lives in the
+# issue. A workflow that stayed permanently red once it tripped would teach
+# everyone to ignore the Actions tab, which is the same failure this design
+# rejects for pull requests.
+name: dated claims
+
+on:
+  # 2026-09-19/AC28 — the first of every month.
+  schedule:
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check dated-claim freshness
+        id: freshness
+        run: |
+          set +e
+          report="$(bash scripts/build.sh --check-freshness 2>&1)"
+          rc=$?
+          set -e
+          echo "$report"
+          {
+            echo "rc=$rc"
+            echo 'report<<DATED_CLAIMS_REPORT_EOF'
+            echo "$report"
+            echo 'DATED_CLAIMS_REPORT_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # 2026-09-19/AC29, AC30, AC30b — files at most one issue, and only on a
+      # non-zero freshness exit. Matching is on the LABEL, never on issue title
+      # text, so a wording change cannot produce a duplicate every month
+      # (2026-09-19/AC32).
+      - name: File an issue when a claim is stale
+        if: steps.freshness.outputs.rc != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.freshness.outputs.report }}
+        run: |
+          open_count="$(gh issue list --label stale-claims --state open --json number --jq 'length')"
+          if [ "$open_count" != "0" ]; then
+            echo "An open stale-claims issue already exists; not filing another."
+            exit 0
+          fi
+          {
+            printf '%s\n\n' "$REPORT"
+            printf 'Re-verify each claim above against its named source, then update the\n'
+            printf 'annotation date in the module and the `Claims to re-verify` index in\n'
+            printf '`docs/tutorial-corpus.md`.\n'
+          } > issue-body.md
+          gh issue create \
+            --label stale-claims \
+            --title 'Dated capability claims are past the freshness threshold' \
+            --body-file issue-body.md

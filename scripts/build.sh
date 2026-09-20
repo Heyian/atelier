@@ -35,11 +35,13 @@ make_stage_dir() {
 
 usage() {
   cat <<'EOF'
-Usage: build.sh [--lang fr|en|all] [--check]
+Usage: build.sh [--lang fr|en|all] [--check] [--check-freshness]
 
   --lang fr|en|all   Build that locale without prompting.
   --check            Run the mechanical checks only; build to a temp dir and
                      leave dist/ untouched. Exits non-zero on any failure.
+  --check-freshness  Validate every dated capability claim and fail if the
+                     oldest has passed the freshness threshold. Builds nothing.
 
 With no --lang, the script asks which language to build.
 EOF
@@ -151,18 +153,26 @@ build_locale() {
 }
 
 main() {
-  local lang="" check=0
+  local lang="" check=0 freshness=0
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --lang) [[ $# -ge 2 ]] || die "--lang needs a value"; lang="$2"; shift 2 ;;
       --lang=*) lang="${1#--lang=}"; shift ;;
       --check) check=1; shift ;;
+      --check-freshness) freshness=1; shift ;;
       -h|--help) usage; exit 0 ;;
       *) die "unknown argument: $1" ;;
     esac
   done
 
   [[ -f "$NAMES_TSV" ]] || die "missing $NAMES_TSV"
+
+  # 2026-09-19/AC19 — neither stages a skill nor writes to dist/, so it
+  # returns before any of the build machinery below.
+  if [[ "$freshness" -eq 1 ]]; then
+    run_freshness_check
+    exit $?
+  fi
 
   if [[ -z "$lang" ]]; then
     if [[ "$check" -eq 1 ]]; then
@@ -201,6 +211,295 @@ main() {
 
 CHECK_FAILURES=0
 check_fail() { echo "CHECK FAIL: $*" >&2; CHECK_FAILURES=$((CHECK_FAILURES + 1)); }
+
+# --- 2026-09-19/AC14 — the two staleness thresholds, named once. Nothing
+# else in this script may write either threshold's day count as a bare
+# literal.
+REPORT_AGE_DAYS=180
+FAIL_AGE_DAYS=365
+
+DATED_CLAIMS_TSV="$SKILLS_DIR/dated-claims.tsv"
+TODAY_YMD="$(date +%Y-%m-%d)"
+
+# The day-number conversion every dated-claim awk shares. `date -d` is
+# GNU-only and would break for a contributor on macOS (2026-09-19/AC18), so
+# the civil algorithm is inlined into each awk program that needs it.
+DATED_CLAIMS_AWK_LIB='
+function days_from_civil(y, m, d,   era, yoe, doy, doe) {
+  if (m <= 2) y -= 1
+  era = int((y >= 0 ? y : y - 399) / 400)
+  yoe = y - era * 400
+  doy = int((153 * (m + (m > 2 ? -3 : 9)) + 2) / 5) + d - 1
+  doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+  return era * 146097 + doe - 719468
+}
+function ymd_to_days(s) {
+  return days_from_civil(substr(s, 1, 4) + 0, substr(s, 6, 2) + 0, substr(s, 9, 2) + 0)
+}
+function real_calendar_day(y, m, d,   dim) {
+  if (m < 1 || m > 12 || d < 1) return 0
+  dim = 31
+  if (m == 4 || m == 6 || m == 9 || m == 11) dim = 30
+  else if (m == 2) dim = ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0) ? 29 : 28
+  return d <= dim
+}
+'
+
+# --- 2026-09-19/AC12, AC13 — every *.md at any depth under
+# skills/<skill>/<locale>/references/, for every skill in names.tsv and both
+# locales, and nothing outside that set. Emitted in lexicographic path order
+# (2026-09-19/AC3b); LC_ALL=C so the order does not depend on the locale the
+# contributor happens to run under.
+dated_claims_files() {
+  local canonical locale dir
+  for canonical in $(list_skills); do
+    for locale in "${LOCALES[@]}"; do
+      dir="$SKILLS_DIR/$canonical/$locale/references"
+      [[ -d "$dir" ]] || continue
+      find "$dir" -type f -name '*.md' -print
+    done
+  done | LC_ALL=C sort
+}
+
+# --- Scan one file, emitting one TSV record per detected annotation.
+#
+# Detection is deliberately looser than validation (Decision §1): a line
+# beginning `> **` that carries EITHER locale's marker is detected, then must
+# satisfy its own locale's full pattern. If the strict pattern were also the
+# detector, a typo in a date would make the line invisible and the check would
+# report one fewer annotation rather than failing.
+scan_one_dated_claim_file() {
+  local file="$1" rel locale lead sep own other
+  rel="${file#"$REPO_ROOT"/}"
+
+  # The locale is the segment directly under the skill directory, not just any
+  # /en/ or /fr/ in the path — skills/x/en/references/fr/notes.md is legal and
+  # is an English file.
+  locale="$(awk -F/ '{ for (i = 1; i < NF; i++) if ($i == "skills") { print $(i + 2); exit } }' <<<"$rel")"
+  case "$locale" in
+    en) lead='> **Last verified '; sep='** — source: '; own='Last verified'; other='Vérifié le' ;;
+    fr) lead='> **Vérifié le ';    sep='** — source : '; own='Vérifié le';   other='Last verified' ;;
+    *) return 0 ;;
+  esac
+
+  awk -v rel="$rel" -v locale="$locale" -v lead="$lead" -v sep="$sep" \
+      -v own="$own" -v other="$other" -v today="$TODAY_YMD" \
+      "$DATED_CLAIMS_AWK_LIB"'
+    # A fenced block quoting the pattern (docs/AUTHORING.md mirrors it) is an
+    # example, not an annotation. Fence boundaries follow CommonMark 4.5, not
+    # a bare "```" toggle: 0-3 leading spaces then 3+ of the SAME
+    # backtick-or-tilde character opens; the same character, at least as many
+    # of them, 0-3 leading spaces, and nothing but whitespace after it closes.
+    # A fence left open at EOF stays open — that is correct, not a bug.
+    function fence_marker(line,    lead) {
+      lead = 0
+      while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+      if (substr(line, lead + 1, 1) != "`" && substr(line, lead + 1, 1) != "~") return ""
+      return substr(line, lead + 1)
+    }
+    function fence_run_len(marker, ch,    i) {
+      i = 1
+      while (substr(marker, i, 1) == ch) i++
+      return i - 1
+    }
+    function fence_closes(line, fchar, flen,    marker, rest) {
+      marker = fence_marker(line)
+      if (marker == "" || substr(marker, 1, 1) != fchar) return 0
+      if (fence_run_len(marker, fchar) < flen) return 0
+      rest = substr(marker, fence_run_len(marker, fchar) + 1)
+      gsub(/[ \t]/, "", rest)
+      return rest == ""
+    }
+    BEGIN { todayDays = ymd_to_days(today) }
+    {
+      line = $0
+      sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
+
+      if (fence) {
+        if (fence_closes(line, fenceChar, fenceLen)) fence = 0
+        next
+      }
+      marker = fence_marker(line)
+      if (marker != "") {
+        markerChar = substr(marker, 1, 1)
+        markerLen = fence_run_len(marker, markerChar)
+        if (markerLen >= 3) { fence = 1; fenceChar = markerChar; fenceLen = markerLen; next }
+      }
+
+      if (substr(line, 1, 4) != "> **") next
+      hasOwn = index(line, own) > 0
+      hasOther = index(line, other) > 0
+      if (!hasOwn && !hasOther) next
+
+      verdict = "ok"; date = ""
+      if (!hasOwn) {
+        verdict = "wrong-locale"
+      } else if (substr(line, 1, length(lead)) != lead) {
+        verdict = "bad-leadin"
+      } else {
+        rest = substr(line, length(lead) + 1)
+        date = substr(rest, 1, 10)
+        tail = substr(rest, 11)
+        if (date !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) {
+          verdict = "no-date"; date = ""
+        } else if (!real_calendar_day(substr(date,1,4)+0, substr(date,6,2)+0, substr(date,9,2)+0)) {
+          verdict = "bad-date"
+        } else if (ymd_to_days(date) > todayDays) {
+          verdict = "future-date"
+        } else if (substr(tail, 1, length(sep)) != sep) {
+          verdict = "no-source"
+        } else {
+          src = substr(tail, length(sep) + 1)
+          gsub(/[ \t]/, "", src)
+          if (src == "") verdict = "no-source"
+        }
+      }
+      printf "%s\t%d\t%s\t%s\t%s\n", rel, FNR, locale, date, verdict
+    }
+  ' "$file"
+}
+
+scan_dated_claims() {
+  local f
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && scan_one_dated_claim_file "$f"
+  done < <(dated_claims_files)
+}
+
+DATED_CLAIMS_RECORDS=""
+
+# --- 2026-09-19/AC4–AC8 — every detected line that fails its locale's pattern
+# is a check failure naming the file and line, never a line the scan passes
+# over.
+check_dated_claims() {
+  DATED_CLAIMS_RECORDS="$(scan_dated_claims)"
+  local rel line locale date verdict
+  while IFS=$'\t' read -r rel line locale date verdict; do
+    [[ -n "$rel" ]] || continue
+    case "$verdict" in
+      ok) ;;
+      wrong-locale) check_fail "$rel:$line — carries the other locale's verified lead-in (this file is $locale)" ;;
+      bad-leadin)   check_fail "$rel:$line — malformed verified lead-in for locale $locale" ;;
+      no-date)      check_fail "$rel:$line — verified annotation has no YYYY-MM-DD in its bold span" ;;
+      bad-date)     check_fail "$rel:$line — '$date' is not a real calendar day" ;;
+      future-date)  check_fail "$rel:$line — verified date '$date' is later than today ($TODAY_YMD)" ;;
+      no-source)    check_fail "$rel:$line — verified annotation names no source after the em dash" ;;
+      *)            check_fail "$rel:$line — unrecognized dated-claim verdict '$verdict'" ;;
+    esac
+  done <<<"$DATED_CLAIMS_RECORDS"
+  check_dated_claims_anchors
+}
+
+# --- 2026-09-19/AC9, AC10, AC10b — the weaker, mechanically decidable version
+# of ADR-0011's real rule. No script can decide whether a sentence is
+# capability-sensitive, but it can notice that a module known to be full of
+# such claims has ended up with none.
+check_dated_claims_anchors() {
+  if [[ ! -f "$DATED_CLAIMS_TSV" ]]; then
+    check_fail "skills/dated-claims.tsv — anchor list not found"
+    return
+  fi
+  local p
+  while IFS= read -r p || [[ -n "$p" ]]; do
+    p="${p%%$'\t'*}"     # single-column today, but tolerate a second column
+    p="${p%$'\r'}"       # a CRLF checkout must not append \r to the path
+    [[ -n "$p" ]] || continue
+    if [[ ! -f "$REPO_ROOT/$p" ]]; then
+      check_fail "$p — listed in skills/dated-claims.tsv but no such file (renamed?)"
+      continue
+    fi
+    # "Detected", not "valid": a malformed annotation still counts here and
+    # fails separately through check_dated_claims, so one broken annotation
+    # does not produce two failures for the same line.
+    if ! grep -qF -- "$p"$'\t' <<<"$DATED_CLAIMS_RECORDS"; then
+      check_fail "$p — listed in skills/dated-claims.tsv but carries no dated claim"
+    fi
+  done < "$DATED_CLAIMS_TSV"
+}
+
+# --- 2026-09-19/AC15, AC15b, AC15c, AC16, AC17 — one summary line before
+# every STATUS: line, plus a note once the oldest claim reaches the report
+# threshold. Never touches CHECK_FAILURES: age alone must not redden a pull
+# request (2026-09-19/AC23), and the only way to guarantee that is for the
+# reporter to have no path to a failure at all.
+report_dated_claims() {
+  local summary n nf oldest age loc
+  summary="$(awk -F'\t' -v today="$TODAY_YMD" "$DATED_CLAIMS_AWK_LIB"'
+    BEGIN { todayDays = ymd_to_days(today) }
+    $5 == "ok" {
+      n++
+      files[$1] = 1
+      dn = ymd_to_days($4)
+      # Strict <, so a tie keeps the FIRST record in scan order
+      # (2026-09-19/AC3b); scan_dated_claims emits in that order.
+      if (n == 1 || dn < oldestDays) { oldestDays = dn; oldestYmd = $4; loc = $1 ":" $2 }
+    }
+    END {
+      nf = 0
+      for (f in files) nf++
+      if (n == 0) { printf "0\t0\t\t\t\n"; exit }
+      printf "%d\t%d\t%s\t%d\t%s\n", n, nf, oldestYmd, todayDays - oldestDays, loc
+    }
+  ' <<<"$DATED_CLAIMS_RECORDS")"
+
+  IFS=$'\t' read -r n nf oldest age loc <<<"$summary"
+
+  if [[ "$n" -eq 0 ]]; then
+    # 2026-09-19/AC15c — the run where the pattern stopped matching entirely
+    # is precisely the one worth seeing this line on.
+    echo "dated claims: 0 annotations across 0 files, no dated claim found"
+    return
+  fi
+
+  echo "dated claims: $n annotations across $nf files, oldest $oldest ($age days)"
+
+  # 2026-09-19/AC16 — the note rides on a passing run only; on a failing run
+  # the check failures are the message.
+  if [[ "$CHECK_FAILURES" -eq 0 ]] && [[ "$age" -ge "$REPORT_AGE_DAYS" ]]; then
+    echo "NOTE: oldest dated claim is $age days old (report threshold $REPORT_AGE_DAYS) —"
+    echo "      $loc"
+    echo "      see docs/tutorial-corpus.md, \"Claims to re-verify\""
+  fi
+}
+
+# --- 2026-09-19/AC19–AC22 — the second tier. Stages nothing, writes nothing
+# to dist/, and carries the form validation deliberately: if the pattern
+# stopped matching, this job is the last thing that would notice, and it must
+# fail rather than report a cheerful zero.
+run_freshness_check() {
+  check_dated_claims
+
+  if [[ "$CHECK_FAILURES" -gt 0 ]]; then
+    echo "STATUS: FAIL ($CHECK_FAILURES check failures)" >&2
+    exit 1
+  fi
+
+  local stale
+  stale="$(awk -F'\t' -v today="$TODAY_YMD" -v fail_age="$FAIL_AGE_DAYS" \
+               -v report_age="$REPORT_AGE_DAYS" "$DATED_CLAIMS_AWK_LIB"'
+    BEGIN { todayDays = ymd_to_days(today); anyFail = 0 }
+    $5 == "ok" {
+      age = todayDays - ymd_to_days($4)
+      if (age >= fail_age) anyFail = 1
+      if (age >= report_age) lines[++n] = sprintf("  %s:%s %s (%d days)", $1, $2, $4, age)
+    }
+    END {
+      if (!anyFail) exit 0
+      for (i = 1; i <= n; i++) print lines[i]
+      exit 0
+    }
+  ' <<<"$DATED_CLAIMS_RECORDS")"
+
+  if [[ -n "$stale" ]]; then
+    echo "Dated capability claims are past the freshness threshold (fail threshold $FAIL_AGE_DAYS days,"
+    echo "listing everything at or over $REPORT_AGE_DAYS days):"
+    echo "$stale"
+    return 1
+  fi
+
+  echo "dated claims: every claim is younger than $FAIL_AGE_DAYS days"
+  return 0
+}
 
 # --- Minimal JSON support, hand-rolled on purpose.
 # AC56 requires --check to run with jq off PATH, and the repo has no other
@@ -552,6 +851,9 @@ run_checks() {
 
   # Repo-wide, not per-locale: run it once.
   check_version_coherence
+  # 2026-09-19/AC13 — the scanner finds its own files, so it runs once here
+  # rather than inside the per-skill, per-locale loop below.
+  check_dated_claims
 
   for locale in "${selected[@]}"; do
     for canonical in $(list_skills); do
@@ -569,6 +871,9 @@ run_checks() {
       rm -rf "$stage"
     done
   done
+
+  # 2026-09-19/AC15 — before STATUS:, on every run that reaches it.
+  report_dated_claims
 
   if [[ "$CHECK_FAILURES" -gt 0 ]]; then
     echo "STATUS: FAIL ($CHECK_FAILURES check failures)" >&2
