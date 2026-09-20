@@ -205,10 +205,14 @@ EOF
   # and the two parallel templates it points at.
   mkdir -p "$dir/skills/atelier-ventes/fr/references" \
            "$dir/skills/atelier-ventes/en/references"
-  cat > "$dir/skills/atelier-ventes/fr/references/modele.md" <<'EOF'
+  # 2026-09-20-heading-pairs/B-2 — the two extra headings on each side cover
+  # the shapes atx_level()/atx_text() define but the AC21 cross-script
+  # comparison never exercised: a tab separator and a '|' in the heading
+  # text (fr), a leading indent and an empty marker (en).
+  cat > "$dir/skills/atelier-ventes/fr/references/modele.md" <<EOF
 # Modèle de revue de pipeline
 
-```markdown
+\`\`\`markdown
 # Revue de pipeline — <entreprise>
 
 ## Où en est le pipeline
@@ -216,7 +220,11 @@ EOF
 ## Ce qui bloque
 
 ## Prochaines relances
-```
+
+##$(printf '\t')Relance après-vente
+
+## Budget | Trésorerie
+\`\`\`
 EOF
   cat > "$dir/skills/atelier-ventes/en/references/template.md" <<'EOF'
 # Pipeline review template
@@ -229,6 +237,10 @@ EOF
 ## What is stuck
 
 ## Next follow-ups
+
+  ## Sign-off checklist
+
+##
 ```
 EOF
   printf 'pipeline-doc\t{root}/docs/ventes/pipeline.md\tskills/atelier-ventes/fr/references/modele.md\t1\tskills/atelier-ventes/en/references/template.md\t1\n' \
@@ -1376,6 +1388,10 @@ cat > "$d/skills/atelier-ventes/en/references/template.md" <<'EOF'
 ## What is stuck
 
 ## Next follow-ups
+
+  ## Sign-off checklist
+
+##
 ```
 EOF
 out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
@@ -1413,6 +1429,10 @@ cat > "$d/skills/atelier-ventes/en/references/template.md" <<'EOF'
 ## What is stuck
 
 ## Next follow-ups
+
+  ## Sign-off checklist
+
+##
 ```
 EOF
 expect_check_fail "$d" 'pipeline-doc — heading levels differ' \
@@ -1594,9 +1614,9 @@ grep -qxF '## pipeline-doc' <<<"$body" \
 grep -qxF '`{root}/docs/ventes/pipeline.md`' <<<"$body" \
   && pass "AC4 the group carries the registry's canonical path verbatim" \
   || fail "AC4 canonical path missing or altered"
-expected_rows=$'| ## Où en est le pipeline | ## Where the pipeline stands |\n| ## Ce qui bloque | ## What is stuck |\n| ## Prochaines relances | ## Next follow-ups |'
+expected_rows=$'| ## Où en est le pipeline | ## Where the pipeline stands |\n| ## Ce qui bloque | ## What is stuck |\n| ## Prochaines relances | ## Next follow-ups |\n| ## Relance après-vente | ## Sign-off checklist |\n| ## Budget \\| Trésorerie | ##  |'
 if grep -qF -- "| ## Où en est le pipeline | ## Where the pipeline stands |" <<<"$body" \
-   && [[ "$(grep -c '^| ## ' <<<"$body")" -eq 3 ]] \
+   && [[ "$(grep -c '^| ## ' <<<"$body")" -eq 5 ]] \
    && [[ "$(grep '^| ## ' <<<"$body")" == "$expected_rows" ]]; then
   pass "AC5 both spellings pair on one line, in document order"
 else
@@ -1794,7 +1814,7 @@ rm -rf "$d"
 # AC19 — different TOTAL counts, level-1 title included, name both totals.
 d="$(make_fixture_repo)"
 sed -i '/^## Prochaines relances$/d' "$d/skills/atelier-ventes/fr/references/modele.md"
-expect_build_fail "$d" 'pipeline-doc — heading counts differ: skills/atelier-ventes/fr/references/modele.md has 3, skills/atelier-ventes/en/references/template.md has 4' \
+expect_build_fail "$d" 'pipeline-doc — heading counts differ: skills/atelier-ventes/fr/references/modele.md has 5, skills/atelier-ventes/en/references/template.md has 6' \
   "AC19/AC20 differing total heading counts fail a plain build, naming both totals"
 rm -rf "$d"
 
@@ -1803,7 +1823,7 @@ rm -rf "$d"
 d="$(make_fixture_repo)"
 sed -i 's|^## Ce qui bloque$|### Ce qui bloque|' "$d/skills/atelier-ventes/fr/references/modele.md"
 expect_build_fail "$d" \
-  'pipeline-doc — heading levels differ: skills/atelier-ventes/fr/references/modele.md [1 2 3 2], skills/atelier-ventes/en/references/template.md [1 2 2 2]' \
+  'pipeline-doc — heading levels differ: skills/atelier-ventes/fr/references/modele.md [1 2 3 2 2 2], skills/atelier-ventes/en/references/template.md [1 2 2 2 2 2]' \
   "equal totals at different depths fail the build naming both sequences"
 rm -rf "$d"
 
