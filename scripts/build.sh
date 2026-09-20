@@ -285,15 +285,46 @@ scan_one_dated_claim_file() {
   awk -v rel="$rel" -v locale="$locale" -v lead="$lead" -v sep="$sep" \
       -v own="$own" -v other="$other" -v today="$TODAY_YMD" \
       "$DATED_CLAIMS_AWK_LIB"'
+    # A fenced block quoting the pattern (docs/AUTHORING.md mirrors it) is an
+    # example, not an annotation. Fence boundaries follow CommonMark 4.5, not
+    # a bare "```" toggle: 0-3 leading spaces then 3+ of the SAME
+    # backtick-or-tilde character opens; the same character, at least as many
+    # of them, 0-3 leading spaces, and nothing but whitespace after it closes.
+    # A fence left open at EOF stays open — that is correct, not a bug.
+    function fence_marker(line,    lead) {
+      lead = 0
+      while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+      if (substr(line, lead + 1, 1) != "`" && substr(line, lead + 1, 1) != "~") return ""
+      return substr(line, lead + 1)
+    }
+    function fence_run_len(marker, ch,    i) {
+      i = 1
+      while (substr(marker, i, 1) == ch) i++
+      return i - 1
+    }
+    function fence_closes(line, fchar, flen,    marker, rest) {
+      marker = fence_marker(line)
+      if (marker == "" || substr(marker, 1, 1) != fchar) return 0
+      if (fence_run_len(marker, fchar) < flen) return 0
+      rest = substr(marker, fence_run_len(marker, fchar) + 1)
+      gsub(/[ \t]/, "", rest)
+      return rest == ""
+    }
     BEGIN { todayDays = ymd_to_days(today) }
     {
       line = $0
       sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
 
-      # A fenced block quoting the pattern (docs/AUTHORING.md mirrors it) is
-      # an example, not an annotation.
-      if (substr(line, 1, 3) == "```") { fence = !fence; next }
-      if (fence) next
+      if (fence) {
+        if (fence_closes(line, fenceChar, fenceLen)) fence = 0
+        next
+      }
+      marker = fence_marker(line)
+      if (marker != "") {
+        markerChar = substr(marker, 1, 1)
+        markerLen = fence_run_len(marker, markerChar)
+        if (markerLen >= 3) { fence = 1; fenceChar = markerChar; fenceLen = markerLen; next }
+      }
 
       if (substr(line, 1, 4) != "> **") next
       hasOwn = index(line, own) > 0

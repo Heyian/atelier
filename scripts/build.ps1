@@ -55,6 +55,33 @@ $FailAgeDays   = 365
 $DatedClaimsTsv = Join-Path $SkillsDir 'dated-claims.tsv'
 $script:DatedClaimRecords = @()
 
+# --- Fence boundary helpers, mirroring build.sh's awk functions of the same
+# shape (scan/detection criteria: AC12, AC13). CommonMark 4.5, not a bare
+# "```" toggle: 0-3 leading spaces then 3+ of the SAME backtick-or-tilde
+# character opens a fence; the same character, at least as many of them, 0-3
+# leading spaces, and nothing but whitespace after it closes one. A fence
+# left open at EOF stays open — that is correct, not a bug.
+function Get-FenceMarker([string]$Line) {
+  $lead = 0
+  while ($lead -lt 3 -and $Line.Length -gt $lead -and $Line[$lead] -eq ' ') { $lead++ }
+  if ($Line.Length -le $lead) { return '' }
+  $ch = $Line[$lead]
+  if ($ch -ne '`' -and $ch -ne '~') { return '' }
+  return $Line.Substring($lead)
+}
+function Get-FenceRunLength([string]$Marker, [char]$Ch) {
+  $i = 0
+  while ($i -lt $Marker.Length -and $Marker[$i] -eq $Ch) { $i++ }
+  return $i
+}
+function Test-FenceCloses([string]$Line, [char]$FenceChar, [int]$FenceLen) {
+  $marker = Get-FenceMarker $Line
+  if ($marker -eq '' -or $marker[0] -ne $FenceChar) { return $false }
+  $runLen = Get-FenceRunLength $marker $FenceChar
+  if ($runLen -lt $FenceLen) { return $false }
+  return $marker.Substring($runLen).Trim() -eq ''
+}
+
 # --- 2026-09-19/AC12, AC13, AC3b — every *.md at any depth under
 # skills/<skill>/<locale>/references/, in lexicographic repo-relative order.
 #
@@ -106,8 +133,16 @@ function Get-DatedClaimRecords {
       # — 2026-09-19/AC3b, AC4: the culture-aware overload ignores zero-weight
       # characters (e.g. U+200B), which would let a malformed lead-in through
       # that bash's byte-exact substr() comparison correctly rejects.
-      if ($line.StartsWith('```', [System.StringComparison]::Ordinal)) { $fence = -not $fence; continue }
-      if ($fence) { continue }
+      if ($fence) {
+        if (Test-FenceCloses $line $fenceChar $fenceLen) { $fence = $false }
+        continue
+      }
+      $marker = Get-FenceMarker $line
+      if ($marker -ne '') {
+        $markerChar = $marker[0]
+        $markerLen = Get-FenceRunLength $marker $markerChar
+        if ($markerLen -ge 3) { $fence = $true; $fenceChar = $markerChar; $fenceLen = $markerLen; continue }
+      }
       if (-not $line.StartsWith('> **', [System.StringComparison]::Ordinal)) { continue }
 
       $hasOwn = $line.Contains($own)

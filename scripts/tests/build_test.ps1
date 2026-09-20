@@ -532,6 +532,79 @@ Expect-CheckFail $d 'skills/dated-claims.tsv' `
   '2026-09-19/AC10b rejects an absent anchor list'
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# --- Fence boundary correctness (adversarial review, post-PR). Mirrors
+# build_test.sh's Case A/B/C almost line for line (see that file for the
+# CommonMark §4.5 rationale): a naive "```" toggle at column 0 gets fence
+# boundaries wrong three ways.
+
+# Case A: an indented closing fence must still close the fence, or a real
+# stale annotation right after it vanishes from the scan — the dangerous
+# direction, since -CheckFreshness would then pass on an actually-stale claim.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-a.md') @'
+# R
+
+```
+x
+   ```
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 2 annotations across 2 files')) {
+  Add-Pass 'Case A: indented closing fence closes, so the stale annotation after it is seen'
+} else {
+  Add-Failure "Case A: indented closing fence mishandled (out=$($r.Output))"
+}
+$rf = Invoke-FixturePwsh $d '-CheckFreshness'
+if ($rf.ExitCode -ne 0) {
+  Add-Pass 'Case A: -CheckFreshness fails on the now-visible 2020-01-01 claim'
+} else {
+  Add-Failure "Case A: -CheckFreshness must fail on the now-visible 2020-01-01 claim (exit=$($rf.ExitCode), out=$($rf.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case B: a ~~~ fence must be recognized at all, so an example wrapped in one
+# is not counted as a real annotation.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-b.md') @'
+# R
+
+~~~
+> **Last verified 2026-09-15** — source: Anthropic help center, article 12512180
+~~~
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 2 annotations across 2 files')) {
+  Add-Pass 'Case B: tilde fence recognized, in-fence example excluded'
+} else {
+  Add-Failure "Case B: tilde fence not recognized (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case C: an indented opening fence must be recognized too, so an in-fence
+# example does not leak in as a real annotation.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-c.md') @'
+# R
+
+  ```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+  ```
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 1 annotations across 1 files')) {
+  Add-Pass 'Case C: indented opening fence recognized, in-fence example excluded'
+} else {
+  Add-Failure "Case C: indented opening fence not recognized (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
 # --- 2026-09-19/AC24: the summary line matches bash's, in both its forms
 $d = New-FixtureRepo
 $r = Invoke-FixtureCheck $d

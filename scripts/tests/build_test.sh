@@ -770,6 +770,80 @@ else
 fi
 rm -rf "$d"
 
+# --- Fence boundary correctness (adversarial review, post-PR). CommonMark
+# §4.5 fences are 0-3 leading spaces then 3+ of the SAME backtick-or-tilde
+# character; a naive "```" toggle at column 0 gets this wrong three ways.
+
+# Case A: an indented closing fence must still close the fence. A naive
+# toggle only recognizes an unindented "```", so the fence here would never
+# close and a real, badly stale annotation right after it would vanish from
+# the scan entirely — the dangerous direction, since --check-freshness would
+# then pass on a claim that is actually stale.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-a.md" <<'EOF'
+# R
+
+```
+x
+   ```
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 2 annotations across 2 files' <<<"$out"; then
+  pass "Case A: indented closing fence closes, so the stale annotation after it is seen"
+else
+  fail "Case A: indented closing fence mishandled (out=$out)"
+fi
+if ( cd "$d" && bash scripts/build.sh --check-freshness >/dev/null 2>&1 ); then
+  fail "Case A: --check-freshness must fail on the now-visible 2020-01-01 claim"
+else
+  pass "Case A: --check-freshness fails on the now-visible 2020-01-01 claim"
+fi
+rm -rf "$d"
+
+# Case B: a ~~~ fence must be recognized at all, so an example wrapped in one
+# (docs/AUTHORING.md convention) is not counted as a real annotation.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-b.md" <<'EOF'
+# R
+
+~~~
+> **Last verified 2026-09-15** — source: Anthropic help center, article 12512180
+~~~
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 2 annotations across 2 files' <<<"$out"; then
+  pass "Case B: tilde fence recognized, in-fence example excluded"
+else
+  fail "Case B: tilde fence not recognized (out=$out)"
+fi
+rm -rf "$d"
+
+# Case C: an indented opening fence must be recognized too, so an in-fence
+# example does not leak in as a real annotation just because it starts with
+# leading spaces.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-c.md" <<'EOF'
+# R
+
+  ```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+  ```
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 1 annotations across 1 files' <<<"$out"; then
+  pass "Case C: indented opening fence recognized, in-fence example excluded"
+else
+  fail "Case C: indented opening fence not recognized (out=$out)"
+fi
+rm -rf "$d"
+
 # --- AC55: the clean fixture passes, with the exact PASS line
 d="$(make_fixture_repo)"
 out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
