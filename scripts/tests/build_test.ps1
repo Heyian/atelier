@@ -605,6 +605,107 @@ if ($r.Output.Contains('dated claims: 1 annotations across 1 files')) {
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 
+# Case D (regression: bash-vs-PowerShell divergence found in review of
+# c3a28a8): CommonMark 4.5 requires trailing "spaces or tabs" only after a
+# closing fence's run of characters — nothing else. A closing candidate
+# followed by U+00A0 (NO-BREAK SPACE, a common copy-paste artifact from a
+# help-centre page) is not blank under that rule, so the fence must NOT
+# close. If it wrongly closed, the stale annotation below would become
+# visible and the file's count would jump from 0 to 1.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+$nbsp = [char]0x00A0
+$emdash = [char]0x2014
+$fence = '```'
+$content = "# R`n`n$fence`nx`n$fence$nbsp`n`n> **Last verified 2020-01-01** $emdash source: Anthropic help center, article 12512180`n"
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-nbsp.md') $content
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 1 annotations across 1 files')) {
+  Add-Pass 'Case D: a closing candidate trailed by U+00A0 does not close the fence'
+} else {
+  Add-Failure "Case D: a closing candidate trailed by U+00A0 wrongly closed the fence (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case E: an opener carrying an info string (```bash, no space between the
+# backticks and the word) still opens a fence — the in-fence example must
+# stay excluded.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-info-string.md') @'
+# R
+
+```bash
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+```
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 1 annotations across 1 files')) {
+  Add-Pass 'Case E: an opener with an info string opens a fence'
+} else {
+  Add-Failure "Case E: an opener with an info string failed to open a fence (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case F: a closing run longer than the opening run still closes the fence.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-longer-close.md') @'
+# R
+
+```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+````
+
+> **Last verified 2020-01-02** — source: Anthropic help center, article 12512180
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 2 annotations across 2 files')) {
+  Add-Pass 'Case F: a closing fence longer than the opening fence closes it'
+} else {
+  Add-Failure "Case F: a longer closing fence failed to close (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case G: a closing candidate with trailing non-whitespace text does not
+# close the fence.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-trailing-text.md') @'
+# R
+
+```
+x
+``` bash
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 1 annotations across 1 files')) {
+  Add-Pass 'Case G: a closing candidate with trailing text does not close the fence'
+} else {
+  Add-Failure "Case G: a closing candidate with trailing text wrongly closed the fence (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# Case H: a 4-space-indented line is an indented code block, not a fence
+# opener, so a real annotation right after it must still be seen.
+$d = New-FixtureRepo
+New-Item -ItemType Directory -Force -Path (Join-Path $d 'skills/atelier-ventes/en/references') | Out-Null
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/fence-case-four-space.md') @'
+# R
+
+    ```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+'@
+$r = Invoke-FixtureCheck $d
+if ($r.Output.Contains('dated claims: 2 annotations across 2 files')) {
+  Add-Pass 'Case H: a 4-space-indented line does not open a fence'
+} else {
+  Add-Failure "Case H: a 4-space-indented line wrongly opened a fence (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
 # --- 2026-09-19/AC24: the summary line matches bash's, in both its forms
 $d = New-FixtureRepo
 $r = Invoke-FixtureCheck $d

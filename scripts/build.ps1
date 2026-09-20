@@ -79,7 +79,11 @@ function Test-FenceCloses([string]$Line, [char]$FenceChar, [int]$FenceLen) {
   if ($marker -eq '' -or $marker[0] -ne $FenceChar) { return $false }
   $runLen = Get-FenceRunLength $marker $FenceChar
   if ($runLen -lt $FenceLen) { return $false }
-  return $marker.Substring($runLen).Trim() -eq ''
+  # CommonMark 4.5 allows only trailing spaces or tabs here, not the full
+  # .NET IsWhiteSpace category — a plain .Trim() also strips U+00A0
+  # (NO-BREAK SPACE) and other Unicode whitespace, over-closing a fence that
+  # awk's `gsub(/[ \t]/, "", rest)` twin correctly leaves open.
+  return ($marker.Substring($runLen) -replace '[ \t]', '') -eq ''
 }
 
 # --- 2026-09-19/AC12, AC13, AC3b — every *.md at any depth under

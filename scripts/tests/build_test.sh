@@ -844,6 +844,104 @@ else
 fi
 rm -rf "$d"
 
+# Case D (regression: bash-vs-PowerShell divergence found in review of
+# c3a28a8): CommonMark 4.5 requires trailing "spaces or tabs" only after a
+# closing fence's run of characters — nothing else. A closing candidate
+# followed by U+00A0 (NO-BREAK SPACE, a common copy-paste artifact from a
+# help-centre page) is not blank under that rule, so the fence must NOT
+# close. If it wrongly closed, the stale annotation below would become
+# visible and the file's count would jump from 0 to 1.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+printf '# R\n\n```\nx\n```\xc2\xa0\n\n> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180\n' \
+  > "$d/skills/atelier-ventes/en/references/fence-case-nbsp.md"
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 1 annotations across 1 files' <<<"$out"; then
+  pass "Case D: a closing candidate trailed by U+00A0 does not close the fence"
+else
+  fail "Case D: a closing candidate trailed by U+00A0 wrongly closed the fence (out=$out)"
+fi
+rm -rf "$d"
+
+# Case E: an opener carrying an info string (``` bash, no space between the
+# backticks and the word) still opens a fence — the in-fence example must
+# stay excluded.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-info-string.md" <<'EOF'
+# R
+
+```bash
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+```
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 1 annotations across 1 files' <<<"$out"; then
+  pass "Case E: an opener with an info string opens a fence"
+else
+  fail "Case E: an opener with an info string failed to open a fence (out=$out)"
+fi
+rm -rf "$d"
+
+# Case F: a closing run longer than the opening run still closes the fence.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-longer-close.md" <<'EOF'
+# R
+
+```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+````
+
+> **Last verified 2020-01-02** — source: Anthropic help center, article 12512180
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 2 annotations across 2 files' <<<"$out"; then
+  pass "Case F: a closing fence longer than the opening fence closes it"
+else
+  fail "Case F: a longer closing fence failed to close (out=$out)"
+fi
+rm -rf "$d"
+
+# Case G: a closing candidate with trailing non-whitespace text does not
+# close the fence.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-trailing-text.md" <<'EOF'
+# R
+
+```
+x
+``` bash
+
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 1 annotations across 1 files' <<<"$out"; then
+  pass "Case G: a closing candidate with trailing text does not close the fence"
+else
+  fail "Case G: a closing candidate with trailing text wrongly closed the fence (out=$out)"
+fi
+rm -rf "$d"
+
+# Case H: a 4-space-indented line is an indented code block, not a fence
+# opener, so a real annotation right after it must still be seen.
+d="$(make_fixture_repo)"
+mkdir -p "$d/skills/atelier-ventes/en/references"
+cat > "$d/skills/atelier-ventes/en/references/fence-case-four-space.md" <<'EOF'
+# R
+
+    ```
+> **Last verified 2020-01-01** — source: Anthropic help center, article 12512180
+EOF
+out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )"
+if grep -qF 'dated claims: 2 annotations across 2 files' <<<"$out"; then
+  pass "Case H: a 4-space-indented line does not open a fence"
+else
+  fail "Case H: a 4-space-indented line wrongly opened a fence (out=$out)"
+fi
+rm -rf "$d"
+
 # --- AC55: the clean fixture passes, with the exact PASS line
 d="$(make_fixture_repo)"
 out="$( cd "$d" && bash scripts/build.sh --check 2>&1 )" && rc=0 || rc=1
