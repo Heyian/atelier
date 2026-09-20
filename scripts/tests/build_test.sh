@@ -1437,5 +1437,105 @@ expect_check_fail "$d" 'pipeline-doc — skills/atelier-ventes/fr/references/mod
   "Review Focus 5 an unclosed template block fails rather than comparing a truncated list"
 rm -rf "$d"
 
+# --- 2026-09-20-heading-pairs/AC11-AC14: exec_doc_heading_text
+# The function is sourced out of build.sh rather than re-implemented: these
+# assert the real shipped code, not a copy that can drift from it.
+ht_setup() {
+  local d; d="$(mktemp -d)"
+  cp "$REPO_ROOT/scripts/build.sh" "$d/build.sh"
+  echo "$d"
+}
+
+# Run one exec_doc_heading_text call against a file, printing its stdout.
+# build.sh runs main() on load, so it is sourced with --check-freshness-style
+# argument suppression: the subshell exits before main by trapping on a
+# sentinel. Simpler and fully equivalent: invoke a tiny driver script.
+ht_run() {
+  local script="$1" file="$2" want="$3"
+  bash -c '
+    set -euo pipefail
+    # Stop build.sh before it runs main "$@": read every line up to the last.
+    head -n -1 "$1" > "$1.lib"
+    # shellcheck disable=SC1090
+    source "$1.lib"
+    exec_doc_heading_text "$2" "$3"
+  ' _ "$script" "$file" "$want"
+}
+
+d="$(ht_setup)"
+cat > "$d/ref.md" <<'EOF'
+# Prose title
+
+```markdown
+# Title
+## Plain heading
+###	Tab separated
+   ## Indented two
+##
+### Deep
+```
+EOF
+out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
+expected=$'1 Title\n2 Plain heading\n3 Tab separated\n2 Indented two\n2 \n3 Deep'
+if [[ "$out" == "$expected" ]]; then
+  pass "AC11 extraction strips indent, marker and separator; empty heading is empty"
+else
+  fail "AC11 extraction wrong (got: $(printf '%q' "$out"))"
+fi
+rm -rf "$d"
+
+# AC12 — a CRLF checkout yields the same text as an LF one.
+d="$(ht_setup)"
+printf '```markdown\r\n# Title\r\n## Current practice\r\n```\r\n' > "$d/ref.md"
+out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
+if [[ "$out" == $'1 Title\n2 Current practice' ]]; then
+  pass "AC12 CRLF checkout extracts the same text, no trailing carriage return"
+else
+  fail "AC12 CRLF extraction wrong (got: $(printf '%q' "$out"))"
+fi
+rm -rf "$d"
+
+# AC13 — a ```bash block quoting a ```markdown opener is not counted.
+d="$(ht_setup)"
+cat > "$d/ref.md" <<'EOF'
+```bash
+cat <<'INNER'
+```markdown
+## Decoy
+INNER
+```
+
+```markdown
+## Real heading
+```
+EOF
+out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
+if [[ "$out" == '2 Real heading' ]]; then
+  pass "AC13 quoted markdown opener is not counted toward the block index"
+else
+  fail "AC13 nested-fence counting wrong (got: $(printf '%q' "$out"))"
+fi
+rm -rf "$d"
+
+# AC14 — UNCLOSED and MISSING sentinels.
+d="$(ht_setup)"
+printf '```markdown\n## Never closed\n' > "$d/ref.md"
+out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
+[[ "$out" == 'UNCLOSED' ]] && pass "AC14 unclosed target block reports UNCLOSED" \
+  || fail "AC14 expected UNCLOSED, got $(printf '%q' "$out")"
+printf '```markdown\n## Only one\n```\n' > "$d/ref.md"
+out="$(ht_run "$d/build.sh" "$d/ref.md" 2)"
+[[ "$out" == 'MISSING' ]] && pass "AC14 too-high block index reports MISSING" \
+  || fail "AC14 expected MISSING, got $(printf '%q' "$out")"
+rm -rf "$d"
+
+# Review Focus 3 — an empty markdown block yields no headings, not an error.
+d="$(ht_setup)"
+printf '```markdown\n```\n' > "$d/ref.md"
+out="$(ht_run "$d/build.sh" "$d/ref.md" 1)"
+[[ -z "$out" ]] && pass "empty template block extracts to nothing" \
+  || fail "empty block should extract to nothing, got $(printf '%q' "$out")"
+rm -rf "$d"
+
 echo
 if [[ "$FAILURES" -eq 0 ]]; then echo "STATUS: PASS"; exit 0; else echo "STATUS: FAIL ($FAILURES)"; exit 1; fi

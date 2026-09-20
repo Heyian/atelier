@@ -336,6 +336,68 @@ exec_doc_headings() {
   ' "$file"
 }
 
+# The heading levels AND text of the WANT-th ```markdown block, one heading
+# per line as "<level> <text>" — the FIRST space is the delimiter, so the
+# text may hold further spaces and '#'. Same MISSING / UNCLOSED sentinels as
+# exec_doc_headings() on the same conditions, so a caller validates once.
+#
+# 2026-09-20-heading-pairs/AC11 — atx_level() already accepts three shapes a
+# naive "strip '# '" would get wrong: up to three leading spaces, a tab
+# separator, and a marker with nothing after it. Extraction has to define all
+# three rather than assume one space, or recognition and extraction disagree.
+exec_doc_heading_text() {
+  local file="$1" want="$2"
+  awk -v WANT="$want" "$FENCE_AWK_LIB"'
+    function atx_text(line,    lead, n, rest) {
+      lead = 0
+      while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+      n = 0
+      while (substr(line, lead + n + 1, 1) == "#") n++
+      rest = substr(line, lead + n + 1)
+      sub(/^[ \t]+/, "", rest)       # only the separator; trailing text is verbatim
+      return rest
+    }
+    BEGIN { want = WANT + 0; seen = 0; inFence = 0; target = 0; found = 0; closed = 0; out = "" }
+    {
+      line = $0
+      sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
+
+      if (inFence) {
+        if (fence_closes(line, fenceChar, fenceLen)) {
+          if (target) { closed = 1; target = 0 }
+          inFence = 0
+          next
+        }
+        if (target) {
+          lvl = atx_level(line)
+          if (lvl > 0) out = out lvl " " atx_text(line) "\n"
+        }
+        next
+      }
+
+      marker = fence_marker(line)
+      if (marker == "") next
+      markerChar = substr(marker, 1, 1)
+      markerLen = fence_run_len(marker, markerChar)
+      if (markerLen < 3) next
+      info = substr(marker, markerLen + 1)
+      gsub(/[ \t]/, "", info)
+      # Enter every fence, target or not: a ```bash block quoting a
+      # ```markdown opener must not be counted as one.
+      inFence = 1; fenceChar = markerChar; fenceLen = markerLen; target = 0
+      if (info == "markdown") {
+        seen++
+        if (seen == want && !found) { target = 1; found = 1 }
+      }
+    }
+    END {
+      if (!found) { print "MISSING"; exit 0 }
+      if (!closed) { print "UNCLOSED"; exit 0 }
+      printf "%s", out       # printf, not print: an empty block emits nothing
+    }
+  ' "$file"
+}
+
 # 2026-09-19-headings/AC17-AC21. Reads the registry once, per row.
 check_exec_documents() {
   if [[ ! -f "$EXEC_DOCS_TSV" ]]; then
