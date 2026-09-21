@@ -1,0 +1,16 @@
+company-profile	{root}/docs/atelier/company-profile.md	skills/atelier/fr/references/onboarding.md	1	skills/atelier/en/references/onboarding.md	1
+role-registry	{root}/docs/atelier/roles.md	skills/atelier/fr/references/onboarding.md	2	skills/atelier/en/references/onboarding.md	2
+progression	{root}/docs/atelier/progression.md	skills/atelier-mentor/fr/references/progression.md	1	skills/atelier-mentor/en/references/progression.md	1
+relay	{root}/docs/atelier/relais/<date>-<subject>.md	skills/atelier/fr/references/relais.md	1	skills/atelier/en/references/relais.md	1
+relay-tutorial	{root}/docs/atelier/relais/<date>-<subject>.md	skills/atelier/fr/references/relais.md	2	skills/atelier/en/references/relais.md	2
+compass-map	{root}/docs/<initiative>/map.md	skills/atelier-boussole/fr/references/carte.md	1	skills/atelier-boussole/en/references/map.md	1
+ticket	{root}/docs/tickets/NN-<short-name>.md	skills/atelier-boussole/fr/references/plan-daction.md	1	skills/atelier-boussole/en/references/action-plan.md	1
+compass-brief	{root}/docs/<date>-<decision>.md	skills/atelier-boussole/fr/references/carte.md	3	skills/atelier-boussole/en/references/map.md	3
+compass-memo	{root}/docs/<initiative>/	skills/atelier-boussole/fr/references/collapse.md	1	skills/atelier-boussole/en/references/collapse.md	1
+research-note	{root}/docs/research/<date>-<subject>.md	skills/atelier-boussole/fr/references/detour-recherche.md	1	skills/atelier-boussole/en/references/detour-research.md	1
+decision-log	{root}/docs/atelier/decisions.md	-	-	-	-
+role-memory	{root}/docs/atelier/memory/<canonical-name>.md	-	-	-	-
+voice-guide	{root}/docs/marketing/guide-de-voix.md	-	-	-	-
+minutes	{root}/docs/reunions/	-	-	-	-
+pipeline-review	{root}/docs/ventes/	-	-	-	-
+mockup	{root}/docs/maquettes/	-	-	-	-

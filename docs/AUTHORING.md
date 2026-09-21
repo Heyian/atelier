@@ -215,3 +215,45 @@ Nothing here judges whether the date is *correct* — only that it is present,
 well formed, not in the future, and not old. Re-verifying a claim is a human
 act; `bash scripts/build.sh --check` reports the oldest claim's age on every
 run, and a monthly job files an issue once one passes a year.
+
+## Exec-facing document headings
+
+Paths are canonical; **section headings are not**. A document the skill writes
+for the executive carries the headings of the locale that created it — «
+Pratique actuelle » on a French install, "Current practice" on an English one.
+Both are correct, and a locale switch leaves the executive holding one of
+them. See [ADR 0016](adr/0016-exec-facing-document-section-headings.md).
+
+That puts the burden on the **read** side, and every instruction you write has
+to carry it:
+
+- Name a section by **what it records**, never by the string to match. "the
+  section listing the completed tutorial modules" survives a locale switch;
+  "the 'Tutorial modules covered' section" does not. Quoting this locale's
+  heading as an *example* is fine — as the thing to grep for, it is a bug.
+- Never tell a reader a section is missing, or a document empty, on the
+  strength of a title it did not recognize.
+- The general rule — disclose once, offer a heading-only rewrite, leave the
+  headings the executive wrote or renamed alone, Cowork only, new lines in the
+  executive's language — lives in
+  `skills/shared/<locale>/memory-protocol.md`. Don't restate it in a skill
+  body; the build copies it into every ZIP.
+
+**Every new exec-facing document gets a row in `skills/exec-documents.tsv`**:
+doc-id, canonical path, then the reference file and 1-based ` ```markdown `
+block index that hold its template in each locale. `bash scripts/build.sh
+--check` reads that registry and fails when the two locales' templates stop
+carrying the same sequence of heading levels. A document whose structure is
+described in prose rather than a template carries `-` in all four template
+columns — in all four, never some.
+
+The build also **generates** `references/exec-document-headings.md` from that
+same registry and stages it into every ZIP, giving both locales' spelling of
+every section. That is what lets a reader evaluate ADR-0016's "spelled the way
+your template spells it, in one locale or the other" test at all. A new
+exec-facing document needs its registry row **and** a ` ```markdown ` template
+block in both locales' reference files, with an identical sequence of heading
+levels, or the build dies. Nothing beyond that is hand-written per document,
+and nothing can rot on one side. The framing prose
+around the table is a shared text, `skills/shared/<locale>/exec-document-headings.md`;
+the table itself is appended at stage time and never checked in.

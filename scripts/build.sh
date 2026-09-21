@@ -126,6 +126,9 @@ stage_skill() {
   cp "$SHARED_DIR/$locale/glossary.md" "$stage/references/glossary.md"
   cp "$SHARED_DIR/$locale/memory-protocol.md" "$stage/references/memory-protocol.md"
 
+  # 2026-09-20-heading-pairs/AC1 — generated per stage, never checked in.
+  generate_exec_heading_pairs "$locale" "$stage/references/exec-document-headings.md"
+
   # AC57 — the annotation is a release-please marker, not skill metadata.
   # Strip it so the packaged SKILL.md carries a clean `version: X.Y.Z`, and
   # a naive frontmatter parser in the skill loader cannot read the version as
@@ -244,6 +247,384 @@ function real_calendar_day(y, m, d,   dim) {
   return d <= dim
 }
 '
+
+# --- 2026-09-19-headings/AC14 — the exec-facing document registry: one row
+# per document, six tab-separated columns
+# <doc-id> <canonical-path> <fr-ref> <fr-block> <en-ref> <en-block>.
+EXEC_DOCS_TSV="$SKILLS_DIR/exec-documents.tsv"
+
+# CommonMark fence boundaries (4.5) plus ATX heading levels (4.2). These
+# duplicate the functions inlined in the dated-claims awk above on purpose:
+# that scanner passes today, and sharing a library would put it at risk to
+# save twenty lines.
+FENCE_AWK_LIB='
+function fence_marker(line,    lead) {
+  lead = 0
+  while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+  if (substr(line, lead + 1, 1) != "`" && substr(line, lead + 1, 1) != "~") return ""
+  return substr(line, lead + 1)
+}
+function fence_run_len(marker, ch,    i) {
+  i = 1
+  while (substr(marker, i, 1) == ch) i++
+  return i - 1
+}
+function fence_closes(line, fchar, flen,    marker, rest) {
+  marker = fence_marker(line)
+  if (marker == "" || substr(marker, 1, 1) != fchar) return 0
+  if (fence_run_len(marker, fchar) < flen) return 0
+  rest = substr(marker, fence_run_len(marker, fchar) + 1)
+  gsub(/[ \t]/, "", rest)
+  return rest == ""
+}
+function atx_level(line,    lead, n, c) {
+  lead = 0
+  while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+  n = 0
+  while (substr(line, lead + n + 1, 1) == "#") n++
+  if (n < 1 || n > 6) return 0
+  c = substr(line, lead + n + 1, 1)
+  if (c != "" && c != " " && c != "\t") return 0
+  return n
+}
+'
+
+# The heading levels of the WANT-th ```markdown block in a file, space-joined
+# and in document order — "1 2 2 2" for a title and three sections. Prints
+# MISSING when the file holds fewer than WANT such blocks, and UNCLOSED when
+# the target block runs to EOF without a closing fence: a truncated heading
+# list compared against a complete one would read as a real divergence and
+# send the reader to the wrong file.
+exec_doc_headings() {
+  local file="$1" want="$2"
+  awk -v WANT="$want" "$FENCE_AWK_LIB"'
+    BEGIN { want = WANT + 0; seen = 0; inFence = 0; target = 0; found = 0; closed = 0; out = "" }
+    {
+      line = $0
+      sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
+
+      if (inFence) {
+        if (fence_closes(line, fenceChar, fenceLen)) {
+          if (target) { closed = 1; target = 0 }
+          inFence = 0
+          next
+        }
+        if (target) {
+          lvl = atx_level(line)
+          if (lvl > 0) out = (out == "" ? "" : out " ") lvl
+        }
+        next
+      }
+
+      marker = fence_marker(line)
+      if (marker == "") next
+      markerChar = substr(marker, 1, 1)
+      markerLen = fence_run_len(marker, markerChar)
+      if (markerLen < 3) next
+      info = substr(marker, markerLen + 1)
+      gsub(/[ \t]/, "", info)
+      # Enter every fence, target or not: a ```bash block quoting a
+      # ```markdown opener must not be counted as one.
+      inFence = 1; fenceChar = markerChar; fenceLen = markerLen; target = 0
+      if (info == "markdown") {
+        seen++
+        if (seen == want && !found) { target = 1; found = 1 }
+      }
+    }
+    END {
+      if (!found) { print "MISSING"; exit 0 }
+      if (!closed) { print "UNCLOSED"; exit 0 }
+      print out
+    }
+  ' "$file"
+}
+
+# The heading levels AND text of the WANT-th ```markdown block, one heading
+# per line as "<level> <text>" — the FIRST space is the delimiter, so the
+# text may hold further spaces and '#'. Same MISSING / UNCLOSED sentinels as
+# exec_doc_headings() on the same conditions, so a caller validates once.
+#
+# 2026-09-20-heading-pairs/AC11 — atx_level() already accepts three shapes a
+# naive "strip '# '" would get wrong: up to three leading spaces, a tab
+# separator, and a marker with nothing after it. Extraction has to define all
+# three rather than assume one space, or recognition and extraction disagree.
+exec_doc_heading_text() {
+  local file="$1" want="$2"
+  awk -v WANT="$want" "$FENCE_AWK_LIB"'
+    function atx_text(line,    lead, n, rest) {
+      lead = 0
+      while (lead < 3 && substr(line, lead + 1, 1) == " ") lead++
+      n = 0
+      while (substr(line, lead + n + 1, 1) == "#") n++
+      rest = substr(line, lead + n + 1)
+      sub(/^[ \t]+/, "", rest)       # only the separator; trailing text is verbatim
+      return rest
+    }
+    BEGIN { want = WANT + 0; seen = 0; inFence = 0; target = 0; found = 0; closed = 0; out = "" }
+    {
+      line = $0
+      sub(/\r$/, "", line)          # a CRLF checkout must behave like an LF one
+
+      if (inFence) {
+        if (fence_closes(line, fenceChar, fenceLen)) {
+          if (target) { closed = 1; target = 0 }
+          inFence = 0
+          next
+        }
+        if (target) {
+          lvl = atx_level(line)
+          if (lvl > 0) out = out lvl " " atx_text(line) "\n"
+        }
+        next
+      }
+
+      marker = fence_marker(line)
+      if (marker == "") next
+      markerChar = substr(marker, 1, 1)
+      markerLen = fence_run_len(marker, markerChar)
+      if (markerLen < 3) next
+      info = substr(marker, markerLen + 1)
+      gsub(/[ \t]/, "", info)
+      # Enter every fence, target or not: a ```bash block quoting a
+      # ```markdown opener must not be counted as one.
+      inFence = 1; fenceChar = markerChar; fenceLen = markerLen; target = 0
+      if (info == "markdown") {
+        seen++
+        if (seen == want && !found) { target = 1; found = 1 }
+      }
+    }
+    END {
+      if (!found) { print "MISSING"; exit 0 }
+      if (!closed) { print "UNCLOSED"; exit 0 }
+      printf "%s", out       # printf, not print: an empty block emits nothing
+    }
+  ' "$file"
+}
+
+# Escape the one character a two-column markdown row cannot hold raw.
+esc_table_cell() { printf '%s' "${1//|/\\|}"; }
+
+# One templated registry row's group, appended to the generated file. Every
+# failure here die()s: check_exec_documents() runs only under --check, so a
+# plain `--lang all` would otherwise ship a table with a document silently
+# missing — the class of failure this file exists to close.
+emit_exec_heading_group() {
+  local doc_id="$1" path="$2" fr_ref="$3" fr_block="$4" en_ref="$5" en_block="$6"
+  local side ref block v
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"
+    else ref="$en_ref"; block="$en_block"; fi
+    [[ -f "$REPO_ROOT/$ref" ]] \
+      || die "$doc_id — $ref listed in skills/exec-documents.tsv but no such file (renamed?)"
+    [[ "$block" =~ ^[1-9][0-9]*$ ]] \
+      || die "$doc_id — $ref template block index '$block' is not a positive integer"
+  done
+
+  local fr_raw en_raw
+  fr_raw="$(exec_doc_heading_text "$REPO_ROOT/$fr_ref" "$fr_block")"
+  en_raw="$(exec_doc_heading_text "$REPO_ROOT/$en_ref" "$en_block")"
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"; v="$fr_raw"
+    else ref="$en_ref"; block="$en_block"; v="$en_raw"; fi
+    case "$v" in
+      MISSING)  die "$doc_id — $ref has no markdown template block $block" ;;
+      UNCLOSED) die "$doc_id — $ref template block $block is never closed" ;;
+    esac
+  done
+
+  # mapfile on an empty string yields a one-element array holding "", so an
+  # empty block would count as one heading. Guard both sides explicitly.
+  local -a fr_all=() en_all=()
+  [[ -n "$fr_raw" ]] && mapfile -t fr_all <<<"$fr_raw"
+  [[ -n "$en_raw" ]] && mapfile -t en_all <<<"$en_raw"
+
+  # 2026-09-20-heading-pairs/AC19 — every heading, level-1 title included,
+  # counted before any level-2 filtering.
+  if [[ "${#fr_all[@]}" -ne "${#en_all[@]}" ]]; then
+    die "$doc_id — heading counts differ: $fr_ref has ${#fr_all[@]}, $en_ref has ${#en_all[@]}"
+  fi
+
+  # Equal totals at different depths would pair a French heading with the
+  # wrong English one once the level-1 titles are filtered out. Same verdict
+  # check_exec_document_row() makes under --check, made here too because a
+  # plain build never calls it.
+  local i fr_levels="" en_levels=""
+  for i in "${!fr_all[@]}"; do
+    fr_levels+="${fr_all[$i]%% *} "
+    en_levels+="${en_all[$i]%% *} "
+  done
+  if [[ "$fr_levels" != "$en_levels" ]]; then
+    die "$doc_id — heading levels differ: $fr_ref [${fr_levels% }], $en_ref [${en_levels% }]"
+  fi
+
+  local -a rows=()
+  local lvl marker
+  for i in "${!fr_all[@]}"; do
+    lvl="${fr_all[$i]%% *}"
+    [[ "$lvl" -ge 2 ]] || continue        # 2026-09-20-heading-pairs/AC6 — level-1 titles never appear
+    marker="$(printf '%*s' "$lvl" '' | tr ' ' '#')"
+    rows+=("$(printf '| %s %s | %s %s |' \
+      "$marker" "$(esc_table_cell "${fr_all[$i]#* }")" \
+      "$marker" "$(esc_table_cell "${en_all[$i]#* }")")")
+  done
+
+  # 2026-09-20-heading-pairs/AC3 / AC7 — a block whose only heading is its
+  # title contributes no group.
+  [[ "${#rows[@]}" -gt 0 ]] || return 0
+
+  printf '\n## %s\n\n`%s`\n\n| Français | English |\n| --- | --- |\n' "$doc_id" "$path"
+  printf '%s\n' "${rows[@]}"
+}
+
+# 2026-09-20-heading-pairs/AC1-AC10, AC15-AC20. Reads the registry once per
+# staged skill and writes the locale's preamble followed by the generated
+# table. Called from stage_skill(), so every ZIP carries the result.
+generate_exec_heading_pairs() {
+  local locale="$1" out="$2"
+  local preamble="$SHARED_DIR/$locale/exec-document-headings.md"
+
+  [[ -f "$EXEC_DOCS_TSV" ]] \
+    || die "skills/exec-documents.tsv — exec-facing document registry not found"
+  [[ -f "$preamble" ]] \
+    || die "skills/shared/$locale/exec-document-headings.md not found"
+
+  cp "$preamble" "$out"
+
+  local raw line_no=0 doc_id path fr_ref fr_block en_ref en_block v dashes
+  local -a cols
+  while IFS= read -r raw || [[ -n "$raw" ]]; do
+    line_no=$((line_no + 1))
+    raw="${raw%$'\r'}"          # strip CR before any column is compared
+    [[ -z "$raw" ]] && continue
+
+    # awk, not `IFS=$'\t' read -a`: tab is IFS whitespace, so read would
+    # collapse two adjacent tabs into one and hide an empty column.
+    mapfile -t cols < <(awk -F'\t' '{ for (i = 1; i <= NF; i++) print $i }' <<<"$raw")
+    [[ "${#cols[@]}" -eq 6 ]] \
+      || die "skills/exec-documents.tsv:$line_no — expected 6 tab-separated columns, found ${#cols[@]}"
+
+    doc_id="${cols[0]}"; path="${cols[1]}"
+    fr_ref="${cols[2]}"; fr_block="${cols[3]}"
+    en_ref="${cols[4]}"; en_block="${cols[5]}"
+
+    dashes=0
+    for v in "$fr_ref" "$fr_block" "$en_ref" "$en_block"; do
+      [[ "$v" == "-" ]] && dashes=$((dashes + 1))
+    done
+    # 2026-09-20-heading-pairs/AC10 — a document described in prose carries
+    # '-' in all four columns.
+    if [[ "$dashes" -eq 4 ]]; then continue; fi
+    [[ "$dashes" -eq 0 ]] \
+      || die "$doc_id — template columns are partly '-': a document described in prose carries '-' in all four"
+
+    emit_exec_heading_group "$doc_id" "$path" \
+      "$fr_ref" "$fr_block" "$en_ref" "$en_block" >> "$out"
+  done < "$EXEC_DOCS_TSV"
+}
+
+# 2026-09-19-headings/AC17-AC21. Reads the registry once, per row.
+check_exec_documents() {
+  if [[ ! -f "$EXEC_DOCS_TSV" ]]; then
+    check_fail "skills/exec-documents.tsv — exec-facing document registry not found"
+    return
+  fi
+
+  local raw line_no=0 doc_id fr_ref fr_block en_ref en_block v dashes
+  local -a cols
+  while IFS= read -r raw || [[ -n "$raw" ]]; do
+    line_no=$((line_no + 1))
+    raw="${raw%$'\r'}"
+    [[ -z "$raw" ]] && continue
+
+    # awk, not `IFS=$'\t' read -a`: tab is IFS whitespace, so read would
+    # collapse two adjacent tabs into one and hide an empty column.
+    mapfile -t cols < <(awk -F'\t' '{ for (i = 1; i <= NF; i++) print $i }' <<<"$raw")
+    if [[ "${#cols[@]}" -ne 6 ]]; then
+      check_fail "skills/exec-documents.tsv:$line_no — expected 6 tab-separated columns, found ${#cols[@]}"
+      continue
+    fi
+
+    doc_id="${cols[0]}"
+    fr_ref="${cols[2]}"; fr_block="${cols[3]}"
+    en_ref="${cols[4]}"; en_block="${cols[5]}"
+
+    # AC15 / AC21 — a document described in prose carries '-' in all four
+    # template columns. All four, or none: a half-filled row would be read as
+    # a real row naming a reference file called '-'.
+    dashes=0
+    for v in "$fr_ref" "$fr_block" "$en_ref" "$en_block"; do
+      [[ "$v" == "-" ]] && dashes=$((dashes + 1))
+    done
+    if [[ "$dashes" -eq 4 ]]; then continue; fi
+    if [[ "$dashes" -ne 0 ]]; then
+      check_fail "$doc_id — template columns are partly '-': a document described in prose carries '-' in all four"
+      continue
+    fi
+
+    if [[ "$fr_ref" == "$en_ref" ]]; then
+      check_fail "$doc_id — names the same reference file for both locales: $fr_ref"
+      continue
+    fi
+
+    check_exec_document_row "$doc_id" "$fr_ref" "$fr_block" "$en_ref" "$en_block"
+  done < "$EXEC_DOCS_TSV"
+}
+
+# One row's two sides. Task 5 adds the comparison; this returns after
+# validating each side on its own.
+check_exec_document_row() {
+  local doc_id="$1" fr_ref="$2" fr_block="$3" en_ref="$4" en_block="$5"
+  local ref block side v ok=1
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"
+    else ref="$en_ref"; block="$en_block"; fi
+
+    if [[ ! -f "$REPO_ROOT/$ref" ]]; then
+      check_fail "$doc_id — $ref listed in skills/exec-documents.tsv but no such file (renamed?)"
+      ok=0; continue
+    fi
+    if [[ ! "$block" =~ ^[1-9][0-9]*$ ]]; then
+      check_fail "$doc_id — $ref template block index '$block' is not a positive integer"
+      ok=0; continue
+    fi
+  done
+
+  [[ "$ok" -eq 1 ]] || return 0   # both sides named a real file and a sane index
+
+  local fr_levels en_levels
+  fr_levels="$(exec_doc_headings "$REPO_ROOT/$fr_ref" "$fr_block")"
+  en_levels="$(exec_doc_headings "$REPO_ROOT/$en_ref" "$en_block")"
+
+  for side in fr en; do
+    if [[ "$side" == "fr" ]]; then ref="$fr_ref"; block="$fr_block"; v="$fr_levels"
+    else ref="$en_ref"; block="$en_block"; v="$en_levels"; fi
+    case "$v" in
+      MISSING)  check_fail "$doc_id — $ref has no markdown template block $block"; ok=0 ;;
+      UNCLOSED) check_fail "$doc_id — $ref template block $block is never closed"; ok=0 ;;
+    esac
+  done
+
+  [[ "$ok" -eq 1 ]] || return 0
+
+  # 2026-09-19-headings/AC19, AC20 — identical sequence of heading levels:
+  # same number of headings, at the same depths, in the same order. No script
+  # can compare a French heading to an English one for meaning; this proves
+  # the two templates are structurally the same document, which is the
+  # property reading-by-meaning depends on.
+  if [[ "$fr_levels" != "$en_levels" ]]; then
+    local fr_n en_n
+    fr_n="$(wc -w <<<"$fr_levels")"
+    en_n="$(wc -w <<<"$en_levels")"
+    if [[ "$fr_n" -ne "$en_n" ]]; then
+      check_fail "$doc_id — heading counts differ: $fr_ref has $fr_n, $en_ref has $en_n"
+    else
+      check_fail "$doc_id — heading levels differ: $fr_ref [$fr_levels], $en_ref [$en_levels]"
+    fi
+  fi
+}
 
 # --- 2026-09-19/AC12, AC13 — every *.md at any depth under
 # skills/<skill>/<locale>/references/, for every skill in names.tsv and both
@@ -854,6 +1235,9 @@ run_checks() {
   # 2026-09-19/AC13 — the scanner finds its own files, so it runs once here
   # rather than inside the per-skill, per-locale loop below.
   check_dated_claims
+  # 2026-09-19-headings/AC16 — the registry names its own files, so this runs
+  # once here rather than inside the per-skill, per-locale loop below.
+  check_exec_documents
 
   for locale in "${selected[@]}"; do
     for canonical in $(list_skills); do

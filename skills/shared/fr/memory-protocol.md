@@ -63,6 +63,82 @@ de temps.**
 avant de produire le document de passage, et ne propose que ce qui n'a **pas
 déjà** été persisté pendant la session.
 
+## Un document écrit dans l'autre langue
+
+Les documents de la personne dirigeante gardent les titres de section de la
+langue qui les a créés. Une installation française écrit « Pratique
+actuelle », une installation anglaise « Current practice ». Les deux sont
+justes, et l'une comme l'autre peut se retrouver devant toi.
+
+**Lis le document en entier, et repère une section à ce qu'elle contient, pas
+à son titre.** « Pratique actuelle », c'est la ligne qui dit où en est la
+personne aujourd'hui, quel que soit son intitulé. Ne signale jamais une
+section absente, et ne traite jamais un document comme vide, parce que ses
+titres sont dans l'autre langue.
+
+**Aucune déduction par la position.** Si tu n'arrives vraiment pas à
+identifier une section, demande. Ce sont les fichiers de la personne et elle
+les modifie ; une écriture silencieuse dans ce qui se trouvait à la place
+attendue vaut bien moins qu'une question.
+
+**Dis-le une fois.** À la première lecture d'un tel document dans la session,
+une ligne : le compte rendu a été écrit dans l'autre langue, tu l'as lu, et il
+compte toujours. Pas de rappel ensuite.
+
+**Propose de réécrire les titres — rien d'autre.** Propose-le comme toute
+autre écriture ci-dessus : les lignes de titre seulement, sur le seul document
+que tu viens de lire, jamais un balayage de tout ce qui traîne. La prose de la
+personne n'est jamais traduite : c'est son compte rendu, et paraphraser
+pourquoi elle a adopté une pratique, c'est une perte réelle. Refusée, la
+proposition est abandonnée, pas reproposée. Elle peut toujours demander une
+traduction.
+
+**Ses propres titres restent les siens.** Deux conditions avant de réécrire un
+titre : tu sais dire quelle section de ton modèle il désigne, *et* il s'écrit
+comme ton modèle l'écrit, dans une langue ou dans l'autre. Les deux
+orthographes de chaque section sont dans `references/exec-document-headings.md` :
+lis l'entrée du document que tu as en main avant de proposer quoi que ce
+soit. Vérifie la deuxième condition exprès — c'est celle qu'on saute. Un titre
+qu'elle a renommé contient quand même ce que contient la section de ton
+modèle : la première condition passe, et tu vas le traduire si tu ne t'arrêtes
+pas pour comparer les mots.
+
+Ton modèle dit « Pratique actuelle ». L'anglais écrit la même section
+"Current practice" — c'est la ligne que tu trouves dans
+`references/exec-document-headings.md`. Son fichier, lui, dit "Where I'm at
+right now". Ni l'une ni l'autre orthographe : même section, pas ton libellé,
+donc on n'y touche pas. Le titre et le texte, et rien ne change de place :
+un titre qu'elle a renommé, ce sont ses mots à elle, au même titre que sa
+prose. Pareil pour une section à elle dont tu n'as aucun modèle. Ne pas savoir
+situer une section n'est pas une raison de demander ici : on demande avant
+d'écrire *dans* une section, et laisser un titre tranquille n'écrit rien.
+
+**Ta proposition nomme les deux listes.** Elle dit les titres que tu vas
+réécrire *et* les titres que tu laisses — les deux, à chaque fois, pas
+seulement quand tu as remarqué une exception. Écrire la proposition t'oblige
+alors à faire la comparaison, et une comparaison sautée se voit dans la
+proposition, pas seulement dans le fichier. Une réécriture acceptée qui laisse
+un titre debout n'a ainsi jamais l'air d'avoir échoué à moitié.
+
+**Un document sans modèle.** Si tu n'as aucun modèle pour ce document, tous
+ses titres restent tels quels. Il n'y a pas de « comme ton modèle l'écrit » à
+vérifier, et laisser un titre tranquille n'écrit rien.
+
+**En Cowork seulement.** La réécriture est une écriture : elle n'a lieu que là
+où le fichier peut être lu et réécrit. Dans une conversation Desktop, la
+mention a quand même lieu, la proposition non, et tu dis clairement que rien
+n'a été écrit.
+
+**Les nouvelles lignes suivent la personne.** Ce que tu ajoutes s'écrit dans
+la langue que la personne parle, pas dans celle des titres du document. Un
+document aux titres anglais avec une ligne française en dessous est un état
+intermédiaire correct, pas un défaut.
+
+Quand les titres sont déjà dans ta langue, rien de tout ceci ne s'applique :
+ni mention, ni proposition. Un document que tu crées toi-même l'est dans ta
+langue, de la même façon — il n'y a rien à signaler sur un fichier que tu
+viens de créer.
+
 ## Portée : écritures en Cowork seulement
 
 Une session Desktop ne peut pas lire les fichiers vivants, donc elle ne les

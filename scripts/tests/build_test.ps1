@@ -184,6 +184,40 @@ Version 0.1.0 <!-- x-release-please-version -->
   Write-Lf (Join-Path $dir 'skills/dated-claims.tsv') "skills/atelier-ventes/en/references/tutorial/03.md`n"
   Write-Annotation -Dir $dir -Locale 'en' -Rel 'skills/atelier-ventes/en/references/tutorial/03.md' -Days 10
 
+  # 2026-09-19-headings/AC22 — the fixture carries the registry and the two
+  # parallel templates it points at; an absent registry is fatal.
+  foreach ($sub in @('skills/atelier-ventes/fr/references', 'skills/atelier-ventes/en/references')) {
+    New-Item -ItemType Directory -Force -Path (Join-Path $dir $sub) | Out-Null
+  }
+  Write-Lf (Join-Path $dir 'skills/atelier-ventes/fr/references/modele.md') @"
+# Modèle de revue de pipeline
+
+``````markdown
+# Revue de pipeline — <entreprise>
+
+## Où en est le pipeline
+
+## Ce qui bloque
+
+## Prochaines relances
+``````
+"@
+  Write-Lf (Join-Path $dir 'skills/atelier-ventes/en/references/template.md') @"
+# Pipeline review template
+
+``````markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+``````
+"@
+  Write-Lf (Join-Path $dir 'skills/exec-documents.tsv') `
+    ("pipeline-doc`t{root}/docs/ventes/pipeline.md`tskills/atelier-ventes/fr/references/modele.md`t1`tskills/atelier-ventes/en/references/template.md`t1`n")
+
   return $dir
 }
 
@@ -742,6 +776,197 @@ if ($r.ExitCode -ne 0 -and $r.Output.Contains('dated claims: 0 annotations acros
   Add-Pass '2026-09-19/AC24 -Check prints the zero summary line on a failing run'
 } else {
   Add-Failure "2026-09-19/AC24 zero summary line wrong (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22: the clean fixture passes
+$d = New-FixtureRepo
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) { Add-Pass '2026-09-19-headings/AC22 clean fixture passes the exec-document rule' }
+else { Add-Failure "2026-09-19-headings/AC22 clean fixture failed (out=$($r.Output))" }
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC17: a reference file that is gone
+$d = New-FixtureRepo
+Remove-Item -LiteralPath (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md')
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md' `
+  '2026-09-19-headings/AC22 missing reference file reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC17: a ref column naming a directory
+# fails the same way as a genuinely missing file (Windows Test-Path with no
+# -PathType Leaf returns true for a directory, so this would otherwise throw
+# an unhandled ReadAllLines access-denied error instead of a CHECK FAIL line).
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/exec-documents.tsv') {
+  param($t) $t -replace [regex]::Escape('skills/atelier-ventes/fr/references/modele.md'), `
+    'skills/atelier-ventes/fr/references' }
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references listed in skills/exec-documents.tsv but no such file (renamed?)' `
+  '2026-09-19-headings/AC22 a directory in the ref column reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC18: a block index the file lacks
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/exec-documents.tsv') {
+  param($t) $t -replace "modele\.md`t1", "modele.md`t4" }
+Expect-CheckFail $d 'pipeline-doc — skills/atelier-ventes/fr/references/modele.md has no markdown template block 4' `
+  '2026-09-19-headings/AC22 missing block index reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC23 over AC19: a dropped section
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md') {
+  param($t) $t -replace "`n## Ce qui bloque`n", "`n" }
+Expect-CheckFail $d 'pipeline-doc — heading counts differ' `
+  '2026-09-19-headings/AC23 a dropped section reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC20: a changed heading depth
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/en/references/template.md') {
+  param($t) $t -replace "`n## What is stuck`n", "`n### What is stuck`n" }
+Expect-CheckFail $d 'pipeline-doc — heading levels differ' `
+  '2026-09-19-headings/AC22 a changed depth reaches the same verdict'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-19-headings/AC22 over AC21: a '-' row is skipped, not failed
+$d = New-FixtureRepo
+Add-Content -LiteralPath (Join-Path $d 'skills/exec-documents.tsv') `
+  -Value "prose-doc`t{root}/docs/atelier/decisions.md`t-`t-`t-`t-"
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0 -and -not $r.Output.Contains('prose-doc')) {
+  Add-Pass "2026-09-19-headings/AC22 a '-' row is skipped on Windows too"
+} else {
+  Add-Failure "2026-09-19-headings/AC22 '-' row not skipped (exit=$($r.ExitCode), out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- Review Focus 3b: a CRLF template file is read the same as an LF one
+$d = New-FixtureRepo
+$mdPath = Join-Path $d 'skills/atelier-ventes/fr/references/modele.md'
+$crlfText = ([System.IO.File]::ReadAllText($mdPath)) -replace "`n", "`r`n"
+[System.IO.File]::WriteAllText($mdPath, $crlfText)
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) {
+  Add-Pass 'Review Focus 3b a CRLF template file is read the same as an LF one'
+} else {
+  Add-Failure "Review Focus 3b CRLF template file failed (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- Review Focus 6: a bash block quoting a markdown opener is not counted
+# as a template block. The quoted opener uses four backticks (the bash fence
+# itself uses three) so that, were the "enter every fence, target or not"
+# behaviour broken, the resulting phantom block would run unclosed to EOF
+# (nothing later in the file has a four-backtick bare closer) rather than
+# just silently swallowing the wrong content — a difference this check's
+# MISSING/UNCLOSED reporting can actually observe.
+$d = New-FixtureRepo
+Write-Lf (Join-Path $d 'skills/atelier-ventes/en/references/template.md') @"
+# Pipeline review template
+
+``````bash
+# quoting a template fence opener as an example, not a real block:
+````````markdown
+``````
+
+``````markdown
+# Pipeline review — <company>
+
+## Where the pipeline stands
+
+## What is stuck
+
+## Next follow-ups
+``````
+"@
+$r = Invoke-FixtureCheck $d
+if ($r.ExitCode -eq 0) {
+  Add-Pass 'Review Focus 6 a bash block quoting a markdown opener is not counted as a template block'
+} else {
+  Add-Failure "Review Focus 6 bash-quoted opener miscounted (out=$($r.Output))"
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-20-heading-pairs/AC1: the generated reference ships in every
+# ZIP. The AC21 byte-identity check against build.sh's output does NOT live
+# here (2026-09-20-heading-pairs/B-1): this suite's only CI home is
+# windows-latest, which has neither `unzip` nor the coreutils toolchain
+# build.sh needs, so a two-script comparison cannot run in this job at all.
+# It lives in scripts/tests/build_test.sh instead, the one job where both
+# bash and pwsh exist. [System.IO.Compression.ZipFile], not `unzip`, reads
+# the ZIP entry here for the same reason.
+$d = New-FixtureRepo
+$buildResult = Invoke-FixturePwsh $d '-Lang all'
+if ($buildResult.ExitCode -eq 0) {
+  Add-Pass '2026-09-20-heading-pairs/AC1 the fixture build itself succeeds (ps1)'
+} else {
+  Add-Failure "2026-09-20-heading-pairs/AC1 the fixture build failed (ps1) (exit=$($buildResult.ExitCode), out=$($buildResult.Output))"
+}
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+foreach ($z in @('atelier-ventes-fr.zip', 'atelier-sales-en.zip')) {
+  $zipPath = Join-Path $d "dist/$z"
+  $hasEntry = $false
+  if (Test-Path -LiteralPath $zipPath -PathType Leaf) {
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+    try {
+      $hasEntry = $null -ne ($archive.Entries | Where-Object { $_.FullName -eq 'references/exec-document-headings.md' })
+    } finally {
+      $archive.Dispose()
+    }
+  }
+  if ($hasEntry) {
+    Add-Pass "2026-09-20-heading-pairs/AC1 $z carries references/exec-document-headings.md (ps1)"
+  } else {
+    Add-Failure "2026-09-20-heading-pairs/AC1 $z missing references/exec-document-headings.md (ps1)"
+  }
+}
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# --- 2026-09-20-heading-pairs/AC20: a registry defect fails a plain
+# `-Lang all` build, not only `-Check`.
+#
+# Every other failure case in this suite goes through Expect-CheckFail, which
+# runs `-Check`. AC20 names `./scripts/build.ps1 -Lang all` explicitly, and a
+# plain build never calls Test-ExecDocuments — the validation it relies on
+# lives inside Write-ExecHeadingGroup, reached through New-SkillStage. Nothing
+# asserted that until now. The byte-identity constraint that pushed AC21 over
+# to build_test.sh (2026-09-20-heading-pairs/B-1) does not apply here: this
+# assertion needs neither `unzip` nor bash, so it belongs in this suite.
+#
+# One representative case is enough — the mismatched-heading-counts path,
+# which is the generator's own check rather than a file-system precondition,
+# so it can only be reached by the generator actually running during a build.
+#
+# Expect-BuildFail is the build-time twin of Expect-CheckFail: same two-part
+# assertion (non-zero exit AND the exact message), so a fixture that dies for
+# an unrelated reason cannot pass by accident.
+function Expect-BuildFail([string]$Dir, [string]$Needle, [string]$Label) {
+  $r = Invoke-FixturePwsh $Dir '-Lang all'
+  if ($r.ExitCode -ne 0 -and $r.Output.Contains($Needle)) { Add-Pass $Label }
+  else { Add-Failure "$Label (exit=$($r.ExitCode), out=$($r.Output))" }
+}
+
+$d = New-FixtureRepo
+Edit-File (Join-Path $d 'skills/atelier-ventes/fr/references/modele.md') {
+  param($t) $t -replace "(?m)^## Prochaines relances\r?\n", ''
+}
+Expect-BuildFail $d `
+  'pipeline-doc — heading counts differ: skills/atelier-ventes/fr/references/modele.md has 3, skills/atelier-ventes/en/references/template.md has 4' `
+  '2026-09-20-heading-pairs/AC20 a registry defect fails a plain -Lang all build, naming both totals (ps1)'
+Remove-Item -Recurse -Force -LiteralPath $d
+
+# The discriminating half: the same `-Lang all` build over an UNBROKEN fixture
+# must exit 0 and must NOT carry that message. Without this, an
+# Expect-BuildFail that passed because the fixture cannot build at all would
+# look identical to one that passed for the stated reason.
+$d = New-FixtureRepo
+$r = Invoke-FixturePwsh $d '-Lang all'
+if ($r.ExitCode -eq 0 -and -not $r.Output.Contains('heading counts differ')) {
+  Add-Pass '2026-09-20-heading-pairs/AC20 the unbroken fixture builds clean, so the failure above is the defect and not the fixture (ps1)'
+} else {
+  Add-Failure "2026-09-20-heading-pairs/AC20 the unbroken fixture did not build clean (exit=$($r.ExitCode), out=$($r.Output))"
 }
 Remove-Item -Recurse -Force -LiteralPath $d
 

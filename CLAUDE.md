@@ -43,7 +43,8 @@ on it. `main` carries releases only.
   `SKILL.md` version line, or the two annotated `README.md` lines.
 - A comment citing an acceptance criterion names its spec: `2026-09-19/AC3`.
   Six specs each number from `AC1` and five define an `AC15`, so a bare
-  `ACn` is ambiguous. Existing bare citations stay as they are.
+  `ACn` is ambiguous. Where two specs share a date, the slug disambiguates:
+  `2026-09-19-headings/AC3`. Existing bare citations stay as they are.
 
 See `docs/adr/0009-release-automation-and-changelog-split.md` and
 `docs/adr/0010-dev-default-main-release-branch.md`.

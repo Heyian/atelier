@@ -33,8 +33,10 @@ recommandation concrète reste toujours une seule pratique à la fois.
 
 ## Établir la pratique actuelle d'abord
 
-Si `progression.md` est absent, ou que sa « Pratique actuelle » est vide,
-établis-la en conversation avant de recommander quoi que ce soit — « aujourd'hui,
+Si `progression.md` est absent, ou que la section qui dit où en est la
+personne aujourd'hui est vide — intitulée « Pratique actuelle » sur une
+installation française, "Current practice" sur une anglaise — établis-la en
+conversation avant de recommander quoi que ce soit — « aujourd'hui,
 comment tu t'y prends pour [la tâche] ? » Ne saute jamais cette étape pour
 aller droit à une recommandation.
 

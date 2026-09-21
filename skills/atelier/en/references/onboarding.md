@@ -207,6 +207,10 @@ follows depends on the executive's choice. Only enter steps 1–4 once the offer
 has been made and the choice is known.
 
 1. Read `{root}/docs/atelier/company-profile.md` in full.
+   If its headings are in the other language, it is still the profile: read it
+   and update it in place, never create a second one beside it. See
+   `references/memory-protocol.md`, "A document written in the other
+   language."
 2. Only re-ask the questions whose answer changed or was missing. For the rest,
    show what's written and ask "still true?".
 3. Rewrite the profile **in place**, same section order, keeping everything

@@ -214,6 +214,9 @@ suite dépend du choix de la personne. N'entre dans les points 1 à 4 qu'une foi
 l'offre faite et le choix connu.
 
 1. Lis `{racine}/docs/atelier/company-profile.md` au complet.
+   Si ses titres sont dans l'autre langue, c'est quand même le profil : lis-le
+   et mets-le à jour en place, ne crée jamais un deuxième à côté. Vois
+   `references/memory-protocol.md`, « Un document écrit dans l'autre langue ».
 2. Ne repose que les questions dont la réponse a changé ou manquait. Pour les
    autres, montre ce qui est écrit et demande « toujours vrai ? ».
 3. Réécris le profil **en place**, sections dans le même ordre, en gardant tout

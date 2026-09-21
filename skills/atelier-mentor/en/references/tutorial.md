@@ -18,8 +18,13 @@ executive picks which ones).
 
 ## On every entry
 
-1. **Read `{root}/docs/atelier/progression.md`** and find the "Tutorial
-   modules covered" section.
+1. **Read `{root}/docs/atelier/progression.md` in full** and find the section
+   that lists the tutorial modules already covered — the one whose lines are
+   dated modules. On an English install it is headed "Tutorial modules
+   covered"; a document written on a French install headed it « Modules du
+   tutoriel couverts ». Identify it by what it lists, not by its title, and
+   see `references/memory-protocol.md`, "A document written in the other
+   language", for what to say and offer when they differ.
 2. **State the exit rule before the first module's content**: "you can stop
    at any point, we'll note where you left off, and pick it back up later."
 3. **Offer both modes** — the full tutorial or revisiting one or two
@@ -84,12 +89,15 @@ never one per module, never silent. Follow `references/memory-protocol.md`.
 - **No answer means nothing written.** That's the relay's time-pressure
   rule, as-is.
 - If `progression.md` already exists, add one dated line per completed
-  module under "Tutorial modules covered", formatted
-  `- YYYY-MM-DD — module <n> — <module title>` — leave the rest of the file
-  untouched.
+  module to the section that lists covered modules — headed "Tutorial modules
+  covered" on an English install — formatted
+  `- YYYY-MM-DD — module <n> — <module title>`. Write the line in the language
+  the executive is speaking, and leave the rest of the file untouched,
+  including its existing heading language.
 - If `progression.md` doesn't exist yet and the executive agrees, create it
-  with the section headings documented in `references/progression.md`,
-  including the "Tutorial modules covered" section.
+  with the section headings documented in `references/progression.md`, in your
+  own language, including the covered-modules section. A file you just created
+  needs no disclosure and no rewrite offer.
 
 ## Without folder access
 
